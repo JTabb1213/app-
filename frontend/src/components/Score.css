@@ -1,0 +1,347 @@
+.score-card {
+    width: 100%;
+    animation: slideUp 0.6s ease-out;
+}
+
+.score-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.score-display {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.score-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 120px;
+}
+
+.score-info {
+    flex: 1;
+}
+
+.score-label {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 2px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.score-badge.excellent {
+    border-color: var(--success);
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.score-badge.good {
+    border-color: #84cc16;
+    color: #bef264;
+    background: rgba(132, 204, 22, 0.1);
+}
+
+.score-badge.fair {
+    border-color: var(--warning);
+    color: #fcd34d;
+    background: rgba(234, 179, 8, 0.1);
+}
+
+.score-badge.poor {
+    border-color: var(--danger);
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.score-bar-container {
+    width: 100%;
+}
+
+.score-bar-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.score-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 100px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 100px;
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 0 15px rgba(97, 218, 251, 0.4);
+}
+
+.score-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 100px;
+    width: 0%;
+    animation: slideRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    box-shadow: 0 0 15px rgba(97, 218, 251, 0.4);
+}
+
+@keyframes slideRight {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: var(--fill-percentage);
+    }
+}
+
+.breakdown-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.breakdown-toggle {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(51, 65, 85, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.breakdown-toggle:hover {
+    background: rgba(51, 65, 85, 0.5);
+    border-color: var(--secondary);
+}
+
+.toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon.open {
+    transform: rotate(180deg);
+}
+
+.breakdown-details {
+    margin-top: 1rem;
+    animation: slideUp 0.4s ease-out;
+}
+
+.factor-item {
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.factor-item:hover {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(148, 163, 184, 0.4);
+    transform: translateX(4px);
+}
+
+.factor-left {
+    flex: 1;
+}
+
+.factor-name {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.factor-weight {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.factor-right {
+    text-align: right;
+}
+
+.factor-score {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.factor-bar {
+    width: 60px;
+    height: 4px;
+    background: rgba(51, 65, 85, 0.5);
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.factor-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 2px;
+}
+
+.github-repo-link {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(100, 108, 255, 0.1) 0%, rgba(97, 218, 251, 0.1) 100%);
+    border: 1px solid rgba(97, 218, 251, 0.3);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.repo-link {
+    color: var(--secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.repo-link:hover {
+    color: var(--primary);
+    transform: translateX(4px);
+}
+
+.github-metrics {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.github-metrics-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.github-icon {
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.metric-item {
+    padding: 1rem;
+    background: rgba(51, 65, 85, 0.3);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--surface);
+    border-top-color: var(--secondary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@media (max-width: 768px) {
+    .score-display {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .score-number {
+        font-size: 2.5rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .score-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+    }
+
+    .score-number {
+        font-size: 2rem;
+    }
+
+    .factor-score {
+        font-size: 1.1rem;
+    }
+}
