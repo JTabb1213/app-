@@ -105,14 +105,10 @@ class CoinGeckoProvider(CryptoDataProvider):
 
 
 # Create a singleton instance for backward compatibility
-_provider = CoinGeckoProvider()
+#_provider = CoinGeckoProvider()
 
-# Export legacy function names for existing code
-def resolve_coin_id(search_query: str) -> str:
-    return _provider.resolve_coin_id(search_query)
-
-def fetch_coin_data(coin_id: str):
-    return _provider.get_coin_data(coin_id)
-
-def get_tokenomics(coin_id: str):
-    return _provider.get_tokenomics(coin_id)
+# Export legacy function names for existing code. Only used by code that hasn't
+# yet migrated to DataService. Can be removed once all code uses DataService.
+# Note: legacy module-level singleton and wrapper functions removed.
+# Use the unified `data_service` (services.data_service.data_service) or
+# instantiate `CoinGeckoProvider` directly when needed.

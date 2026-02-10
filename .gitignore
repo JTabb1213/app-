@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyd
+*.egg-info/
+build/
+dist/
+pip-wheel-metadata/
+*.egg
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+**/venv/
+/backend/venv/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Pytest
+.pytest_cache/
+
+# VSCode
+.vscode/
+
+# Environment files
+.env
+.env.*
+
+# Node / frontend
+node_modules/
+/dist/
+/.vite
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.idea/
+*.swp
+
+# Ignore compiled binaries
+*.so
+
+# Redis or local runtime files (if any)
+redis-data/
+
+# Ignore local configuration
+local_settings.py

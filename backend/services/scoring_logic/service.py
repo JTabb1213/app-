@@ -1,7 +1,7 @@
-from services.data_service import data_service
+from services.data import data_service
 from services.apis import github
-from services.scoring import calculate_score
-from services.scoring import github_score
+from services.scoring_logic import calculate_score
+from services.scoring_logic import github_score
 
 
 def get_score(coin_id):

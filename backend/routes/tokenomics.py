@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify
-from services.tokenomics_service import get_tokenomics
+from services.data import data_service
 
 tokenomics_bp = Blueprint("tokenomics", __name__)
 
 @tokenomics_bp.route("/tokenomics/<coin_id>")
 def tokenomics_route(coin_id):
     try:
-        tokenomics = get_tokenomics(coin_id)
+        tokenomics = data_service.get_tokenomics(coin_id)
         return jsonify(tokenomics)
     except Exception as e:
         error_msg = str(e)

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.scoring_service import get_score
+from services.scoring_logic import get_score
 
 score_bp = Blueprint("score", __name__)
 
