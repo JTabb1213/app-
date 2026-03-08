@@ -5,5 +5,6 @@ Provides Redis caching for cryptocurrency data.
 
 from .service import cache_service
 from .updater import cache_updater
+from .realtime_updater import realtime_cache_updater
 
-__all__ = ['cache_service', 'cache_updater']
+__all__ = ['cache_service', 'cache_updater', 'realtime_cache_updater']

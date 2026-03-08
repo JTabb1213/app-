@@ -95,7 +95,10 @@ class CoinGeckoProvider(CryptoDataProvider):
         tokenomics = {
             "name": data["name"],
             "symbol": data["symbol"],
+            "current_price": data["market_data"]["current_price"]["usd"],
             "market_cap": data["market_data"]["market_cap"]["usd"],
+            "total_volume": data["market_data"]["total_volume"]["usd"],
+            "price_change_percentage_24h": data["market_data"].get("price_change_percentage_24h"),
             "circulating_supply": data["market_data"]["circulating_supply"],
             "total_supply": data["market_data"]["total_supply"],
             "max_supply": data["market_data"]["max_supply"],

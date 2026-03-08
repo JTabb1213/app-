@@ -4,8 +4,9 @@ CREATE TABLE coins (
   symbol TEXT NOT NULL,                -- "btc", "eth"
   name TEXT NOT NULL,                  -- "Bitcoin"
 
-  -- Media / display
+  -- Media / links
   image_url TEXT,
+  github_url TEXT,
 
   -- Market cap metadata (semi-static)
   market_cap_rank INTEGER,
@@ -20,11 +21,11 @@ CREATE TABLE coins (
   atl NUMERIC,
   atl_date TIMESTAMPTZ,
 
-  -- Your app-specific fields (optional, editable later)
-  description TEXT,                    -- your own or cleaned CoinGecko text
-  rating_score NUMERIC(4, 2),           -- e.g. 0–10 or 0–100
-  rating_notes TEXT,                   -- internal notes
-  review_count INTEGER,                -- optional aggregate
+  -- App-specific fields
+  description TEXT,
+  rating_score NUMERIC(4, 2),
+  rating_notes TEXT,
+  review_count INTEGER,
   is_featured BOOLEAN DEFAULT FALSE,
 
   -- Timestamps
@@ -32,10 +33,10 @@ CREATE TABLE coins (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_coins_market_cap_rank
-ON coins (market_cap_rank);
+CREATE INDEX idx_coins_market_cap_rank ON public.coins(market_cap_rank);
+CREATE INDEX idx_coins_symbol ON public.coins(symbol);
 
-CREATE OR REPLACE FUNCTION update_updated_at()
+CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -43,9 +44,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_update_coins_timestamp
-BEFORE UPDATE ON coins
+DROP TRIGGER IF EXISTS trg_set_updated_at ON public.coins;
+
+CREATE TRIGGER trg_set_updated_at
+BEFORE UPDATE ON public.coins
 FOR EACH ROW
-EXECUTE FUNCTION update_updated_at();
-
-
+EXECUTE FUNCTION set_updated_at();

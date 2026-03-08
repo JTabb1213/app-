@@ -1,4 +1,5 @@
 from services.data import data_service
+from services.database.reader import coin_reader
 from services.apis import github
 from services.scoring_logic import calculate_score
 from services.scoring_logic import github_score
@@ -8,21 +9,25 @@ def get_score(coin_id):
     """
     Gather multiple metrics from APIs, compute individual factor scores,
     combine them using weighted averaging, and return detailed breakdown.
-    """
-    try:
-        # 1. Fetch raw coin data using unified service (with automatic fallback)
-        data = data_service.get_coin_data(coin_id)
-    except Exception as e:
-        raise Exception(f"Error fetching coin data: {str(e)}")
-
-    # 2. Extract key metrics
-    market_cap = data.get("market_data", {}).get("market_cap", {}).get("usd") or 0
-    volume_24h = data.get("market_data", {}).get("total_volume", {}).get("usd") or 0
     
-    # Top holder percentage (if available from CoinGecko)
-    # Note: CoinGecko doesn't always provide this; we'll estimate from market concentration
-    # For now, use a default neutral value (we can enhance later with blockchain data)
-    top_holder_percentage = 0.15  # Placeholder; refine with on-chain data later
+    Now optimized to use:
+    - Tokenomics cache for market cap & volume (no API call if cached)
+    - Database for GitHub URL (no API call if populated)
+    """
+    # 1. Get market cap & volume from tokenomics (uses cache!)
+    try:
+        tokenomics = data_service.get_tokenomics(coin_id)
+        market_cap = tokenomics.get("market_cap") or 0
+        volume_24h = tokenomics.get("total_volume") or 0  # Now available from /markets cache!
+    except Exception as e:
+        raise Exception(f"Error fetching tokenomics: {str(e)}")
+    
+    # 2. Get GitHub URL from database
+    static_data = coin_reader.get_coin(coin_id)
+    github_url = static_data.get("github_url") if static_data else None
+    
+    # Top holder percentage (placeholder)
+    top_holder_percentage = 0.15  # TODO: Add on-chain data later
 
     # 3. Score individual factors (each returns 0-100)
     market_cap_score = calculate_score.score_market_cap(market_cap)
@@ -35,12 +40,9 @@ def get_score(coin_id):
     
     # Try to get repo from mapping first
     repo_info = github.get_repo_for_coin(coin_id)
-    if not repo_info:
-        # If not in mapping, try to extract from CoinGecko data
-        github_repos = data.get("links", {}).get("repos_url", {}).get("github", [])
-        if github_repos:
-            github_url = github_repos[0]  # Get the first (main) repository
-            repo_info = github.get_repo_for_coin(coin_id, github_url)
+    if not repo_info and github_url:
+        # Use github_url from database if available
+        repo_info = github.get_repo_for_coin(coin_id, github_url)
     
     if repo_info:
         owner, repo = repo_info

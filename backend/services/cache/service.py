@@ -91,6 +91,34 @@ class CacheService:
         except Exception as e:
             print(f"[CacheService] ✗ Error caching tokenomics for {coin_id}: {e}")
     
+    def set_bulk_tokenomics(self, tokenomics_dict: Dict[str, Dict[str, Any]], ttl: int = CACHE_TTL_TOKENOMICS) -> int:
+        """
+        Efficiently store multiple tokenomics entries using Redis pipelining.
+        
+        Args:
+            tokenomics_dict: Dict mapping coin_id -> tokenomics data
+            ttl: Time to live in seconds
+        
+        Returns:
+            Number of entries successfully cached
+        """
+        if not tokenomics_dict:
+            return 0
+        
+        try:
+            pipe = self.redis_client.pipeline(transaction=False)
+            
+            for coin_id, data in tokenomics_dict.items():
+                key = self._make_key("tokenomics", coin_id)
+                pipe.setex(key, ttl, json.dumps(data))
+            
+            pipe.execute()
+            print(f"[CacheService] ✓ Bulk cached {len(tokenomics_dict)} tokenomics entries (TTL: {ttl}s)")
+            return len(tokenomics_dict)
+        except Exception as e:
+            print(f"[CacheService] ✗ Error in bulk tokenomics cache: {e}")
+            return 0
+    
     def get_alias(self, search_term: str) -> Optional[str]:
         """
         Resolve a search term to its canonical coin ID via aliases.

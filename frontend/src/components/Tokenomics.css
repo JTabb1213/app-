@@ -3,6 +3,28 @@
     animation: slideUp 0.6s ease-out;
 }
 
+/* Live Price card – slightly highlighted to stand out */
+.tokenomics-card.price-card {
+    border: 1px solid rgba(99, 179, 237, 0.35);
+    background: rgba(30, 58, 95, 0.45);
+}
+
+.price-change {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 0.35rem;
+}
+
+.price-change.positive {
+    color: #4ade80;
+    /* green */
+}
+
+.price-change.negative {
+    color: #f87171;
+    /* red */
+}
+
 .tokenomics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
