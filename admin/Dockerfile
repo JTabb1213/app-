@@ -31,8 +31,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Cloud Run sets $PORT at runtime
-ENV PORT=3000
-EXPOSE 3000
+# Cloud Run sets $PORT at runtime (defaults to 8080)
+ENV PORT=8080
+EXPOSE 8080
 
 CMD ["node", "server.js"]
