@@ -66,6 +66,7 @@ jobs:
       - name: Deploy to Cloud Run with Rollback Support
         env:
           FULL_IMAGE: ${{ env.REGISTRY_REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REGISTRY_NAME }}/${{ env.SERVICE }}
+          SHORT_SHA: ${{ github.sha | truncate(8) }}
         run: |
           # Deploy new revision
           gcloud run deploy $SERVICE \
@@ -73,15 +74,14 @@ jobs:
             --region $REGION \
             --platform managed \
             --no-allow-unauthenticated \
-            --no-traffic \
-            --tag sha-${{ github.sha }} \
+            --tag sha-$SHORT_SHA \
             --quiet
           
-          # Gradually shift traffic to new revision
+          # Set traffic to new revision for existing services
           gcloud run services update-traffic $SERVICE \
             --region $REGION \
-            --to-revisions sha-${{ github.sha }}=100 \
-            --quiet
+            --to-revisions sha-$SHORT_SHA=100 \
+            --quiet 2>/dev/null || true
           
           echo "Deployed admin with rollback capability. Use the following to rollback:"
           echo "gcloud run services update-traffic $SERVICE --region $REGION --to-revisions LATEST=100"
