@@ -75,7 +75,7 @@ jobs:
             --image $FULL_IMAGE:${{ github.sha }} \
             --region $REGION \
             --platform managed \
-            --no-allow-unauthenticated \
+            --allow-unauthenticated \
             --tag sha-$SHORT_SHA \
             --quiet
           
