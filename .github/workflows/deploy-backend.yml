@@ -10,8 +10,10 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: us-central1
+  REGISTRY_REGION: us-central1
+  REGISTRY_NAME: docker-repo
   SERVICE: crypto-backend
-  IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/crypto-backend
+  IMAGE: ${{ secrets.GCP_PROJECT_ID }}-docker-repo
 
 # Allow parallel deployments
 concurrency:
@@ -39,7 +41,8 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker to use gcloud credentials
-        run: gcloud auth configure-docker --quiet
+        run: |
+          gcloud auth configure-docker $REGISTRY_REGION-docker.pkg.dev --quiet
 
       # Set up Docker Buildx for better caching
       - name: Set up Docker Buildx
@@ -47,22 +50,26 @@ jobs:
 
       - name: Build and Push Docker image
         working-directory: backend
+        env:
+          FULL_IMAGE: ${{ env.REGISTRY_REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REGISTRY_NAME }}/${{ env.SERVICE }}
         run: |
           # Build with cache optimization and multiple tags
           docker buildx build \
-            --cache-from type=registry,ref=$IMAGE:buildcache \
-            --cache-to type=registry,ref=$IMAGE:buildcache,mode=max \
-            --tag $IMAGE:${{ github.sha }} \
-            --tag $IMAGE:latest \
+            --cache-from type=registry,ref=$FULL_IMAGE:buildcache \
+            --cache-to type=registry,ref=$FULL_IMAGE:buildcache,mode=max \
+            --tag $FULL_IMAGE:${{ github.sha }} \
+            --tag $FULL_IMAGE:latest \
             --push \
             --platform linux/amd64 \
             .
 
       - name: Deploy to Cloud Run with Rollback Support
+        env:
+          FULL_IMAGE: ${{ env.REGISTRY_REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REGISTRY_NAME }}/${{ env.SERVICE }}
         run: |
           # Deploy new revision
           gcloud run deploy $SERVICE \
-            --image $IMAGE:${{ github.sha }} \
+            --image $FULL_IMAGE:${{ github.sha }} \
             --region $REGION \
             --platform managed \
             --allow-unauthenticated \
