@@ -66,8 +66,10 @@ jobs:
       - name: Deploy to Cloud Run with Rollback Support
         env:
           FULL_IMAGE: ${{ env.REGISTRY_REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REGISTRY_NAME }}/${{ env.SERVICE }}
-          SHORT_SHA: ${{ github.sha | truncate(8) }}
         run: |
+          SHORT_SHA="${{ github.sha }}"
+          SHORT_SHA=${SHORT_SHA:0:8}
+          
           # Deploy new revision
           gcloud run deploy $SERVICE \
             --image $FULL_IMAGE:${{ github.sha }} \
