@@ -50,7 +50,8 @@ jobs:
         run: |
           # Build with cache optimization and multiple tags
           docker buildx build \
-            --cache-type=registry \
+            --cache-from type=registry,ref=$IMAGE:buildcache \
+            --cache-to type=registry,ref=$IMAGE:buildcache,mode=max \
             --tag $IMAGE:${{ github.sha }} \
             --tag $IMAGE:latest \
             --push \
