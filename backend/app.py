@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 import os
 
@@ -19,6 +19,12 @@ def create_app():
     allowed_origins = [o.strip() for o in allowed_origins_str.split(",")]
     
     CORS(app, origins=allowed_origins, supports_credentials=True)
+
+    # Verification endpoint for deployment testing
+    @app.route("/api/verify", methods=["GET"])
+    def verify():
+        print("Backend verification: hello")  # This will show in Cloud Run logs
+        return jsonify({"message": "Backend deployed successfully!", "status": "hello"})
 
     app.register_blueprint(score_bp, url_prefix="/api")
     app.register_blueprint(tokenomics_bp, url_prefix="/api")

@@ -51,7 +51,7 @@ def top_coins():
 @database_bp.route("/coins/<coin_id>", methods=["GET"])
 def get_coin(coin_id: str):
     """Return a single coin's static data from the DB.
-    On a cache miss, fetches from CoinGecko, populates the DB, and returns the result.
+    Returns 404 if coin is not in database.
     """
     try:
         # Resolve aliases first (e.g. "ada" → "cardano", "btc" → "bitcoin")
@@ -63,24 +63,11 @@ def get_coin(coin_id: str):
         if coin:
             return jsonify(coin), 200
 
-        # DB miss – fetch full coin data from CoinGecko and auto-populate
-        print(f"[DB Route] '{coin_id}' not in DB, fetching from CoinGecko...")
-        from services.apis.coingecko import CoinGeckoProvider
-        from services.database.writer import _map_full_coin_data
-
-        provider = CoinGeckoProvider()
-        raw = provider.get_coin_data(canonical_id)
-        mapped = _map_full_coin_data(raw)
-        result = coin_writer.upsert_coin(mapped)
-        print(f"[DB Route] ✓ Auto-populated DB for {mapped.get('id')}")
-        return jsonify(result), 200
+        # Coin not in DB – return 404
+        return jsonify({"error": f"No {coin_id} available"}), 404
 
     except Exception as e:
         error_msg = str(e)
-        if "rate limit" in error_msg.lower():
-            return jsonify({"error": error_msg}), 429
-        if "not found" in error_msg.lower():
-            return jsonify({"error": f"Coin '{coin_id}' not found"}), 404
         return jsonify({"error": error_msg}), 500
 
 

@@ -13,10 +13,21 @@ export default function LoginPage() {
 
     // Skip login if a valid session cookie already exists
     useEffect(() => {
+        // Verification log for deployment testing
+        console.log("Admin verification: hello");
+
+        // Verify backend connectivity
         fetch("/api/auth/session")
-            .then((r) => (r.ok ? r.json() : null))
+            .then((r) => {
+                console.log("Admin backend connectivity: ✅ Connected");
+                console.log("Hello from admin API!");
+                return r.ok ? r.json() : null;
+            })
             .then((data) => {
                 if (data?.username) router.replace("/dashboard");
+            })
+            .catch((err) => {
+                console.log("Admin backend connectivity: ❌ Failed", err);
             })
             .finally(() => setChecking(false));
     }, []);
