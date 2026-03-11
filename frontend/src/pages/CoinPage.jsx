@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCoinStatic, getTokenomics } from "../services/api";
-import Tokenomics from "../components/tokenomics";
+import Tokenomics from "../components/Tokenomics";
 import Score from "../components/Score";
 import "./CoinPage.css"
 
