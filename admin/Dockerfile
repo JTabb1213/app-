@@ -14,6 +14,9 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
 
+# Copy shared data directory (coin_aliases.json)
+COPY ../data ./data/
+
 # Bake-in a placeholder; real secrets are injected via Cloud Run env vars
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
@@ -30,6 +33,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/data ./data
 
 # Cloud Run sets $PORT at runtime (defaults to 8080)
 ENV PORT=8080

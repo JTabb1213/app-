@@ -57,3 +57,4 @@ redis-data/
 
 # Ignore local configuration
 local_settings.py
+python main.py --sources binance

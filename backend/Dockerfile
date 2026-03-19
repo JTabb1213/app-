@@ -19,6 +19,10 @@ COPY --from=builder /install /usr/local
 # Copy application source
 COPY . .
 
+# Copy shared data directory (coin_aliases.json lives at project root /data/)
+# Build context should be the repo root; or mount at deploy time.
+COPY ../data ./data/ 
+
 # Cloud Run injects $PORT at runtime (default 8080).
 # Gunicorn picks it up via the shell form of CMD.
 ENV PORT=8080

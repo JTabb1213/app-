@@ -1,18 +1,21 @@
 """
 Cache management routes.
-Endpoints for updating and monitoring the Redis cache, including alias management.
+Endpoints for updating and monitoring the Redis cache.
+
+Alias management has moved to data/coin_aliases.json (managed by
+tools/populate_aliases/main.py).  The /api/reload-aliases endpoint
+hot-reloads the file without a restart.
 """
 
 from flask import Blueprint, jsonify, request
 from services.cache import cache_updater
 from services.cache.service import CacheService
-from services.cache.alias_updater import AliasUpdater
+from services.alias.resolver import alias_resolver
 
 cache_bp = Blueprint("cache", __name__)
 
 # Initialize services
 cache_service = CacheService()
-alias_updater_service = AliasUpdater(cache_service)
 
 
 @cache_bp.route("/update-cache", methods=["POST"])
@@ -108,55 +111,71 @@ def cache_stats():
 @cache_bp.route("/update-aliases", methods=["POST"])
 def update_aliases():
     """
-    Trigger an update of all coin aliases from CoinGecko.
-    Fetches the complete coins list and populates alias mappings.
+    DEPRECATED — alias updates are no longer driven by Redis.
+
+    To refresh the alias map:
+      1. Run:  python tools/populate_aliases/main.py
+      2. Then: POST /api/reload-aliases  (or restart the backend)
+
+    This endpoint now returns a 410 Gone with instructions.
+    """
+    return jsonify({
+        "success": False,
+        "message": (
+            "Alias updates via this endpoint are deprecated. "
+            "Run tools/populate_aliases/main.py to regenerate "
+            "data/coin_aliases.json, then POST /api/reload-aliases."
+        ),
+    }), 410
+
+
+@cache_bp.route("/reload-aliases", methods=["POST"])
+def reload_aliases():
+    """
+    Hot-reload the alias map from data/coin_aliases.json without restarting.
+
+    Call this after running tools/populate_aliases/main.py so the running
+    backend picks up the new aliases immediately.
     """
     try:
-        result = alias_updater_service.update_all_aliases()
-        
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "message": "Aliases updated successfully",
-                "aliases_updated": result["aliases_updated"],
-                "coins_processed": result["coins_processed"]
-            }), 200
-        else:
-            return jsonify({
-                "success": False,
-                "error": result.get("error", "Unknown error")
-            }), 500
-            
-    except Exception as e:
+        before = alias_resolver.total_aliases
+        alias_resolver.reload()
+        after = alias_resolver.total_aliases
         return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+            "success": True,
+            "message": "Alias map reloaded from coin_aliases.json",
+            "aliases_before": before,
+            "aliases_after": after,
+            "assets": alias_resolver.total_assets,
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @cache_bp.route("/alias/<search_term>", methods=["GET"])
 def get_alias(search_term: str):
     """
     Resolve a search term to its canonical coin ID.
-    
+    Uses the in-memory alias resolver (data/coin_aliases.json).
+
     Args:
         search_term: Coin name, symbol, or ID to resolve
     """
     try:
-        canonical_id = cache_service.get_alias(search_term)
-        
+        canonical_id = alias_resolver.resolve(search_term)
+
         if canonical_id:
             return jsonify({
                 "success": True,
                 "search_term": search_term,
-                "canonical_id": canonical_id
+                "canonical_id": canonical_id,
             }), 200
         else:
             return jsonify({
                 "success": False,
                 "message": f"No alias found for '{search_term}'"
             }), 404
-            
+
     except Exception as e:
         return jsonify({
             "success": False,

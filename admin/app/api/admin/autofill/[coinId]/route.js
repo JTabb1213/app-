@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { getAlias } from "@/lib/redis";
+import { resolveAlias } from "@/lib/aliases";
 import { fetchFullCoin, mapFullCoinToDb } from "@/lib/coingecko";
 
 /**
@@ -13,7 +13,7 @@ export async function GET(_req, { params }) {
 
     const { coinId } = await params;
     try {
-        const canonical = (await getAlias(coinId)) || coinId.toLowerCase();
+        const canonical = resolveAlias(coinId) || coinId.toLowerCase();
         const raw = await fetchFullCoin(canonical);
         const mapped = mapFullCoinToDb(raw);
         return NextResponse.json(mapped);

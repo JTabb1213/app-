@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import pool from "@/lib/db";
-import { getAlias } from "@/lib/redis";
+import { resolveAlias } from "@/lib/aliases";
 
 /**
  * GET /api/admin/coins — list all coins from DB
@@ -35,7 +35,7 @@ export async function POST(req) {
         }
 
         // Check alias collision
-        const aliasMatch = await getAlias(coinId);
+        const aliasMatch = resolveAlias(coinId);
         if (aliasMatch) {
             const { rows } = await pool.query("SELECT id, name FROM coins WHERE id = $1", [aliasMatch]);
             if (rows[0]) {
@@ -61,7 +61,7 @@ export async function POST(req) {
         // Check symbol alias collision
         const symbol = (data.symbol || "").toLowerCase().trim();
         if (symbol) {
-            const symMatch = await getAlias(symbol);
+            const symMatch = resolveAlias(symbol);
             if (symMatch && symMatch !== coinId) {
                 return NextResponse.json(
                     {

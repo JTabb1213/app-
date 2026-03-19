@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { resolveAlias } from "@/lib/aliases";
 
 const globalForRedis = globalThis;
 
@@ -31,36 +32,11 @@ export async function deleteSession(token) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Alias helpers                                                      */
-/* ------------------------------------------------------------------ */
-
-export async function getAlias(term) {
-    return redis.get(`crypto:alias:${term.toLowerCase()}`);
-}
-
-export async function setAlias(term, target, ttl = 604800) {
-    await redis.setex(`crypto:alias:${term.toLowerCase()}`, ttl, target);
-}
-
-export async function deleteAlias(term) {
-    await redis.del(`crypto:alias:${term.toLowerCase()}`);
-}
-
-export async function setBulkAliases(aliases, ttl = 604800) {
-    const pipe = redis.pipeline();
-    for (const [term, target] of Object.entries(aliases)) {
-        pipe.setex(`crypto:alias:${term.toLowerCase()}`, ttl, target);
-    }
-    await pipe.exec();
-    return Object.keys(aliases).length;
-}
-
-/* ------------------------------------------------------------------ */
 /*  Tokenomics cache helpers                                           */
 /* ------------------------------------------------------------------ */
 
 export async function setTokenomics(coinId, data, ttl = 120) {
-    const canonical = (await getAlias(coinId)) || coinId.toLowerCase();
+    const canonical = resolveAlias(coinId) || coinId.toLowerCase();
     await redis.setex(
         `crypto:tokenomics:${canonical}`,
         ttl,

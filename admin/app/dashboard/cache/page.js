@@ -12,18 +12,9 @@ export default function CachePage() {
     const [singleResult, setSingleResult] = useState(null);
     const [singleLoading, setSingleLoading] = useState(false);
 
-    /* ---- Rebuild Aliases ---- */
-    const [aliasesResult, setAliasesResult] = useState(null);
-    const [aliasesLoading, setAliasesLoading] = useState(false);
-
     /* ---- Lookup Alias ---- */
     const [lookupTerm, setLookupTerm] = useState("");
     const [lookupResult, setLookupResult] = useState(null);
-
-    /* ---- Set Alias ---- */
-    const [newAliasTerm, setNewAliasTerm] = useState("");
-    const [newAliasTarget, setNewAliasTarget] = useState("");
-    const [aliasMessage, setAliasMessage] = useState(null);
 
     /* ================================================================
        Handlers
@@ -62,21 +53,6 @@ export default function CachePage() {
         }
     }
 
-    async function refreshAllAliases() {
-        setAliasesLoading(true);
-        setAliasesResult(null);
-        try {
-            const res = await fetch("/api/admin/cache/refresh-aliases", {
-                method: "POST",
-            });
-            setAliasesResult(await res.json());
-        } catch (err) {
-            setAliasesResult({ error: err.message });
-        } finally {
-            setAliasesLoading(false);
-        }
-    }
-
     async function lookupAlias() {
         if (!lookupTerm.trim()) return;
         try {
@@ -86,43 +62,6 @@ export default function CachePage() {
             setLookupResult(await res.json());
         } catch {
             setLookupResult({ error: "Lookup failed" });
-        }
-    }
-
-    async function deleteAlias() {
-        if (!lookupResult?.term) return;
-        try {
-            await fetch(`/api/admin/cache/alias/${lookupResult.term}`, {
-                method: "DELETE",
-            });
-            setLookupResult({ ...lookupResult, resolved_to: null, deleted: true });
-        } catch {
-            /* ignore */
-        }
-    }
-
-    async function setAlias() {
-        if (!newAliasTerm.trim() || !newAliasTarget.trim()) return;
-        setAliasMessage(null);
-        try {
-            const res = await fetch("/api/admin/cache/alias", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    term: newAliasTerm.trim(),
-                    target: newAliasTarget.trim(),
-                }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            setAliasMessage({
-                type: "success",
-                text: `✓ '${data.term}' now maps to '${data.target}'`,
-            });
-            setNewAliasTerm("");
-            setNewAliasTarget("");
-        } catch (err) {
-            setAliasMessage({ type: "error", text: err.message });
         }
     }
 
@@ -195,52 +134,31 @@ export default function CachePage() {
                         </div>
                     )}
                 </div>
-
-                {/* Rebuild All Aliases */}
-                <div className="cache-card">
-                    <h2 className="cache-card-title">🔗 Rebuild All Aliases</h2>
-                    <p className="cache-card-desc">
-                        Re-fetches the full CoinGecko coin list and rebuilds every alias
-                        mapping. Top-market-cap coins get symbol priority (fixes btc →
-                        batcat-type issues).
-                    </p>
-                    <button
-                        onClick={refreshAllAliases}
-                        className="btn btn-primary"
-                        disabled={aliasesLoading}
-                    >
-                        {aliasesLoading ? "Rebuilding…" : "Rebuild Aliases"}
-                    </button>
-                    {aliasesResult && (
-                        <div
-                            className={`result-box ${aliasesResult.error ? "error" : "success"
-                                }`}
-                        >
-                            {aliasesResult.error
-                                ? `Error: ${aliasesResult.error}`
-                                : `✓ Updated ${aliasesResult.aliases_updated} aliases from ${aliasesResult.coins_processed} coins`}
-                        </div>
-                    )}
-                </div>
             </div>
 
             {/* ---- Alias Management section ---- */}
             <h2 className="section-title" style={{ marginTop: "2rem" }}>
-                Alias Management
+                Alias Lookup
             </h2>
+            <p className="cache-card-desc" style={{ marginBottom: "1rem" }}>
+                Aliases are now stored in{" "}
+                <code>data/coin_aliases.json</code> (not Redis).
+                To update aliases, edit the JSON file or run{" "}
+                <code>python tools/populate_aliases/main.py</code>.
+            </p>
 
             <div className="cache-grid">
                 {/* Lookup Alias */}
                 <div className="cache-card">
                     <h2 className="cache-card-title">🔍 Lookup Alias</h2>
                     <p className="cache-card-desc">
-                        Check what a search term currently resolves to, and optionally
-                        delete it.
+                        Check what a search term currently resolves to from the
+                        alias map.
                     </p>
                     <div className="inline-form">
                         <input
                             type="text"
-                            placeholder="e.g. btc, ada, ethereum"
+                            placeholder="e.g. btc, xbt, ethereum"
                             value={lookupTerm}
                             onChange={(e) => setLookupTerm(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && lookupAlias()}
@@ -252,69 +170,19 @@ export default function CachePage() {
 
                     {lookupResult && (
                         <div className="alias-result">
-                            {lookupResult.deleted ? (
-                                <p className="text-success">
-                                    ✓ Alias &apos;{lookupResult.term}&apos; has been deleted.
+                            {lookupResult.resolved_to ? (
+                                <p>
+                                    <span className="badge">{lookupResult.term}</span>
+                                    <span className="arrow"> → </span>
+                                    <span className="badge badge-accent">
+                                        {lookupResult.resolved_to}
+                                    </span>
                                 </p>
-                            ) : lookupResult.resolved_to ? (
-                                <>
-                                    <p>
-                                        <span className="badge">{lookupResult.term}</span>
-                                        <span className="arrow"> → </span>
-                                        <span className="badge badge-accent">
-                                            {lookupResult.resolved_to}
-                                        </span>
-                                    </p>
-                                    <button
-                                        onClick={deleteAlias}
-                                        className="btn btn-sm btn-danger"
-                                        style={{ marginTop: "0.65rem" }}
-                                    >
-                                        🗑 Delete This Alias
-                                    </button>
-                                </>
                             ) : (
                                 <p className="text-muted">
                                     No alias found for &apos;{lookupResult.term}&apos;
                                 </p>
                             )}
-                        </div>
-                    )}
-                </div>
-
-                {/* Set / Overwrite Alias */}
-                <div className="cache-card">
-                    <h2 className="cache-card-title">✏️ Set Alias</h2>
-                    <p className="cache-card-desc">
-                        Create or overwrite an alias mapping. e.g.&nbsp;
-                        <strong>btc → bitcoin</strong>
-                    </p>
-                    <div className="alias-form">
-                        <div className="form-group">
-                            <label>Search Term</label>
-                            <input
-                                type="text"
-                                value={newAliasTerm}
-                                onChange={(e) => setNewAliasTerm(e.target.value)}
-                                placeholder="e.g. btc"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Target Coin ID</label>
-                            <input
-                                type="text"
-                                value={newAliasTarget}
-                                onChange={(e) => setNewAliasTarget(e.target.value)}
-                                placeholder="e.g. bitcoin"
-                            />
-                        </div>
-                        <button onClick={setAlias} className="btn btn-primary">
-                            Set Alias
-                        </button>
-                    </div>
-                    {aliasMessage && (
-                        <div className={`result-box ${aliasMessage.type}`}>
-                            {aliasMessage.text}
                         </div>
                     )}
                 </div>
