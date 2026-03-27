@@ -4,14 +4,22 @@ In-process alias resolver backed by data/coin_aliases.json.
 Loads once at startup; resolves any term → canonical coin ID in O(1).
 This replaces Redis-based alias lookups for static mappings.
 
-Why not Redis?
-  - Aliases are static config, not ephemeral cached data. They don't expire.
-  - Every cache read was hitting Redis twice (alias lookup + data lookup),
-    adding 1-10ms of network latency per request unnecessarily.
-  - A local in-memory dict lookup is ~50ns vs ~5ms for Redis — ~200× faster.
-  - Exchange-specific names (e.g. Kraken's 'XBT' for bitcoin) cannot come
-    from CoinGecko and need a curated file anyway.
-  - Aliases belong in version control, not an ephemeral cache.
+JSON schema:
+  {
+    "assets": {
+      "bitcoin": {
+        "symbol":          "BTC",
+        "aliases":         ["bitcoin", "btc", "xbt"],
+        "exchange_symbols": { "kraken": "XBT" }
+      }
+    }
+  }
+
+The resolver builds its lookup dict with clear priority:
+  1. canonical_id       → itself
+  2. symbol             → canonical_id
+  3. aliases[]          → canonical_id
+  4. exchange_symbols values → canonical_id  (highest priority, applied last)
 
 To refresh the alias map, run:
     python tools/populate_aliases/main.py
@@ -76,32 +84,36 @@ class AliasResolver:
         assets: Dict = data.get("assets", {})
 
         for canonical_id, entry in assets.items():
-            # canonical_id always resolves to itself
+            # 1. canonical_id always resolves to itself
             self._lookup[canonical_id.lower()] = canonical_id
 
-            # Standard symbol for fallback lookups (e.g. "bitcoin" → "BTC")
+            # 2. Standard symbol → canonical_id (e.g. "btc" → "bitcoin")
             symbol = entry.get("symbol", "")
             if symbol:
                 self._standard_symbols[canonical_id] = symbol
+                self._lookup[symbol.lower()] = canonical_id
 
-            # All explicit aliases (symbol, name, exchange codes, etc.)
+            # 3. All curated/auto-derived aliases
             for alias in entry.get("aliases", []):
                 self._lookup[alias.lower()] = canonical_id
 
-            # Exchange-specific symbols (outgoing direction)
-            exchange_syms: Dict[str, str] = entry.get("exchange_symbols", {})
-            if exchange_syms:
+            # Cache exchange symbol map for outgoing direction
+            exchanges: Dict[str, str] = entry.get("exchange_symbols", {})
+            if exchanges:
                 self._exchange_symbols[canonical_id] = {
-                    ex.lower(): sym for ex, sym in exchange_syms.items()
+                    ex.lower(): sym for ex, sym in exchanges.items()
                 }
-                # Also register as incoming aliases so resolve("XBT") works
-                for sym in exchange_syms.values():
-                    self._lookup[sym.lower()] = canonical_id
+
+            # 4. Exchange symbols → canonical_id (highest priority, applied last)
+            # These are curated overrides (e.g. Kraken's "XBT" → "bitcoin").
+            # Applied after alias registration so they always win.
+            for sym in exchanges.values():
+                self._lookup[sym.lower()] = canonical_id
 
         meta = data.get("_meta", {})
         print(
             f"[AliasResolver] ✓ Loaded {len(assets)} assets / "
-            f"{len(self._lookup)} aliases "
+            f"{len(self._lookup)} lookup entries "
             f"(updated: {meta.get('updated_at', 'unknown')})"
         )
 
@@ -146,8 +158,8 @@ class AliasResolver:
         Convenience wrapper for parsing incoming WebSocket/REST data from an
         exchange that uses non-standard symbols.
 
-        Identical to resolve() since exchange symbols are registered as
-        aliases at load time, but more expressive at the call site:
+        Identical to resolve() since exchange symbols are registered in the
+        lookup dict at load time, but more expressive at the call site:
 
             resolve_from_exchange("XBT", "kraken")  → "bitcoin"
 
@@ -198,8 +210,6 @@ class AliasResolver:
         override = self.get_exchange_symbol(canonical_id, exchange)
         if override:
             return override
-        # Fall back to standard symbol from alias map JSON
-        # Re-parse the JSON each time is wasteful — cache the symbols dict
         return self._standard_symbols.get(canonical_id)
 
     # ------------------------------------------------------------------
@@ -208,7 +218,7 @@ class AliasResolver:
 
     @property
     def total_aliases(self) -> int:
-        """Total number of registered alias strings."""
+        """Total number of registered lookup entries."""
         return len(self._lookup)
 
     @property

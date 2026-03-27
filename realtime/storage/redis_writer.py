@@ -114,11 +114,44 @@ class RedisWriter:
         # Swap out the buffer so new writes don't interfere with the flush
         batch = self._buffer
         self._buffer = []
+
+        # ##############################################################################
+        # DEBUG BANDWIDTH — capture ms since last flush BEFORE updating _last_flush
+        # Comment out this one line to disable interval tracking
+        # ##############################################################################
+        _debug_interval_ms = (time.time() - self._last_flush) * 1000
+        # ##############################################################################
+
         self._last_flush = time.time()
+
+        # ##############################################################################
+        # OPTIMIZATION: DEDUPLICATION — keep only the latest tick per coin_id.
+        # If the same coin ticked 10x before this flush, only the newest value is sent.
+        # Can cut bandwidth by 50-80% for liquid coins.  Uncomment to enable.
+        # ##############################################################################
+        
+        _dedup: dict = {}
+        for tick in batch:
+            _dedup[tick.coin_id] = tick   # later tick overwrites earlier one
+        batch = list(_dedup.values())
+        logger.debug(f"[dedup] {len(self._buffer)} → {len(batch)} ticks after dedup")
+        
+        # ##############################################################################
+        # END DEDUPLICATION
+        # ##############################################################################
 
         try:
             pipe = self._client.pipeline(transaction=False)
             ttl = config.RT_PRICE_TTL
+
+            # ##########################################################################
+            # DEBUG BANDWIDTH — accumulate raw byte estimates inside the write loop.
+            # Includes key + value + approximate Redis RESP protocol overhead (~30 bytes
+            # per SETEX command).  Comment out _debug_total_bytes lines to disable.
+            # ##########################################################################
+            _debug_total_bytes = 0
+            _RESP_OVERHEAD = 30   # approximate RESP2 framing per SETEX command
+            # ##########################################################################
 
             for tick in batch:
                 tick_data = json.dumps(tick.to_dict())
@@ -132,13 +165,38 @@ class RedisWriter:
                 # Key 2: Per-exchange ticker data
                 # Useful for cross-exchange comparison, spread analysis,
                 # and debugging which exchange is providing data
-                exchange_key = f"rt:ticker:{tick.exchange}:{tick.coin_id}"
-                pipe.setex(exchange_key, ttl, tick_data)
+                # exchange_key = f"rt:ticker:{tick.exchange}:{tick.coin_id}"
+                # pipe.setex(exchange_key, ttl, tick_data)
+
+                # ##################################################################
+                # DEBUG BANDWIDTH — byte cost for this tick (2 keys written)
+                # ##################################################################
+                _debug_total_bytes += (
+                    len(price_key.encode()) + len(tick_data.encode()) + _RESP_OVERHEAD
+                    #+ len(exchange_key.encode()) + len(tick_data.encode()) + _RESP_OVERHEAD
+                )
+                # ##################################################################
 
             await pipe.execute()
 
             self._flush_count += 1
             self._write_count += len(batch)
+
+            # ##########################################################################
+            # DEBUG BANDWIDTH — print full summary for this flush.
+            # Comment out this entire logger.info block to silence it.
+            # ##########################################################################
+            logger.info(
+                f"\n  ╔══ BANDWIDTH DEBUG ══════════════════════════════════════════╗"
+                f"\n  ║  Batch #{self._flush_count:<5} │ {len(batch):>4} ticks "
+                f"│ {_debug_total_bytes:>8,} bytes ({_debug_total_bytes / 1024:.2f} KB)"
+                f"\n  ║  Per tick: ~{_debug_total_bytes // max(len(batch), 1):>4} bytes  "
+                f"│  Interval since last flush: {_debug_interval_ms:.1f}ms"
+                f"\n  ╚═════════════════════════════════════════════════════════════╝"
+            )
+            # ##########################################################################
+            # END BANDWIDTH DEBUG
+            # ##########################################################################
 
             # Log every 20th flush to avoid spam
             if self._flush_count % 20 == 0:

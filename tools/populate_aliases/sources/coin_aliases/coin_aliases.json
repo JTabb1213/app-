@@ -1,0 +1,2415 @@
+{
+    "_meta": {
+        "description": "Manually curated aliases per coin. For each canonical_id, list every string you want the resolver to recognise. Coins not listed here fall back to auto-derived aliases [canonical_id, symbol.lower(), display_name.lower()] from CoinGecko. To add a new coin: find its CoinGecko canonical ID and add an entry. Run tools/populate_aliases/main.py to rebuild.",
+        "updated_at": "2026-03-26",
+        "note": "Covers all ~671 non-null coins in exchange_symbols/kraken_symbols.json. Format: canonical_id (CoinGecko) -> [aliases...]"
+    },
+    "aliases": {
+        "0x": [
+            "0x",
+            "zrx"
+        ],
+        "1inch": [
+            "1inch",
+            "1inch exchange"
+        ],
+        "aave": [
+            "aave"
+        ],
+        "acala": [
+            "acala",
+            "aca"
+        ],
+        "acurast": [
+            "acurast",
+            "acu"
+        ],
+        "across-protocol": [
+            "across",
+            "across protocol",
+            "acx"
+        ],
+        "act-i-the-ai-prophecy": [
+            "act i",
+            "act"
+        ],
+        "adex": [
+            "adex",
+            "adx"
+        ],
+        "adi-token": [
+            "adi token",
+            "adi"
+        ],
+        "adventure-gold": [
+            "adventure gold",
+            "agld",
+            "nft worlds"
+        ],
+        "aethir": [
+            "aethir",
+            "ath"
+        ],
+        "aevo-exchange": [
+            "aevo",
+            "aevo exchange"
+        ],
+        "aerodrome-finance": [
+            "aerodrome",
+            "aero"
+        ],
+        "agora-dollar": [
+            "agora dollar",
+            "ausd"
+        ],
+        "ai-network": [
+            "ai network",
+            "ain"
+        ],
+        "ai16z": [
+            "ai16z"
+        ],
+        "aioz-network": [
+            "aioz",
+            "aioz network"
+        ],
+        "akash-network": [
+            "akash",
+            "akash network",
+            "akt"
+        ],
+        "akedo": [
+            "akedo",
+            "ake"
+        ],
+        "alchemist-ai": [
+            "alchemist ai",
+            "alch"
+        ],
+        "alchemix": [
+            "alchemix",
+            "alcx"
+        ],
+        "aleo": [
+            "aleo"
+        ],
+        "algorand": [
+            "algorand",
+            "algo"
+        ],
+        "alice": [
+            "alice",
+            "my neighbor alice"
+        ],
+        "alien-worlds": [
+            "alien worlds",
+            "tlm"
+        ],
+        "alkimi-2": [
+            "alkimi"
+        ],
+        "all-in-one-wallet": [
+            "all in one wallet",
+            "aio"
+        ],
+        "allora": [
+            "allora",
+            "allo"
+        ],
+        "almanak": [
+            "almanak"
+        ],
+        "alpha-finance": [
+            "alpha finance",
+            "alpha"
+        ],
+        "altair": [
+            "altair",
+            "air"
+        ],
+        "altlayer": [
+            "altlayer",
+            "alt"
+        ],
+        "althea": [
+            "althea"
+        ],
+        "ami": [
+            "ami"
+        ],
+        "analog": [
+            "analog",
+            "anlog"
+        ],
+        "anoma": [
+            "anoma",
+            "xan",
+            "namada"
+        ],
+        "anon-2": [
+            "anon"
+        ],
+        "ankr": [
+            "ankr"
+        ],
+        "apecoin": [
+            "apecoin",
+            "ape"
+        ],
+        "api3": [
+            "api3"
+        ],
+        "apriori": [
+            "apriori",
+            "apr"
+        ],
+        "aptos": [
+            "aptos",
+            "apt"
+        ],
+        "apu-apustaja": [
+            "apu apustaja",
+            "apu"
+        ],
+        "apyusd": [
+            "apyusd"
+        ],
+        "arc": [
+            "arc"
+        ],
+        "arbitrum": [
+            "arbitrum",
+            "arb"
+        ],
+        "arkham": [
+            "arkham",
+            "arkm",
+            "arkham intelligence"
+        ],
+        "arpa": [
+            "arpa"
+        ],
+        "arweave": [
+            "arweave",
+            "ar"
+        ],
+        "assisterr-ai": [
+            "assisterr",
+            "asrr"
+        ],
+        "astar": [
+            "astar",
+            "astr"
+        ],
+        "aster-2": [
+            "aster"
+        ],
+        "astra-nova": [
+            "astra nova",
+            "rvv"
+        ],
+        "auction": [
+            "auction",
+            "bounce finance"
+        ],
+        "audius": [
+            "audius",
+            "audio"
+        ],
+        "auki-labs": [
+            "auki labs",
+            "auki"
+        ],
+        "aura-finance": [
+            "aura finance",
+            "aura"
+        ],
+        "aurora-dao": [
+            "aurora dao",
+            "idex"
+        ],
+        "aussie-dollar-token": [
+            "aussie dollar",
+            "audx"
+        ],
+        "autonomys-network": [
+            "autonomys",
+            "ai3"
+        ],
+        "avalanche-2": [
+            "avalanche",
+            "avalanche-2",
+            "avax"
+        ],
+        "avantis": [
+            "avantis",
+            "avnt"
+        ],
+        "aventus": [
+            "aventus",
+            "avt"
+        ],
+        "axie-infinity": [
+            "axie infinity",
+            "axs"
+        ],
+        "aztec": [
+            "aztec"
+        ],
+        "b3": [
+            "b3"
+        ],
+        "baby": [
+            "baby"
+        ],
+        "baby-shark-universe": [
+            "baby shark universe",
+            "bsu"
+        ],
+        "backstage": [
+            "backstage",
+            "bks"
+        ],
+        "badger-dao": [
+            "badger dao",
+            "badger"
+        ],
+        "balancer": [
+            "balancer",
+            "bal"
+        ],
+        "banana-for-scale-2": [
+            "banana for scale",
+            "bananas31"
+        ],
+        "band-protocol": [
+            "band protocol",
+            "band"
+        ],
+        "barnbridge": [
+            "barnbridge",
+            "bond"
+        ],
+        "basic-attention-token": [
+            "basic attention token",
+            "bat"
+        ],
+        "basilisk": [
+            "basilisk",
+            "bsx"
+        ],
+        "beam": [
+            "beam"
+        ],
+        "beamable-network-token": [
+            "beamable",
+            "bmb"
+        ],
+        "berachain-bera": [
+            "berachain",
+            "bera"
+        ],
+        "bert": [
+            "bert"
+        ],
+        "biconomy": [
+            "biconomy",
+            "bico"
+        ],
+        "big-time": [
+            "big time",
+            "bigtime"
+        ],
+        "billy": [
+            "billy"
+        ],
+        "binancecoin": [
+            "binancecoin",
+            "bnb",
+            "binance coin"
+        ],
+        "bio-protocol": [
+            "bio protocol",
+            "bio"
+        ],
+        "bitcoin": [
+            "bitcoin",
+            "btc",
+            "xbt"
+        ],
+        "bitcoin-cash": [
+            "bitcoin cash",
+            "bch",
+            "bitcoincash",
+            "bitcoin-cash"
+        ],
+        "bitcoinos": [
+            "bitcoinos",
+            "bos"
+        ],
+        "bitdao": [
+            "bitdao",
+            "bit"
+        ],
+        "bitget-token": [
+            "bitget",
+            "bgb",
+            "bitget token"
+        ],
+        "bitlayer-bitvm": [
+            "bitlayer",
+            "btr"
+        ],
+        "bittensor": [
+            "bittensor",
+            "tao"
+        ],
+        "bittorrent": [
+            "bittorrent",
+            "btt"
+        ],
+        "black-mirror": [
+            "black mirror"
+        ],
+        "bless-2": [
+            "bless"
+        ],
+        "bluzelle": [
+            "bluzelle",
+            "blz"
+        ],
+        "bluefin": [
+            "bluefin",
+            "blue"
+        ],
+        "bluwhale": [
+            "bluwhale",
+            "bluai"
+        ],
+        "blur": [
+            "blur"
+        ],
+        "bnc": [
+            "bnc"
+        ],
+        "bancor": [
+            "bancor",
+            "bnt"
+        ],
+        "bob": [
+            "bob"
+        ],
+        "boba-network": [
+            "boba network",
+            "boba"
+        ],
+        "bonfida": [
+            "bonfida",
+            "fida"
+        ],
+        "bonk": [
+            "bonk"
+        ],
+        "bonzo-finance": [
+            "bonzo"
+        ],
+        "brl1": [
+            "brl1"
+        ],
+        "brevis": [
+            "brevis",
+            "brev"
+        ],
+        "brickcoin": [
+            "brickcoin",
+            "brick"
+        ],
+        "bsquared-network": [
+            "bsquared",
+            "b2"
+        ],
+        "bubblemaps": [
+            "bubblemaps",
+            "bmt"
+        ],
+        "cardano": [
+            "cardano",
+            "ada"
+        ],
+        "carv": [
+            "carv"
+        ],
+        "cartesi": [
+            "cartesi",
+            "ctsi"
+        ],
+        "cat-2": [
+            "cat"
+        ],
+        "cat-in-a-dogs-world": [
+            "mew",
+            "cat in a dogs world"
+        ],
+        "celer-network": [
+            "celer",
+            "celer network",
+            "celr"
+        ],
+        "celo": [
+            "celo"
+        ],
+        "centrifuge-2": [
+            "centrifuge",
+            "cfg"
+        ],
+        "cf-large-cap-index": [
+            "cf large cap",
+            "lcap"
+        ],
+        "chain-2": [
+            "chain",
+            "xcn"
+        ],
+        "chainlink": [
+            "chainlink",
+            "link"
+        ],
+        "checkmate-2": [
+            "checkmate",
+            "check"
+        ],
+        "cheems": [
+            "cheems"
+        ],
+        "chex-token": [
+            "chex",
+            "chex token"
+        ],
+        "chill-house": [
+            "chill house",
+            "chillhouse"
+        ],
+        "chiliz": [
+            "chiliz",
+            "chz"
+        ],
+        "chromaway": [
+            "chromaway",
+            "chr",
+            "chromia"
+        ],
+        "civic": [
+            "civic",
+            "cvc"
+        ],
+        "clanker": [
+            "clanker"
+        ],
+        "clearpool": [
+            "clearpool",
+            "cpool"
+        ],
+        "clover-finance": [
+            "clover finance",
+            "clv"
+        ],
+        "codatta": [
+            "codatta",
+            "xny"
+        ],
+        "coin98": [
+            "coin98",
+            "c98"
+        ],
+        "compound-governance-token": [
+            "compound",
+            "comp"
+        ],
+        "concordium": [
+            "concordium",
+            "ccd"
+        ],
+        "conflux-token": [
+            "conflux",
+            "cfx"
+        ],
+        "connect-token-wct": [
+            "connect token",
+            "wct"
+        ],
+        "convex-finance": [
+            "convex",
+            "convex finance",
+            "cvx"
+        ],
+        "cookie": [
+            "cookie"
+        ],
+        "corn-2": [
+            "corn"
+        ],
+        "coq-inu": [
+            "coq inu",
+            "coq"
+        ],
+        "cosmos": [
+            "cosmos",
+            "atom"
+        ],
+        "coti": [
+            "coti"
+        ],
+        "covalent-x-token": [
+            "covalent",
+            "cxt"
+        ],
+        "cow": [
+            "cow protocol",
+            "cow"
+        ],
+        "creditcoin-2": [
+            "creditcoin",
+            "ctc"
+        ],
+        "crust-storage-market": [
+            "crust",
+            "csm"
+        ],
+        "crypto-com-chain": [
+            "cronos",
+            "cro",
+            "crypto.com coin"
+        ],
+        "curve-dao-token": [
+            "curve",
+            "crv",
+            "curve dao"
+        ],
+        "cyberconnect": [
+            "cyberconnect",
+            "cyber"
+        ],
+        "cygnus-2": [
+            "cygnus",
+            "cgn"
+        ],
+        "ccop": [
+            "ccop",
+            "copm"
+        ],
+        "dai": [
+            "dai"
+        ],
+        "dash": [
+            "dash"
+        ],
+        "debridge": [
+            "debridge",
+            "dbr"
+        ],
+        "degen-base": [
+            "degen"
+        ],
+        "decentraland": [
+            "decentraland",
+            "mana"
+        ],
+        "decentralized-mining-exchange": [
+            "dmc"
+        ],
+        "deep": [
+            "deep"
+        ],
+        "dent": [
+            "dent"
+        ],
+        "derive": [
+            "derive",
+            "drv"
+        ],
+        "dog-go-to-the-moon-rune": [
+            "dog go to the moon",
+            "dog"
+        ],
+        "dogecoin": [
+            "dogecoin",
+            "doge",
+            "xdg"
+        ],
+        "dogs-2": [
+            "dogs"
+        ],
+        "dogwifcoin": [
+            "dogwifhat",
+            "dogwifcoin",
+            "wif"
+        ],
+        "dolomite": [
+            "dolomite",
+            "dolo"
+        ],
+        "donald-tremp": [
+            "donald tremp",
+            "tremp"
+        ],
+        "dovu-2": [
+            "dovu"
+        ],
+        "drift-protocol": [
+            "drift protocol",
+            "drift"
+        ],
+        "duckchain-token": [
+            "duckchain",
+            "duck"
+        ],
+        "dydx-chain": [
+            "dydx"
+        ],
+        "dymension": [
+            "dymension",
+            "dym"
+        ],
+        "echelon-prime": [
+            "echelon prime",
+            "prime"
+        ],
+        "ecomi": [
+            "ecomi",
+            "omi"
+        ],
+        "eden": [
+            "eden"
+        ],
+        "edge": [
+            "edge"
+        ],
+        "edu-coin": [
+            "edu coin",
+            "edu"
+        ],
+        "eigenlayer": [
+            "eigenlayer",
+            "eigen"
+        ],
+        "elizaos": [
+            "elizaos",
+            "eliza os"
+        ],
+        "elixir-finance": [
+            "elixir finance",
+            "elx"
+        ],
+        "elrond-erd-2": [
+            "elrond",
+            "egld",
+            "multiversx"
+        ],
+        "energy-web-token": [
+            "energy web",
+            "ewt"
+        ],
+        "enjincoin": [
+            "enjin coin",
+            "enjin",
+            "enj"
+        ],
+        "enso": [
+            "enso"
+        ],
+        "eos": [
+            "eos"
+        ],
+        "ethena": [
+            "ethena",
+            "ena"
+        ],
+        "ethena-usde": [
+            "usde",
+            "ethena usde"
+        ],
+        "ethereum": [
+            "ethereum",
+            "eth",
+            "ether"
+        ],
+        "ethereum-classic": [
+            "ethereum classic",
+            "etc"
+        ],
+        "ethereum-name-service": [
+            "ens",
+            "ethereum name service"
+        ],
+        "ethereum-pow-iou": [
+            "ethereum pow",
+            "ethw"
+        ],
+        "ether-fi": [
+            "ether.fi",
+            "ethfi"
+        ],
+        "ethgas-2": [
+            "ethgas",
+            "gwei"
+        ],
+        "euler": [
+            "euler",
+            "eul"
+        ],
+        "euro-coin": [
+            "euro coin",
+            "eurc"
+        ],
+        "evaa-protocol": [
+            "evaa",
+            "evaa protocol"
+        ],
+        "exchangeart": [
+            "exchangeart",
+            "art"
+        ],
+        "falcon-finance-ff": [
+            "falcon finance",
+            "ff"
+        ],
+        "fantom": [
+            "fantom",
+            "ftm"
+        ],
+        "farm": [
+            "farm",
+            "harvest finance"
+        ],
+        "fartcoin": [
+            "fartcoin"
+        ],
+        "fetch-ai": [
+            "fetch.ai",
+            "fetch ai",
+            "fet"
+        ],
+        "fidelity-digital-dollar": [
+            "fidelity digital dollar",
+            "fidd"
+        ],
+        "fight": [
+            "fight"
+        ],
+        "filecoin": [
+            "filecoin",
+            "fil"
+        ],
+        "flare-networks": [
+            "flare",
+            "flr",
+            "flare network"
+        ],
+        "floki": [
+            "floki"
+        ],
+        "flow": [
+            "flow"
+        ],
+        "flock-2": [
+            "flock"
+        ],
+        "flux": [
+            "flux"
+        ],
+        "folks": [
+            "folks"
+        ],
+        "forest": [
+            "forest"
+        ],
+        "franklin": [
+            "franklin",
+            "fly"
+        ],
+        "frontier-stable-token": [
+            "frontier",
+            "frnt"
+        ],
+        "fun": [
+            "fun",
+            "funfair"
+        ],
+        "fwog": [
+            "fwog"
+        ],
+        "g-token": [
+            "g token",
+            "g"
+        ],
+        "gaia-everworld": [
+            "gaia everworld",
+            "gaia"
+        ],
+        "gaib": [
+            "gaib"
+        ],
+        "galatasaray-fan-token": [
+            "galatasaray fan token",
+            "gal"
+        ],
+        "gala": [
+            "gala"
+        ],
+        "gari-network": [
+            "gari",
+            "gari network"
+        ],
+        "genius-yield": [
+            "genius yield",
+            "gens"
+        ],
+        "gensokishis-metaverse": [
+            "gensokishi",
+            "mv"
+        ],
+        "ghiblification": [
+            "ghiblification",
+            "ghibli"
+        ],
+        "gigachad-2": [
+            "gigachad",
+            "giga"
+        ],
+        "gitcoin": [
+            "gitcoin",
+            "gtc"
+        ],
+        "global-dollar": [
+            "global dollar",
+            "usdg"
+        ],
+        "gmx": [
+            "gmx"
+        ],
+        "gnosis": [
+            "gnosis",
+            "gno"
+        ],
+        "goat": [
+            "goat"
+        ],
+        "goldfinch": [
+            "goldfinch",
+            "gfi"
+        ],
+        "grass": [
+            "grass"
+        ],
+        "griffain": [
+            "griffain"
+        ],
+        "gmt-token": [
+            "gomining"
+        ],
+        "gunz": [
+            "gunz",
+            "gun"
+        ],
+        "h": [
+            "h"
+        ],
+        "hamster-kombat": [
+            "hamster kombat",
+            "hmstr"
+        ],
+        "hashflow": [
+            "hashflow",
+            "hft"
+        ],
+        "hashkey-ecopoints": [
+            "hashkey",
+            "hsk"
+        ],
+        "hashpack": [
+            "hashpack",
+            "pack"
+        ],
+        "havven": [
+            "synthetix",
+            "snx"
+        ],
+        "hedera-hashgraph": [
+            "hedera",
+            "hedera hashgraph",
+            "hbar"
+        ],
+        "helium": [
+            "helium",
+            "hnt"
+        ],
+        "hivemapper": [
+            "hivemapper",
+            "honey"
+        ],
+        "holo": [
+            "holo",
+            "holochain",
+            "hot"
+        ],
+        "housecoin-2": [
+            "housecoin",
+            "house"
+        ],
+        "hydradx": [
+            "hydradx",
+            "hdx"
+        ],
+        "hyperliquid": [
+            "hyperliquid",
+            "hype"
+        ],
+        "icon": [
+            "icon",
+            "icx"
+        ],
+        "iagon": [
+            "iagon",
+            "iag"
+        ],
+        "iexec-rlc": [
+            "iexec",
+            "rlc"
+        ],
+        "immutable-x": [
+            "immutable x",
+            "imx",
+            "immutable"
+        ],
+        "impossible-cloud-network-token": [
+            "impossible cloud",
+            "icnt"
+        ],
+        "infinex-2": [
+            "infinex",
+            "inx"
+        ],
+        "infinit": [
+            "infinit"
+        ],
+        "infrared-finance": [
+            "infrared",
+            "ir"
+        ],
+        "init": [
+            "init"
+        ],
+        "injective-protocol": [
+            "injective",
+            "inj"
+        ],
+        "internet-computer": [
+            "internet computer",
+            "icp"
+        ],
+        "intuition": [
+            "intuition",
+            "trust"
+        ],
+        "jasmycoin": [
+            "jasmy",
+            "jasmycoin"
+        ],
+        "jeo-boden": [
+            "jeo boden",
+            "boden"
+        ],
+        "jito-governance-token": [
+            "jito",
+            "jto"
+        ],
+        "jito-staked-sol": [
+            "jito staked sol",
+            "jitosol"
+        ],
+        "joe": [
+            "joe",
+            "trader joe"
+        ],
+        "jupiter-exchange-solana": [
+            "jupiter",
+            "jup"
+        ],
+        "juno-network": [
+            "juno",
+            "juno network"
+        ],
+        "just": [
+            "just",
+            "jst"
+        ],
+        "kamino": [
+            "kamino",
+            "kmno"
+        ],
+        "karura": [
+            "karura",
+            "kar"
+        ],
+        "kaspa": [
+            "kaspa",
+            "kas"
+        ],
+        "katana-network-token": [
+            "katana",
+            "kat"
+        ],
+        "kava": [
+            "kava"
+        ],
+        "kaito": [
+            "kaito"
+        ],
+        "keep-network": [
+            "keep network",
+            "keep"
+        ],
+        "keep3rv1": [
+            "keep3rv1",
+            "kp3r"
+        ],
+        "keeta": [
+            "keeta",
+            "kta"
+        ],
+        "kernel-2": [
+            "kernel"
+        ],
+        "ket": [
+            "ket"
+        ],
+        "kgen": [
+            "kgen"
+        ],
+        "kilt-protocol-2": [
+            "kilt",
+            "kilt protocol"
+        ],
+        "kin": [
+            "kin"
+        ],
+        "koban": [
+            "koban"
+        ],
+        "kula": [
+            "kula"
+        ],
+        "kusama": [
+            "kusama",
+            "ksm"
+        ],
+        "kyber-network-crystal": [
+            "kyber",
+            "kyber network",
+            "knc"
+        ],
+        "layer3": [
+            "layer3",
+            "l3"
+        ],
+        "lava": [
+            "lava"
+        ],
+        "layerzero": [
+            "layerzero",
+            "zro"
+        ],
+        "lcx": [
+            "lcx"
+        ],
+        "lido-dao": [
+            "lido",
+            "ldo"
+        ],
+        "limewire-token": [
+            "limewire",
+            "lmwr"
+        ],
+        "linea": [
+            "linea"
+        ],
+        "lit": [
+            "lit"
+        ],
+        "liquid-staked-ethereum": [
+            "liquid staked eth",
+            "lseth"
+        ],
+        "liquid-staked-sol": [
+            "liquid staked sol",
+            "lssol"
+        ],
+        "liquity": [
+            "liquity",
+            "lqty"
+        ],
+        "litecoin": [
+            "litecoin",
+            "ltc"
+        ],
+        "lisk": [
+            "lisk",
+            "lsk"
+        ],
+        "livepeer": [
+            "livepeer",
+            "lpt"
+        ],
+        "lobo": [
+            "lobo"
+        ],
+        "lock-in": [
+            "lock-in",
+            "lockin"
+        ],
+        "lofi-2": [
+            "lofi"
+        ],
+        "loaded-lions": [
+            "loaded lions",
+            "lion"
+        ],
+        "loopring": [
+            "loopring",
+            "lrc"
+        ],
+        "magic-eden": [
+            "magic eden",
+            "me"
+        ],
+        "magic-internet-money": [
+            "magic internet money",
+            "mim"
+        ],
+        "maker": [
+            "maker",
+            "mkr"
+        ],
+        "mantle": [
+            "mantle",
+            "mnt"
+        ],
+        "mantle-restaked-eth": [
+            "mantle restaked eth",
+            "cmeth"
+        ],
+        "mantle-staked-ether": [
+            "mantle staked ether",
+            "meth"
+        ],
+        "mantra": [
+            "mantra"
+        ],
+        "mantra-dao": [
+            "mantra dao",
+            "om"
+        ],
+        "maple": [
+            "maple",
+            "mpl"
+        ],
+        "marlin": [
+            "marlin",
+            "pond"
+        ],
+        "mask-network": [
+            "mask network",
+            "mask"
+        ],
+        "matchain": [
+            "matchain",
+            "mat"
+        ],
+        "matic-network": [
+            "polygon",
+            "matic"
+        ],
+        "melania-meme": [
+            "melania",
+            "melania meme"
+        ],
+        "melon": [
+            "melon",
+            "mln",
+            "enzyme"
+        ],
+        "memecoin-2": [
+            "memecoin",
+            "meme"
+        ],
+        "memecore": [
+            "memecore"
+        ],
+        "mentat": [
+            "mentat",
+            "spice"
+        ],
+        "merit-circle": [
+            "merit circle",
+            "mc"
+        ],
+        "merlin-chain": [
+            "merlin chain",
+            "merl"
+        ],
+        "meteora": [
+            "meteora",
+            "met"
+        ],
+        "metafighter": [
+            "metafighter",
+            "mf"
+        ],
+        "metis-token": [
+            "metis",
+            "metis token"
+        ],
+        "michi": [
+            "michi"
+        ],
+        "microvisionchain": [
+            "microvision",
+            "space"
+        ],
+        "mind-network": [
+            "mind network",
+            "fhe"
+        ],
+        "mina-protocol": [
+            "mina",
+            "mina protocol"
+        ],
+        "mira-2": [
+            "mira"
+        ],
+        "mirror-protocol": [
+            "mirror protocol",
+            "mir"
+        ],
+        "mocaverse": [
+            "mocaverse",
+            "moca"
+        ],
+        "monad": [
+            "monad",
+            "mon"
+        ],
+        "monero": [
+            "monero",
+            "xmr"
+        ],
+        "moon": [
+            "moon"
+        ],
+        "moonbeam": [
+            "moonbeam",
+            "glmr"
+        ],
+        "moonriver": [
+            "moonriver",
+            "movr"
+        ],
+        "moo-deng": [
+            "moo deng",
+            "moodeng"
+        ],
+        "morpho": [
+            "morpho"
+        ],
+        "movement": [
+            "movement",
+            "move"
+        ],
+        "msol": [
+            "msol",
+            "marinade staked sol"
+        ],
+        "mubarak": [
+            "mubarak"
+        ],
+        "multichain": [
+            "multichain",
+            "multi"
+        ],
+        "mxc": [
+            "mxc"
+        ],
+        "mxnb": [
+            "mxnb"
+        ],
+        "myx-finance": [
+            "myx finance",
+            "myx"
+        ],
+        "near": [
+            "near",
+            "near protocol"
+        ],
+        "neiro": [
+            "neiro"
+        ],
+        "neutron-3": [
+            "neutron",
+            "ntrn"
+        ],
+        "newton-project": [
+            "newton project",
+            "ab"
+        ],
+        "newton-protocol": [
+            "newton protocol",
+            "newt"
+        ],
+        "midnight": [
+            "midnight",
+            "night"
+        ],
+        "nillion": [
+            "nillion",
+            "nil"
+        ],
+        "nodle-network": [
+            "nodle",
+            "nodl"
+        ],
+        "nobody-sausage": [
+            "nobody sausage",
+            "nobody"
+        ],
+        "node-2": [
+            "node"
+        ],
+        "nosana": [
+            "nosana",
+            "nos"
+        ],
+        "notcoin": [
+            "notcoin",
+            "not"
+        ],
+        "npc": [
+            "npc"
+        ],
+        "numeraire": [
+            "numeraire",
+            "nmr"
+        ],
+        "nym": [
+            "nym"
+        ],
+        "obol-2": [
+            "obol"
+        ],
+        "ocean-protocol": [
+            "ocean protocol",
+            "ocean"
+        ],
+        "odos": [
+            "odos"
+        ],
+        "official-trump": [
+            "trump",
+            "official trump"
+        ],
+        "okb": [
+            "okb",
+            "okx token"
+        ],
+        "omisego": [
+            "omg",
+            "omisego"
+        ],
+        "omni": [
+            "omni"
+        ],
+        "ondo-finance": [
+            "ondo",
+            "ondo finance"
+        ],
+        "oob": [
+            "oob"
+        ],
+        "open-ticketing-ecosystem": [
+            "open ticketing",
+            "opn"
+        ],
+        "openledger-2": [
+            "openledger",
+            "open"
+        ],
+        "optimism": [
+            "optimism",
+            "op"
+        ],
+        "orca": [
+            "orca"
+        ],
+        "orchid-protocol": [
+            "orchid",
+            "oxt"
+        ],
+        "orderly-network": [
+            "orderly",
+            "order"
+        ],
+        "origin-ether": [
+            "origin ether",
+            "oeth"
+        ],
+        "origin-protocol": [
+            "origin protocol",
+            "ogn"
+        ],
+        "osmosis": [
+            "osmosis",
+            "osmo"
+        ],
+        "oxygen": [
+            "oxygen",
+            "oxy"
+        ],
+        "pact-2": [
+            "pact"
+        ],
+        "pancakeswap-token": [
+            "pancakeswap",
+            "cake"
+        ],
+        "panther": [
+            "panther",
+            "zkp"
+        ],
+        "paraverse": [
+            "paraverse",
+            "para"
+        ],
+        "parcl": [
+            "parcl",
+            "prcl"
+        ],
+        "particle-network": [
+            "particle network",
+            "parti"
+        ],
+        "pax-gold": [
+            "pax gold",
+            "paxg"
+        ],
+        "paypal-usd": [
+            "paypal usd",
+            "pyusd"
+        ],
+        "peaq-2": [
+            "peaq"
+        ],
+        "pendle": [
+            "pendle"
+        ],
+        "pepe": [
+            "pepe"
+        ],
+        "pepecoin-2": [
+            "pepecoin classic",
+            "pepecoin"
+        ],
+        "pepecoin-network": [
+            "pep"
+        ],
+        "perpetual-protocol": [
+            "perpetual protocol",
+            "perp"
+        ],
+        "pha": [
+            "pha",
+            "phala"
+        ],
+        "pi-network": [
+            "pi network",
+            "pi"
+        ],
+        "pineapple-cat-2": [
+            "pineapple cat",
+            "pica"
+        ],
+        "pipe": [
+            "pipe"
+        ],
+        "planck": [
+            "planck"
+        ],
+        "plasma": [
+            "plasma",
+            "xpl"
+        ],
+        "play-2": [
+            "play"
+        ],
+        "playdapp": [
+            "playdapp",
+            "pda"
+        ],
+        "plume": [
+            "plume"
+        ],
+        "pnut": [
+            "peanut the squirrel",
+            "pnut"
+        ],
+        "polkadot": [
+            "polkadot",
+            "dot"
+        ],
+        "polkastarter": [
+            "polkastarter",
+            "pols"
+        ],
+        "polis": [
+            "polis"
+        ],
+        "polygon-ecosystem-token": [
+            "polygon",
+            "pol"
+        ],
+        "ponke": [
+            "ponke"
+        ],
+        "popcat": [
+            "popcat"
+        ],
+        "portal-2": [
+            "portal"
+        ],
+        "portal-to-bitcoin": [
+            "portal to bitcoin",
+            "ptb"
+        ],
+        "power-ledger": [
+            "power ledger",
+            "powr"
+        ],
+        "propy": [
+            "propy",
+            "pro"
+        ],
+        "pstake-finance": [
+            "pstake",
+            "pstake finance"
+        ],
+        "pudgy-penguins": [
+            "pudgy penguins",
+            "pengu"
+        ],
+        "puffer-finance": [
+            "puffer",
+            "puffer finance"
+        ],
+        "pump": [
+            "pump"
+        ],
+        "pyth-network": [
+            "pyth",
+            "pyth network"
+        ],
+        "q": [
+            "q"
+        ],
+        "stablecorp-qcad": [
+            "qcad"
+        ],
+        "benqi": [
+            "benqi",
+            "qi"
+        ],
+        "quant-network": [
+            "quant",
+            "qnt"
+        ],
+        "qtum": [
+            "qtum"
+        ],
+        "radicle": [
+            "radicle",
+            "rad"
+        ],
+        "raiinmaker": [
+            "raiinmaker",
+            "raiin"
+        ],
+        "rails": [
+            "rails"
+        ],
+        "rainbow-3-2": [
+            "rainbow",
+            "rnbw"
+        ],
+        "rain": [
+            "rain"
+        ],
+        "raydium": [
+            "raydium",
+            "ray"
+        ],
+        "rayls": [
+            "rayls",
+            "rls"
+        ],
+        "rarible": [
+            "rarible",
+            "rari"
+        ],
+        "ravedao": [
+            "ravedao",
+            "rave"
+        ],
+        "redstone-oracles": [
+            "redstone",
+            "red"
+        ],
+        "render-token": [
+            "render",
+            "rndr"
+        ],
+        "republic-protocol": [
+            "ren",
+            "republic protocol"
+        ],
+        "request-network": [
+            "request",
+            "request network",
+            "req"
+        ],
+        "reserve-rights-token": [
+            "reserve rights",
+            "rsr"
+        ],
+        "researchcoin": [
+            "researchcoin",
+            "rsc"
+        ],
+        "retardio": [
+            "retardio"
+        ],
+        "renzo": [
+            "renzo",
+            "rez"
+        ],
+        "rhea-2": [
+            "rhea"
+        ],
+        "ripple": [
+            "ripple",
+            "xrp"
+        ],
+        "ripple-usd": [
+            "ripple usd",
+            "rlusd"
+        ],
+        "river": [
+            "river"
+        ],
+        "rize": [
+            "rize"
+        ],
+        "robo-token-2": [
+            "robo token",
+            "robo"
+        ],
+        "robonomics-network": [
+            "robonomics",
+            "xrt"
+        ],
+        "rocket-pool": [
+            "rocket pool",
+            "rpl"
+        ],
+        "roll": [
+            "roll"
+        ],
+        "rook": [
+            "rook"
+        ],
+        "rubic": [
+            "rubic",
+            "rbc"
+        ],
+        "rujira": [
+            "rujira",
+            "ruji"
+        ],
+        "rune-pups": [
+            "rune pups",
+            "pups"
+        ],
+        "saber": [
+            "saber",
+            "sbr"
+        ],
+        "safe": [
+            "safe",
+            "gnosis safe"
+        ],
+        "saga-2": [
+            "saga"
+        ],
+        "sahara-ai": [
+            "sahara ai",
+            "sahara"
+        ],
+        "samoyedcoin": [
+            "samoyedcoin",
+            "samo"
+        ],
+        "saakuru-labs": [
+            "saakuru",
+            "skr"
+        ],
+        "sanctum-2": [
+            "sanctum",
+            "cloud"
+        ],
+        "sapien-2": [
+            "sapien"
+        ],
+        "saros-finance": [
+            "saros",
+            "saros finance"
+        ],
+        "saucerswap": [
+            "saucerswap",
+            "sauce"
+        ],
+        "scallop-2": [
+            "scallop",
+            "sca"
+        ],
+        "scor": [
+            "scor"
+        ],
+        "secret": [
+            "secret",
+            "scrt",
+            "secret network"
+        ],
+        "sei-network": [
+            "sei",
+            "sei network"
+        ],
+        "selfkey": [
+            "selfkey",
+            "key"
+        ],
+        "sentient": [
+            "sentient",
+            "sent"
+        ],
+        "serum": [
+            "serum",
+            "srm"
+        ],
+        "shape": [
+            "shape"
+        ],
+        "shiba-inu": [
+            "shiba inu",
+            "shib",
+            "shiba"
+        ],
+        "shiden": [
+            "shiden",
+            "sdn"
+        ],
+        "siacoin": [
+            "siacoin",
+            "sc"
+        ],
+        "sidekick": [
+            "sidekick"
+        ],
+        "sigma": [
+            "sigma"
+        ],
+        "sky": [
+            "sky"
+        ],
+        "slay": [
+            "slay"
+        ],
+        "snek": [
+            "snek"
+        ],
+        "sogni-ai": [
+            "sogni ai",
+            "sogni"
+        ],
+        "solana": [
+            "solana",
+            "sol"
+        ],
+        "solayer": [
+            "solayer",
+            "layer"
+        ],
+        "solv-protocol": [
+            "solv",
+            "solv protocol"
+        ],
+        "somnia": [
+            "somnia",
+            "somi"
+        ],
+        "sonic-3": [
+            "sonic",
+            "s"
+        ],
+        "sonic-svm": [
+            "sonic svm"
+        ],
+        "soon-2": [
+            "soon"
+        ],
+        "sosovalue": [
+            "sosovalue",
+            "soso"
+        ],
+        "spark-2": [
+            "spark",
+            "spk"
+        ],
+        "spell-token": [
+            "spell",
+            "spell token"
+        ],
+        "spx6900": [
+            "spx6900",
+            "spx"
+        ],
+        "ssv-network": [
+            "ssv network",
+            "ssv"
+        ],
+        "stafi": [
+            "stafi",
+            "fis"
+        ],
+        "staked-ether": [
+            "staked ether",
+            "steth",
+            "lido staked eth"
+        ],
+        "starknet": [
+            "starknet",
+            "strk"
+        ],
+        "stargate-finance": [
+            "stargate",
+            "stg"
+        ],
+        "stablr-euro": [
+            "stablr euro",
+            "eurr"
+        ],
+        "stablr-usd": [
+            "stablr usd",
+            "usdr"
+        ],
+        "stbl": [
+            "stbl"
+        ],
+        "stellar": [
+            "stellar",
+            "xlm",
+            "stellar lumens"
+        ],
+        "stepn": [
+            "stepn",
+            "gmt"
+        ],
+        "step": [
+            "step"
+        ],
+        "story-2": [
+            "story",
+            "ip"
+        ],
+        "storj": [
+            "storj"
+        ],
+        "stool-prisondente": [
+            "jailstool"
+        ],
+        "stride": [
+            "stride",
+            "strd"
+        ],
+        "stronghold-token": [
+            "stronghold",
+            "shx"
+        ],
+        "blockstack": [
+            "stacks",
+            "stx"
+        ],
+        "succinct": [
+            "succinct",
+            "prove"
+        ],
+        "sui": [
+            "sui"
+        ],
+        "suku": [
+            "suku"
+        ],
+        "sun-token": [
+            "sun token",
+            "sun"
+        ],
+        "sundog": [
+            "sundog"
+        ],
+        "superfarm": [
+            "superfarm",
+            "super"
+        ],
+        "superform": [
+            "superform",
+            "up"
+        ],
+        "superrare": [
+            "superrare",
+            "rare"
+        ],
+        "superp": [
+            "superp",
+            "sup"
+        ],
+        "sushi": [
+            "sushi",
+            "sushiswap"
+        ],
+        "swell-network": [
+            "swell",
+            "swell network"
+        ],
+        "swarms": [
+            "swarms"
+        ],
+        "sweatcoin": [
+            "sweatcoin",
+            "sweat"
+        ],
+        "swipe": [
+            "swipe",
+            "sxp"
+        ],
+        "synapse-2": [
+            "synapse",
+            "syn"
+        ],
+        "syndicate-3": [
+            "syndicate",
+            "synd"
+        ],
+        "syrup": [
+            "syrup"
+        ],
+        "space-and-time": [
+            "space and time",
+            "sxt"
+        ],
+        "talus": [
+            "talus"
+        ],
+        "tac": [
+            "tac"
+        ],
+        "tanssi": [
+            "tanssi"
+        ],
+        "tbtc": [
+            "tbtc",
+            "threshold btc"
+        ],
+        "tea-protocol": [
+            "tea protocol",
+            "tea"
+        ],
+        "telcoin": [
+            "telcoin",
+            "tel"
+        ],
+        "tensor": [
+            "tensor",
+            "tnsr"
+        ],
+        "term-finance": [
+            "term finance",
+            "term"
+        ],
+        "terra-luna-2": [
+            "luna",
+            "terra",
+            "luna2"
+        ],
+        "terrausd-wormhole": [
+            "ust",
+            "terra usd",
+            "terrausd"
+        ],
+        "tether": [
+            "tether",
+            "usdt"
+        ],
+        "tether-eurt": [
+            "tether euro",
+            "eurt"
+        ],
+        "tether-gold": [
+            "tether gold",
+            "xaut"
+        ],
+        "tezos": [
+            "tezos",
+            "xtz"
+        ],
+        "the-graph": [
+            "the graph",
+            "grt"
+        ],
+        "the-open-network": [
+            "ton",
+            "toncoin",
+            "the open network"
+        ],
+        "the-sandbox": [
+            "the sandbox",
+            "sand"
+        ],
+        "the-virtua-kolect": [
+            "virtua",
+            "tvk"
+        ],
+        "theoriq": [
+            "theoriq",
+            "thq"
+        ],
+        "threshold-network-token": [
+            "threshold",
+            "t token"
+        ],
+        "tia": [
+            "celestia",
+            "tia"
+        ],
+        "titcoin-2": [
+            "titcoin"
+        ],
+        "token": [
+            "token"
+        ],
+        "tokemak": [
+            "tokemak",
+            "toke"
+        ],
+        "toshi": [
+            "toshi"
+        ],
+        "trac": [
+            "trac",
+            "origintrail"
+        ],
+        "treehouse": [
+            "treehouse",
+            "tree"
+        ],
+        "tribe-2": [
+            "tribe"
+        ],
+        "tria": [
+            "tria"
+        ],
+        "tron": [
+            "tron",
+            "trx"
+        ],
+        "true-usd": [
+            "true usd",
+            "tusd"
+        ],
+        "truefi": [
+            "truefi",
+            "tru"
+        ],
+        "turbo": [
+            "turbo"
+        ],
+        "tx": [
+            "tx"
+        ],
+        "u": [
+            "u"
+        ],
+        "unicorn-ultra": [
+            "unicorn ultra",
+            "u2u"
+        ],
+        "unicorn-fart-dust": [
+            "unicorn fart dust",
+            "ufd"
+        ],
+        "uma": [
+            "uma"
+        ],
+        "unifai-network": [
+            "unifai",
+            "uai"
+        ],
+        "unifi-protocol-dao": [
+            "unifi",
+            "unfi"
+        ],
+        "uniswap": [
+            "uniswap",
+            "uni"
+        ],
+        "unite-2": [
+            "unite"
+        ],
+        "unstable-coin": [
+            "unstable coin",
+            "usduc"
+        ],
+        "useless-3": [
+            "useless"
+        ],
+        "usd-coin": [
+            "usd coin",
+            "usdc"
+        ],
+        "usd1": [
+            "usd1"
+        ],
+        "usdd": [
+            "usdd"
+        ],
+        "usds": [
+            "usds",
+            "sky usd"
+        ],
+        "usdt0": [
+            "usdt0"
+        ],
+        "usdtb": [
+            "usdtb"
+        ],
+        "quantoz-usdq": [
+            "usdq"
+        ],
+        "quantoz-eurq": [
+            "eurq"
+        ],
+        "schuman-europ": [
+            "europ",
+            "schuman europ"
+        ],
+        "usual": [
+            "usual"
+        ],
+        "uxlink": [
+            "uxlink"
+        ],
+        "vanar-chain": [
+            "vanar",
+            "vanry"
+        ],
+        "vaulta": [
+            "vaulta"
+        ],
+        "velo": [
+            "velo"
+        ],
+        "velvet": [
+            "velvet"
+        ],
+        "venice-token": [
+            "venice token",
+            "vvv"
+        ],
+        "vechain": [
+            "vechain",
+            "vet"
+        ],
+        "verse-bitcoin": [
+            "verse bitcoin",
+            "verse"
+        ],
+        "vethor-token": [
+            "vethor",
+            "vtho",
+            "vechain thor"
+        ],
+        "vine": [
+            "vine"
+        ],
+        "virtual-protocol": [
+            "virtuals",
+            "virtual protocol",
+            "virtual"
+        ],
+        "vision-3": [
+            "vision",
+            "vsn"
+        ],
+        "vooi": [
+            "vooi"
+        ],
+        "vultisig": [
+            "vultisig",
+            "vult"
+        ],
+        "w": [
+            "wormhole",
+            "w"
+        ],
+        "walrus-2": [
+            "walrus",
+            "wal"
+        ],
+        "war": [
+            "war"
+        ],
+        "warden-2": [
+            "warden",
+            "ward"
+        ],
+        "weth": [
+            "weth",
+            "wrapped ether"
+        ],
+        "whitebit": [
+            "whitebit",
+            "wbt"
+        ],
+        "winklink": [
+            "winklink",
+            "win"
+        ],
+        "world-liberty-financial": [
+            "world liberty financial",
+            "wlfi"
+        ],
+        "world-mobile-token": [
+            "world mobile",
+            "wmtx"
+        ],
+        "worldcoin-wld": [
+            "worldcoin",
+            "wld"
+        ],
+        "woo": [
+            "woo",
+            "woo network"
+        ],
+        "wrapped-axelar": [
+            "wrapped axelar",
+            "waxl"
+        ],
+        "wrapped-bitcoin": [
+            "wrapped bitcoin",
+            "wbtc"
+        ],
+        "xdce-crowd-sale": [
+            "xdce",
+            "xdc"
+        ],
+        "xion-2": [
+            "xion"
+        ],
+        "xl1": [
+            "xl1"
+        ],
+        "xmoney-2": [
+            "xmoney",
+            "xmn"
+        ],
+        "xterio": [
+            "xterio",
+            "xter"
+        ],
+        "xyo-network": [
+            "xyo",
+            "xyo network"
+        ],
+        "yala": [
+            "yala"
+        ],
+        "yield-basis": [
+            "yield basis",
+            "yb"
+        ],
+        "yield-guild-games": [
+            "yield guild games",
+            "ygg"
+        ],
+        "yfi": [
+            "yearn finance",
+            "yfi"
+        ],
+        "yooldo-games": [
+            "yooldo",
+            "esports"
+        ],
+        "zama": [
+            "zama"
+        ],
+        "zebec-network": [
+            "zebec",
+            "zbcn"
+        ],
+        "zerobase": [
+            "zerobase",
+            "zbt"
+        ],
+        "zcash": [
+            "zcash",
+            "zec"
+        ],
+        "zerebro": [
+            "zerebro"
+        ],
+        "zeta": [
+            "zex"
+        ],
+        "zetachain": [
+            "zetachain",
+            "zeta"
+        ],
+        "zeus-network": [
+            "zeus network",
+            "zeus"
+        ],
+        "zignaly": [
+            "zignaly",
+            "zig"
+        ],
+        "zircuit": [
+            "zircuit",
+            "zrc"
+        ],
+        "zkverify": [
+            "zkverify",
+            "vfy"
+        ],
+        "zksync": [
+            "zksync",
+            "zk"
+        ],
+        "zora": [
+            "zora"
+        ]
+    }
+}

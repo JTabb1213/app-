@@ -43,6 +43,21 @@ from exchanges.base import BaseExchange
 logger = logging.getLogger(__name__)
 
 
+# ==============================================================================
+# TEST MODE — swap in a short list for development so you're not hammering
+# 600+ pairs while debugging.  To activate: uncomment the list below and
+# comment out the None.  To deactivate: set back to None.
+# ==============================================================================
+TEST_PAIRS_OVERRIDE = None
+
+'''''
+TEST_PAIRS_OVERRIDE = [
+     "BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "ADA/USD",
+     "DOGE/USD", "AVAX/USD", "DOT/USD", "LINK/USD", "POL/USD",
+]
+# ==============================================================================
+'''''
+
 class KrakenConnector(BaseExchange):
     """
     Kraken exchange websocket connector.
@@ -98,6 +113,22 @@ class KrakenConnector(BaseExchange):
                     pairs.append(wsname)
 
             pairs = sorted(set(pairs))
+
+            # Kraken's REST API returns wsnames in v1 format (e.g. "XBT/USD")
+            # but WS v2 requires standard symbols (e.g. "BTC/USD").
+            # Translate known v1-only codes before subscribing.
+            V1_TO_V2 = {"XBT": "BTC", "XDG": "DOGE"}
+            translated = []
+            for pair in pairs:
+                parts = pair.split("/")
+                if len(parts) == 2:
+                    base = V1_TO_V2.get(parts[0], parts[0])
+                    quote = V1_TO_V2.get(parts[1], parts[1])
+                    translated.append(f"{base}/{quote}")
+                else:
+                    translated.append(pair)
+            pairs = sorted(set(translated))
+
             logger.info(
                 f"[kraken] Fetched {len(pairs)} pairs "
                 f"(quote filter: {self._quote_currencies})"
@@ -106,7 +137,30 @@ class KrakenConnector(BaseExchange):
 
         except Exception as e:
             logger.error(f"[kraken] Failed to fetch pairs: {e} — using fallback")
-            return ["XBT/USD", "ETH/USD", "SOL/USD", "XRP/USD", "ADA/USD"]
+            # ── Fallback: build pair list from coin_aliases.json ──────────────
+            # Avoids a hardcoded list that can go stale.  We still apply the
+            # same V1→V2 translation so WS v2 symbols are correct.
+            try:
+                with open(config.ALIAS_JSON_PATH) as fp:
+                    alias_data = json.load(fp)
+                V1_TO_V2_FB = {"XBT": "BTC", "XDG": "DOGE"}
+                fb_pairs = []
+                for entry in alias_data.get("assets", {}).values():
+                    kraken_sym = entry.get("exchange_symbols", {}).get("kraken")
+                    if kraken_sym:
+                        base = V1_TO_V2_FB.get(kraken_sym, kraken_sym)
+                        fb_pairs.append(f"{base}/USD")
+                fb_pairs = sorted(set(fb_pairs))
+                if fb_pairs:
+                    logger.info(
+                        f"[kraken] Fallback: loaded {len(fb_pairs)} pairs "
+                        f"from coin_aliases.json"
+                    )
+                    return fb_pairs
+            except Exception as fb_err:
+                logger.warning(f"[kraken] coin_aliases.json fallback also failed: {fb_err}")
+            # ── Last-resort hardcoded seed (use v2 symbols, not v1 XBT) ──────
+            return ["BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "ADA/USD"]
 
     # ------------------------------------------------------------------
     # WebSocket streaming
@@ -121,6 +175,17 @@ class KrakenConnector(BaseExchange):
         connections in parallel (one per chunk).
         """
         self._pairs = await self._fetch_pairs()
+
+        # ==============================================================================
+        # TEST MODE — override full pair list with short dev list if set above
+        # ==============================================================================
+        if TEST_PAIRS_OVERRIDE is not None:
+            self._pairs = TEST_PAIRS_OVERRIDE
+            logger.info(
+                f"[kraken] ⚠️  TEST MODE ACTIVE: using {len(self._pairs)} pairs "
+                f"instead of full list — set TEST_PAIRS_OVERRIDE = None to disable"
+            )
+        # ==============================================================================
 
         if not self._pairs:
             logger.warning("[kraken] No pairs to subscribe to — sleeping 30s")

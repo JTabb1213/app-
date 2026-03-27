@@ -28,10 +28,17 @@ ALIAS_JSON_PATH = os.getenv(
 # ---------------------------------------------------------------------------
 # TTL for realtime data in Redis (seconds)
 # ---------------------------------------------------------------------------
-# Short TTL ensures stale data auto-expires if this service goes down.
-# The service writes much faster than this expiry, so keys stay alive
-# continuously while the service is running.
-RT_PRICE_TTL = int(os.getenv("RT_PRICE_TTL", "30"))
+# Acts as a safety valve: if this service crashes, stale prices auto-expire
+# rather than persisting in Redis forever.  The service refreshes each key's
+# TTL on every write, so active coins are never affected.
+#
+# 43200 s (12 h) accommodates illiquid coins that trade only once or twice
+# a day — their last known price remains readable until the next tick arrives.
+# The `timestamp` field inside the stored JSON tells consumers exactly how
+# old the data is, so staleness is always transparent regardless of TTL.
+# Never set this to 0 (no expiry): a crashed service would leave
+# permanently stale prices in Redis with no indication of staleness.
+RT_PRICE_TTL = int(os.getenv("RT_PRICE_TTL", "300")) # 43200 = 12 hours if needed
 
 # ---------------------------------------------------------------------------
 # Batch settings for Redis writes

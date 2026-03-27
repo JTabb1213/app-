@@ -53,9 +53,11 @@ class CoinGeckoSource(BaseAliasSource):
 
         For each coin the following entry is created:
         {
-            "symbol":       "BTC",
-            "aliases":      ["btc", "bitcoin"],   # id + symbol + name (lowercased)
-            "exchange_symbols": {}                # filled in by exchange sources
+            "symbol":          "BTC",
+            "aliases":         ["bitcoin",      # auto-derived: id + symbol + name
+                                "btc",           # (overrideable by CoinAliasSource)
+                                "bitcoin"],
+            "exchange_symbols": {}              # filled in by exchange sources
         }
         """
         if self.top_n == -1:
@@ -75,12 +77,14 @@ class CoinGeckoSource(BaseAliasSource):
             if not canonical_id:
                 continue
 
-            # Build alias list: id + symbol + lowercased name
+            # Auto-derive the base alias list from CoinGecko data.
+            # CoinAliasSource (run next) will replace this with curated entries
+            # for coins that have them; others keep this auto-derived set.
             aliases = list({
                 canonical_id.lower(),
                 symbol.lower(),
                 name.lower(),
-            })
+            }) if name else [canonical_id.lower(), symbol.lower()]
 
             assets[canonical_id] = {
                 "symbol": symbol,

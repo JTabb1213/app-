@@ -15,11 +15,15 @@ Usage:
     # Preview without writing (dry run)
     python main.py --dry-run
 
+    # Print raw Kraken assets (for discovering new symbols to map)
+    python main.py --sources kraken --print-assets
+
 Adding a new exchange later:
-    1. Create  tools/populate_aliases/sources/<exchange>.py
-    2. Subclass BaseAliasSource and implement enrich()
-    3. Add it to SOURCE_REGISTRY below
-    4. Run:  python main.py --sources coingecko <exchange>
+    1. Create  tools/populate_aliases/sources/<exchange>_symbols.json
+    2. Create  tools/populate_aliases/sources/<exchange>.py
+    3. Subclass BaseAliasSource and implement enrich()
+    4. Add it to SOURCE_REGISTRY below
+    5. Run:  python main.py --sources coingecko <exchange>
 
 This script is intentionally standalone — it has no dependency on the backend
 application code. It only needs the 'requests' library (pip install requests).
@@ -45,11 +49,13 @@ DEFAULT_OUTPUT = os.path.join(_PROJECT_ROOT, "data", "coin_aliases.json")
 # Import lazily inside main() so missing optional deps don't break --help
 def _build_registry():
     from sources.coingecko import CoinGeckoSource
+    from sources.coin_aliases import CoinAliasSource
     from sources.kraken import KrakenSource
 
     return {
-        "coingecko": CoinGeckoSource,
-        "kraken": KrakenSource,
+        "coingecko":    CoinGeckoSource,
+        "coin_aliases": CoinAliasSource,
+        "kraken":       KrakenSource,
         # "coinbase": CoinbaseSource,   # ← add future exchanges here
         # "binance":  BinanceSource,
     }
@@ -62,6 +68,7 @@ def _build_registry():
 def build_assets(
     source_names: List[str],
     top_n: int,
+    print_assets: bool = False,
     preloaded: Dict[str, dict] = None,
 ) -> Dict[str, dict]:
     """
@@ -82,11 +89,14 @@ def build_assets(
 
         print(f"\n[main] ── Running source: {name} ──")
 
-        # CoinGeckoSource accepts top_n; exchange sources don't need it
+        # CoinGeckoSource accepts top_n; exchange sources accept print_assets;
+        # CoinAliasSource takes no constructor args
         if name == "coingecko":
             source = cls(top_n=top_n)
-        else:
+        elif name == "coin_aliases":
             source = cls()
+        else:
+            source = cls(print_assets=print_assets)
 
         source.enrich(assets)
 
@@ -124,18 +134,18 @@ def write_output(assets: Dict[str, dict], source_names: List[str],
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Populate backend/data/coin_aliases.json from API sources.",
+        description="Populate data/coin_aliases.json from API sources.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
     parser.add_argument(
         "--sources",
         nargs="+",
-        default=["coingecko", "kraken"],
+        default=["coingecko", "coin_aliases", "kraken"],
         metavar="SOURCE",
         help=(
             "Sources to run in order. CoinGecko must be first. "
-            "Default: coingecko kraken"
+            "Default: coingecko coin_aliases kraken"
         ),
     )
     parser.add_argument(
@@ -159,16 +169,25 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fetch data and print a summary without writing the output file.",
     )
+    parser.add_argument(
+        "--print-assets",
+        action="store_true",
+        help=(
+            "Print raw exchange asset symbols to screen. "
+            "Useful for discovering new symbols to add to the mapping files."
+        ),
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    print(f"[main] Sources : {args.sources}")
-    print(f"[main] Top N   : {args.top}")
-    print(f"[main] Output  : {args.out}")
-    print(f"[main] Dry run : {args.dry_run}")
+    print(f"[main] Sources      : {args.sources}")
+    print(f"[main] Top N        : {args.top}")
+    print(f"[main] Output       : {args.out}")
+    print(f"[main] Dry run      : {args.dry_run}")
+    print(f"[main] Print assets : {args.print_assets}")
 
     # ------------------------------------------------------------------
     # If CoinGecko is not in sources, load the existing file so exchange
@@ -187,7 +206,7 @@ def main() -> None:
             print("[main]   Run with 'coingecko' first to build the base asset list.")
             sys.exit(1)
 
-    assets = build_assets(args.sources, args.top, preloaded)
+    assets = build_assets(args.sources, args.top, args.print_assets, preloaded)
 
     if not assets:
         print("[main] ✗ No assets built — check source errors above.")
@@ -200,9 +219,9 @@ def main() -> None:
         exchanges_covered.update(entry.get("exchange_symbols", {}).keys())
 
     print(f"\n[main] ── Summary ──")
-    print(f"  Assets          : {len(assets)}")
-    print(f"  Total aliases   : {total_aliases}")
-    print(f"  Exchanges mapped: {exchanges_covered or '(none)'}")
+    print(f"  Assets            : {len(assets)}")
+    print(f"  Total aliases     : {total_aliases}")
+    print(f"  Exchanges mapped  : {exchanges_covered or '(none)'}")
 
     if args.dry_run:
         print("\n[main] Dry run — file not written.")

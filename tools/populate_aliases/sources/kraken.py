@@ -1,53 +1,58 @@
 """
 Kraken alias source.
 
-Enriches the shared assets dict with Kraken-specific exchange symbols by
-calling Kraken's public /Assets endpoint.  No API key required.
+Enriches the shared assets dict with Kraken-specific exchange symbols
+using a curated mapping file (exchange_symbols/kraken_symbols.json) instead of trying
+to auto-match symbols to CoinGecko IDs.
 
-Why this matters:
-  Kraken uses 'XBT' for bitcoin (ISO 4217 convention) instead of 'BTC'.
-  Without this mapping, parsing a Kraken WebSocket feed for "XBT/USD"
-  would fail to resolve to the canonical ID "bitcoin".
+Why curated instead of automated?
+  Many Kraken symbols (SOL, DOT, ETH, etc.) collide with dozens of
+  obscure CoinGecko coins that share the same ticker.  Automated
+  matching picks the wrong coin more often than not at scale.
+  A curated JSON file is explicit, version-controlled, and correct.
+
+Adding new Kraken symbols:
+  1. Run:  python main.py --sources kraken --print-assets
+  2. Find new symbols not yet in exchange_symbols/kraken_symbols.json
+  3. Look up the correct CoinGecko canonical ID
+  4. Add the mapping to sources/exchange_symbols/kraken_symbols.json
 
 Adding more exchanges later:
-  Copy this file as tools/populate_aliases/sources/<exchange>.py,
-  subclass BaseAliasSource, implement enrich(), then register it in main.py.
+  Copy this pattern:
+    sources/exchange_symbols/<exchange>_symbols.json   ← curated symbol mapping
+    sources/<exchange>.py                              ← source class
 """
 
+import json
+import os
 import requests
 from typing import Dict, Optional
 
 from .base import BaseAliasSource, AssetsDict
 
 _KRAKEN_ASSETS_URL = "https://api.kraken.com/0/public/Assets"
+_SYMBOLS_FILE = os.path.join(os.path.dirname(__file__), "exchange_symbols", "kraken_symbols.json")
 
-# Hardcoded overrides for cases where Kraken's altname doesn't match the
-# standard symbol used in the CoinGecko-built assets dict.
-# Key   = Kraken altname  (what Kraken calls it)
-# Value = canonical_id    (CoinGecko convention)
-#
-# Add new entries here whenever you discover a Kraken/CoinGecko mismatch.
-KNOWN_OVERRIDES: Dict[str, str] = {
-    "XBT": "bitcoin",    # Kraken: XBT  ↔  CoinGecko: bitcoin (symbol BTC)
-    "XDG": "dogecoin",   # Kraken: XDG  ↔  CoinGecko: dogecoin (symbol DOGE)
-}
+# Kraken fiat currencies to skip when printing assets
+_FIAT_ALTNAMES = {"USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "ARS", "COP", "DKK", "MXN", "PLN", "SEK", "FEE"}
 
-# Kraken internal asset codes use these prefixes for "real" currencies.
-# We skip assets that are clearly fiat (start with Z) but keep stablecoins.
-_FIAT_ALTNAMES = {"USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"}
+# Staking/hold/margin suffixes to skip when printing
+_SKIP_SUFFIXES = (".S", ".P", ".M", ".HOLD", "21.S", "28.S", "14.S", "07.S", "03.S", "04.S")
 
 
 class KrakenSource(BaseAliasSource):
     """
-    Enriches assets dict with Kraken exchange symbols.
+    Enriches assets dict with Kraken exchange symbols from a curated
+    mapping file (exchange_symbols/kraken_symbols.json).
 
-    For each Kraken asset whose altname maps to a known canonical ID:
-      - Sets exchange_symbols["kraken"] = <altname>
-      - Appends the lowercased altname to the aliases list (so the resolver
-        can map incoming Kraken WebSocket data with no extra logic)
+    For each Kraken symbol that maps to an existing canonical ID in the
+    assets dict, sets exchange_symbols["kraken"] = <symbol>.
     """
 
     SOURCE_NAME = "kraken"
+
+    def __init__(self, print_assets: bool = False):
+        self._print_assets = print_assets
 
     # ------------------------------------------------------------------
     # BaseAliasSource interface
@@ -57,69 +62,108 @@ class KrakenSource(BaseAliasSource):
         """
         Add Kraken exchange symbols to matching entries in the assets dict.
 
-        Does NOT create new canonical entries — the CoinGeckoSource is the
-        authority for what assets exist.  This only annotates existing ones.
+        Reads from exchange_symbols/kraken_symbols.json (curated mapping), NOT from auto-
+        matching against CoinGecko symbols.  Only adds to coins that
+        already exist in the assets dict (created by CoinGeckoSource).
         """
-        raw = self._fetch_assets()
-        if not raw:
-            print("[KrakenSource] ✗ No data from Kraken — skipping enrichment.")
+        # Optionally print raw Kraken assets to screen
+        if self._print_assets:
+            self._print_kraken_assets()
+
+        # Load curated mapping
+        mapping = self._load_symbol_mapping()
+        if not mapping:
+            print("[KrakenSource] ✗ No symbol mapping loaded — skipping.")
             return
 
-        # Build a quick symbol → canonical_id lookup from the assets already
-        # in the dict so we can match standard symbols without KNOWN_OVERRIDES.
-        # e.g. {"eth": "ethereum", "sol": "solana", ...}
-        symbol_to_id: Dict[str, str] = {
-            entry["symbol"].lower(): cid
-            for cid, entry in assets.items()
-            if entry.get("symbol")
-        }
-
         enriched = 0
-        unmatched = []
+        skipped_null = 0
+        skipped_missing = []
 
-        for _kraken_code, asset_info in raw.items():
-            altname: str = asset_info.get("altname", "").strip()
-            if not altname:
+        for kraken_sym, canonical_id in mapping.items():
+            # null entries = intentionally unmapped (fiat, staking, etc.)
+            if canonical_id is None:
+                skipped_null += 1
                 continue
 
-            # Skip pure fiat currencies (we only care about crypto assets)
-            if altname in _FIAT_ALTNAMES:
+            if canonical_id not in assets:
+                skipped_missing.append(f"{kraken_sym}->{canonical_id}")
                 continue
 
-            # Resolve: KNOWN_OVERRIDES first, then symbol lookup
-            canonical_id: Optional[str] = (
-                KNOWN_OVERRIDES.get(altname)
-                or symbol_to_id.get(altname.lower())
-            )
-
-            if not canonical_id or canonical_id not in assets:
-                unmatched.append(altname)
-                continue
-
-            entry = assets[canonical_id]
-
-            # Set outgoing exchange symbol
-            entry["exchange_symbols"]["kraken"] = altname
-
-            # Add to incoming aliases so resolve("XBT") works directly
-            alias_lower = altname.lower()
-            if alias_lower not in entry["aliases"]:
-                entry["aliases"].append(alias_lower)
-
+            assets[canonical_id]["exchange_symbols"]["kraken"] = kraken_sym
             enriched += 1
 
-        matched_symbols = [
-            entry["exchange_symbols"]["kraken"]
-            for entry in assets.values()
-            if entry.get("exchange_symbols", {}).get("kraken")
-        ]
         print(f"[KrakenSource] ✓ Enriched {enriched} assets with Kraken symbols")
-        print(f"[KrakenSource]   Matched  ({len(matched_symbols)}): {sorted(matched_symbols)}")
-        print(f"[KrakenSource]   Unmatched ({len(unmatched)}): {sorted(unmatched)}")
+        print(f"[KrakenSource]   Skipped (null/unmapped): {skipped_null}")
+        if skipped_missing:
+            print(f"[KrakenSource]   Skipped (not in CoinGecko top-N): {len(skipped_missing)}")
+            # Only show first 10 to avoid spam
+            if len(skipped_missing) <= 10:
+                print(f"[KrakenSource]   → {skipped_missing}")
+            else:
+                print(f"[KrakenSource]   → {skipped_missing[:10]} ... and {len(skipped_missing)-10} more")
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    def _load_symbol_mapping(self) -> Optional[Dict[str, Optional[str]]]:
+        """Load the curated exchange_symbols/kraken_symbols.json mapping file."""
+        try:
+            with open(_SYMBOLS_FILE, "r") as f:
+                data = json.load(f)
+            mapping = data.get("symbols", {})
+            print(f"[KrakenSource]   Loaded {len(mapping)} symbol mappings from exchange_symbols/kraken_symbols.json")
+            return mapping
+        except FileNotFoundError:
+            print(f"[KrakenSource] ✗ Mapping file not found: {_SYMBOLS_FILE}")
+            print("[KrakenSource]   Create it with curated Kraken→CoinGecko mappings in exchange_symbols/.")
+            return None
+        except json.JSONDecodeError as e:
+            print(f"[KrakenSource] ✗ Invalid JSON in mapping file: {e}")
+            return None
+
+    def _print_kraken_assets(self) -> None:
+        """Fetch and print all Kraken asset altnames to screen."""
+        raw = self._fetch_assets()
+        if not raw:
+            print("[KrakenSource] ✗ Could not fetch Kraken assets for printing.")
+            return
+
+        # Get all altnames, skip fiat and staking variants
+        altnames = sorted(set(
+            a.get("altname", "") for a in raw.values()
+            if a.get("altname", "")
+            and a.get("altname", "") not in _FIAT_ALTNAMES
+            and not any(a.get("altname", "").endswith(s) for s in _SKIP_SUFFIXES)
+        ))
+
+        # Load existing mapping to show what's mapped vs unmapped
+        mapping = self._load_symbol_mapping() or {}
+
+        mapped = [a for a in altnames if a in mapping and mapping[a] is not None]
+        unmapped = [a for a in altnames if a not in mapping]
+        null_mapped = [a for a in altnames if a in mapping and mapping[a] is None]
+
+        print(f"\n{'='*60}")
+        print(f"  KRAKEN ASSETS ({len(altnames)} crypto symbols)")
+        print(f"{'='*60}")
+        print(f"  Mapped:   {len(mapped)}")
+        print(f"  Unmapped: {len(unmapped)}  ← add these to exchange_symbols/kraken_symbols.json")
+        print(f"  Null:     {len(null_mapped)}  (intentionally skipped)")
+
+        if unmapped:
+            print(f"\n  --- UNMAPPED (need CoinGecko IDs) ---")
+            for sym in unmapped:
+                print(f"    {sym}")
+
+        print(f"\n  --- ALL SYMBOLS ---")
+        for sym in altnames:
+            status = "✓" if sym in mapping and mapping[sym] else ("–" if sym in mapping else "?")
+            cg_id = mapping.get(sym, "")
+            print(f"    {status} {sym:20s} → {cg_id or '(unmapped)'}")
+
+        print(f"{'='*60}\n")
 
     def _fetch_assets(self) -> Optional[Dict]:
         """Call Kraken's public /Assets endpoint and return the result dict."""
@@ -134,9 +178,10 @@ class KrakenSource(BaseAliasSource):
                 return None
 
             result = payload.get("result", {})
-            print(f"[KrakenSource]   Fetched {len(result)} Kraken assets")
+            print(f"[KrakenSource]   Fetched {len(result)} Kraken assets from API")
             return result
 
         except requests.exceptions.RequestException as e:
             print(f"[KrakenSource] ✗ Request failed: {e}")
+            return None
             return None
