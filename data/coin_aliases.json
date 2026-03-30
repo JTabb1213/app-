@@ -1,16 +1,5 @@
 {
     "assets": {
-        "avalanche-2": {
-            "symbol": "AVAX",
-            "aliases": [
-                "avalanche",
-                "avalanche-2",
-                "avax"
-            ],
-            "exchange_symbols": {
-                "kraken": "AVAX"
-            }
-        },
         "binancecoin": {
             "symbol": "BNB",
             "aliases": [
@@ -19,7 +8,8 @@
                 "binance coin"
             ],
             "exchange_symbols": {
-                "kraken": "BNB"
+                "kraken": "BNB",
+                "coinbase": "BNB"
             }
         },
         "bitcoin": {
@@ -30,7 +20,8 @@
                 "xbt"
             ],
             "exchange_symbols": {
-                "kraken": "XBT"
+                "kraken": "XBT",
+                "coinbase": "BTC"
             }
         },
         "cardano": {
@@ -40,17 +31,8 @@
                 "ada"
             ],
             "exchange_symbols": {
-                "kraken": "ADA"
-            }
-        },
-        "chainlink": {
-            "symbol": "LINK",
-            "aliases": [
-                "chainlink",
-                "link"
-            ],
-            "exchange_symbols": {
-                "kraken": "LINK"
+                "kraken": "ADA",
+                "coinbase": "ADA"
             }
         },
         "dogecoin": {
@@ -61,37 +43,20 @@
                 "xdg"
             ],
             "exchange_symbols": {
-                "kraken": "XDG"
+                "kraken": "XDG",
+                "coinbase": "DOGE"
             }
         },
-        "litecoin": {
-            "symbol": "LTC",
+        "ethereum": {
+            "symbol": "ETH",
             "aliases": [
-                "litecoin",
-                "ltc"
+                "ethereum",
+                "eth",
+                "ether"
             ],
             "exchange_symbols": {
-                "kraken": "LTC"
-            }
-        },
-        "matic-network": {
-            "symbol": "MATIC",
-            "aliases": [
-                "polygon",
-                "matic"
-            ],
-            "exchange_symbols": {
-                "kraken": "MATIC"
-            }
-        },
-        "optimism": {
-            "symbol": "OP",
-            "aliases": [
-                "optimism",
-                "op"
-            ],
-            "exchange_symbols": {
-                "kraken": "OP"
+                "kraken": "ETH",
+                "coinbase": "ETH"
             }
         },
         "ripple": {
@@ -101,7 +66,41 @@
                 "xrp"
             ],
             "exchange_symbols": {
-                "kraken": "XRP"
+                "kraken": "XRP",
+                "coinbase": "XRP"
+            }
+        },
+        "solana": {
+            "symbol": "SOL",
+            "aliases": [
+                "solana",
+                "sol"
+            ],
+            "exchange_symbols": {
+                "kraken": "SOL",
+                "coinbase": "SOL"
+            }
+        },
+        "tether": {
+            "symbol": "USDT",
+            "aliases": [
+                "tether",
+                "usdt"
+            ],
+            "exchange_symbols": {
+                "kraken": "USDT",
+                "coinbase": "USDT"
+            }
+        },
+        "usd-coin": {
+            "symbol": "USDC",
+            "aliases": [
+                "usd coin",
+                "usdc"
+            ],
+            "exchange_symbols": {
+                "kraken": "USDC",
+                "coinbase": "USDC"
             }
         }
     }

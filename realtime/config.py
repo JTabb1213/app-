@@ -47,7 +47,9 @@ RT_PRICE_TTL = int(os.getenv("RT_PRICE_TTL", "300")) # 43200 = 12 hours if neede
 BATCH_MAX_SIZE = int(os.getenv("BATCH_MAX_SIZE", "100"))
 # ...or when this many milliseconds have elapsed since the last flush,
 # whichever comes first.
-BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "500"))
+# 1000ms (1 second) gives enough time to capture multiple exchanges per coin
+# before computing aggregates (avg price, best/worst exchange).
+BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "1000"))
 
 # ---------------------------------------------------------------------------
 # Kraken exchange settings
@@ -58,6 +60,14 @@ KRAKEN_REST_URL = os.getenv(
 )
 # Max pairs per websocket connection (Kraken limit is ~250, stay under)
 KRAKEN_CHUNK_SIZE = int(os.getenv("KRAKEN_CHUNK_SIZE", "200"))
+
+# ---------------------------------------------------------------------------
+# Coinbase exchange settings
+# ---------------------------------------------------------------------------
+COINBASE_WS_URL = os.getenv("COINBASE_WS_URL", "wss://ws-feed.exchange.coinbase.com")
+COINBASE_REST_URL = os.getenv(
+    "COINBASE_REST_URL", "https://api.exchange.coinbase.com/products",
+)
 
 # ---------------------------------------------------------------------------
 # Quote currencies to track
@@ -77,4 +87,4 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 # ---------------------------------------------------------------------------
 # Health check server (Cloud Run injects PORT automatically)
 # ---------------------------------------------------------------------------
-HEALTH_PORT = int(os.getenv("PORT", "8080"))
+HEALTH_PORT = int(os.getenv("PORT", "8081"))

@@ -25,6 +25,7 @@ from aiohttp import web
 import config
 from core.pipeline import Pipeline
 from exchanges.kraken import KrakenConnector
+from exchanges.coinbase import CoinbaseConnector
 from normalizer.normalizer import Normalizer
 from normalizer.aliases import AliasResolver
 from storage.redis_writer import RedisWriter
@@ -108,9 +109,9 @@ async def main():
     # 5. Exchange connectors
     #    Add more exchanges here as you build them:
     #      binance  = BinanceConnector(ingestion_queue)
-    #      coinbase = CoinbaseConnector(ingestion_queue)
     kraken = KrakenConnector(ingestion_queue)
-    connectors = [kraken]
+    coinbase = CoinbaseConnector(ingestion_queue)
+    connectors = [kraken, coinbase]
 
     # 6. Wire up the pipeline
     _pipeline = Pipeline(

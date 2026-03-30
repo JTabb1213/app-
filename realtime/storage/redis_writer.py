@@ -1,60 +1,75 @@
 """
-Batched Redis writer with pipeline support.
+Batched Redis writer with pipeline support and multi-exchange aggregation.
 
 Groups incoming NormalizedTick writes into batches and flushes them
 to Redis using pipelining for maximum efficiency.
 
-Batching strategy (time-or-count, whichever comes first):
-  - Flush when BATCH_MAX_SIZE ticks have accumulated, OR
-  - Flush when BATCH_INTERVAL_MS has elapsed since the last flush
+Architecture:
+    Ticks → Buffer → Aggregator (compute) → Redis Pipeline (write)
 
-Without batching:  ~200 Redis calls/sec (one per tick)
-With batching:     ~2 pipeline calls/sec containing ~100 ops each
-  → 100× fewer network round-trips
-  → Tradeoff: up to 500ms staleness (configurable, acceptable for display)
+The aggregator is injected, keeping this class focused on I/O only.
 
-Redis key schema:
+Redis key schema (production):
+  rt:avg:<coin_id>                  → average price across all exchanges
+  rt:best:<coin_id>                 → exchange with highest price
+  rt:worst:<coin_id>                → exchange with lowest price
+
+Redis key schema (debug, can be disabled):
   rt:price:<coin_id>                → latest price (from any exchange)
   rt:ticker:<exchange>:<coin_id>    → per-exchange ticker data
 
-The rt: prefix separates realtime data (sub-second writes, short TTL)
-from the existing crypto:tokenomics: cache (10-min TTL, from CoinGecko).
-Both coexist in the same Redis instance cleanly.
+Redis Stream (optional, for replay/recovery):
+  rt:ticks                          → append-only log of all normalized ticks
 """
 
 import asyncio
 import json
 import logging
 import time
-from typing import List
+from typing import List, Optional, Set
 
 import redis.asyncio as aioredis
 
 import config
 from core.models import NormalizedTick
+from compute.aggregator import PriceAggregator
+
+# =============================================================================
+# FEATURE FLAGS — toggle optional behaviors without code changes
+# =============================================================================
+ENABLE_DEBUG_KEYS = True      # Write rt:price, rt:ticker keys (verbose, for debugging)
+ENABLE_REDIS_STREAM = False   # Write to rt:ticks Stream (for replay/recovery)
+STREAM_MAXLEN = 10_000        # Cap stream length (~10K entries, auto-trimmed)
+# =============================================================================
 
 logger = logging.getLogger(__name__)
 
 
 class RedisWriter:
     """
-    Batched async Redis writer.
+    Batched async Redis writer with multi-exchange aggregation.
 
-    Two keys are written per tick:
-      rt:price:<coin_id>              → latest aggregated price data
+    Production keys (always written):
+      rt:avg:<coin_id>                → average price across all active exchanges
+      rt:best:<coin_id>               → exchange with highest price
+      rt:worst:<coin_id>              → exchange with lowest price
+
+    Debug keys (controlled by ENABLE_DEBUG_KEYS):
+      rt:price:<coin_id>              → latest price data (from last exchange)
       rt:ticker:<exchange>:<coin_id>  → per-exchange ticker data
 
-    Both have a short TTL (default 30s) so stale data auto-expires
-    if this service goes down.  The service writes far more frequently
-    than the TTL, so keys stay alive continuously during normal operation.
+    All keys have a short TTL (default 300s) so stale data auto-expires.
     """
 
-    def __init__(self):
+    def __init__(self, aggregator: Optional[PriceAggregator] = None):
         self._client: aioredis.Redis = None
         self._buffer: List[NormalizedTick] = []
         self._last_flush: float = time.time()
         self._flush_count: int = 0
         self._write_count: int = 0
+        
+        # Aggregator handles all computation (injected for testability)
+        self._aggregator = aggregator or PriceAggregator()
 
     # ------------------------------------------------------------------
     # Connection
@@ -115,94 +130,133 @@ class RedisWriter:
         batch = self._buffer
         self._buffer = []
 
-        # ##############################################################################
-        # DEBUG BANDWIDTH — capture ms since last flush BEFORE updating _last_flush
-        # Comment out this one line to disable interval tracking
-        # ##############################################################################
         _debug_interval_ms = (time.time() - self._last_flush) * 1000
-        # ##############################################################################
-
         self._last_flush = time.time()
 
-        # ##############################################################################
-        # OPTIMIZATION: DEDUPLICATION — keep only the latest tick per coin_id.
-        # If the same coin ticked 10x before this flush, only the newest value is sent.
-        # Can cut bandwidth by 50-80% for liquid coins.  Uncomment to enable.
-        # ##############################################################################
-        
-        _dedup: dict = {}
-        for tick in batch:
-            _dedup[tick.coin_id] = tick   # later tick overwrites earlier one
-        batch = list(_dedup.values())
-        logger.debug(f"[dedup] {len(self._buffer)} → {len(batch)} ticks after dedup")
-        
-        # ##############################################################################
-        # END DEDUPLICATION
-        # ##############################################################################
+        # Update aggregator with all ticks in this batch
+        updated_coins = self._aggregator.update_batch(batch)
 
         try:
             pipe = self._client.pipeline(transaction=False)
             ttl = config.RT_PRICE_TTL
-
-            # ##########################################################################
-            # DEBUG BANDWIDTH — accumulate raw byte estimates inside the write loop.
-            # Includes key + value + approximate Redis RESP protocol overhead (~30 bytes
-            # per SETEX command).  Comment out _debug_total_bytes lines to disable.
-            # ##########################################################################
             _debug_total_bytes = 0
-            _RESP_OVERHEAD = 30   # approximate RESP2 framing per SETEX command
-            # ##########################################################################
+            _RESP_OVERHEAD = 30
 
-            for tick in batch:
-                tick_data = json.dumps(tick.to_dict())
+            # ==================================================================
+            # OPTIONAL: Write to Redis Stream for replay/recovery
+            # ==================================================================
+            if ENABLE_REDIS_STREAM:
+                for tick in batch:
+                    tick_data = tick.to_dict()
+                    # XADD rt:ticks MAXLEN ~10000 * field1 val1 field2 val2 ...
+                    pipe.xadd(
+                        "rt:ticks",
+                        tick_data,
+                        maxlen=STREAM_MAXLEN,
+                        approximate=True,
+                    )
 
-                # Key 1: Latest price for this coin (from any exchange)
-                # This is what the API layer reads for
-                # "what is bitcoin's price right now?"
-                price_key = f"rt:price:{tick.coin_id}"
-                pipe.setex(price_key, ttl, tick_data)
+            # ==================================================================
+            # DEBUG KEYS: Per-tick and per-exchange data (disable in prod)
+            # ==================================================================
+            if ENABLE_DEBUG_KEYS:
+                for tick in batch:
+                    tick_data = json.dumps(tick.to_dict())
 
-                # Key 2: Per-exchange ticker data
-                # Useful for cross-exchange comparison, spread analysis,
-                # and debugging which exchange is providing data
-                # exchange_key = f"rt:ticker:{tick.exchange}:{tick.coin_id}"
-                # pipe.setex(exchange_key, ttl, tick_data)
+                    # rt:price:<coin_id> — latest from any exchange
+                    price_key = f"rt:price:{tick.coin_id}"
+                    pipe.setex(price_key, ttl, tick_data)
 
-                # ##################################################################
-                # DEBUG BANDWIDTH — byte cost for this tick (2 keys written)
-                # ##################################################################
+                    # Publish raw tick to WS stream
+                    pipe.publish("rt:stream:prices", tick_data)
+
+                    # rt:ticker:<exchange>:<coin_id> — per-exchange
+                    exchange_key = f"rt:ticker:{tick.exchange}:{tick.coin_id}"
+                    pipe.setex(exchange_key, ttl, tick_data)
+
+                    _debug_total_bytes += (
+                        len(price_key.encode()) + len(tick_data.encode()) + _RESP_OVERHEAD
+                        + len(exchange_key.encode()) + len(tick_data.encode()) + _RESP_OVERHEAD
+                    )
+
+            # ==================================================================
+            # PRODUCTION KEYS: Aggregates (avg, best, worst) — always written
+            # ==================================================================
+            for coin_id in updated_coins:
+                agg = self._aggregator.get_aggregates(coin_id)
+                if not agg:
+                    continue
+                
+                now = agg["timestamp"]
+                best = agg["best"]
+                worst = agg["worst"]
+                
+                # rt:avg:<coin_id> — average price across exchanges
+                avg_data = json.dumps({
+                    "coin_id": coin_id,
+                    "avg_price": agg["avg_price"],
+                    "exchange_count": agg["exchange_count"],
+                    "timestamp": now,
+                })
+                avg_key = f"rt:avg:{coin_id}"
+                pipe.setex(avg_key, ttl, avg_data)
+                
+                # rt:best:<coin_id> — highest priced exchange
+                best_data = json.dumps({
+                    "coin_id": coin_id,
+                    "exchange": best.exchange,
+                    "price": best.price,
+                    "bid": best.bid,
+                    "ask": best.ask,
+                    "timestamp": best.timestamp,
+                })
+                best_key = f"rt:best:{coin_id}"
+                pipe.setex(best_key, ttl, best_data)
+                
+                # rt:worst:<coin_id> — lowest priced exchange
+                worst_data = json.dumps({
+                    "coin_id": coin_id,
+                    "exchange": worst.exchange,
+                    "price": worst.price,
+                    "bid": worst.bid,
+                    "ask": worst.ask,
+                    "timestamp": worst.timestamp,
+                })
+                worst_key = f"rt:worst:{coin_id}"
+                pipe.setex(worst_key, ttl, worst_data)
+                
+                # Publish aggregate to WS stream
+                agg_msg = json.dumps({
+                    "type": "aggregate",
+                    "coin_id": coin_id,
+                    "avg_price": agg["avg_price"],
+                    "best_exchange": best.exchange,
+                    "best_price": best.price,
+                    "worst_exchange": worst.exchange,
+                    "worst_price": worst.price,
+                    "exchange_count": agg["exchange_count"],
+                    "timestamp": now,
+                })
+                pipe.publish("rt:stream:prices", agg_msg)
+                
                 _debug_total_bytes += (
-                    len(price_key.encode()) + len(tick_data.encode()) + _RESP_OVERHEAD
-                    #+ len(exchange_key.encode()) + len(tick_data.encode()) + _RESP_OVERHEAD
+                    len(avg_key.encode()) + len(avg_data.encode()) + _RESP_OVERHEAD
+                    + len(best_key.encode()) + len(best_data.encode()) + _RESP_OVERHEAD
+                    + len(worst_key.encode()) + len(worst_data.encode()) + _RESP_OVERHEAD
                 )
-                # ##################################################################
 
             await pipe.execute()
 
             self._flush_count += 1
             self._write_count += len(batch)
 
-            # ##########################################################################
-            # DEBUG BANDWIDTH — print full summary for this flush.
-            # Comment out this entire logger.info block to silence it.
-            # ##########################################################################
-            logger.info(
-                f"\n  ╔══ BANDWIDTH DEBUG ══════════════════════════════════════════╗"
-                f"\n  ║  Batch #{self._flush_count:<5} │ {len(batch):>4} ticks "
-                f"│ {_debug_total_bytes:>8,} bytes ({_debug_total_bytes / 1024:.2f} KB)"
-                f"\n  ║  Per tick: ~{_debug_total_bytes // max(len(batch), 1):>4} bytes  "
-                f"│  Interval since last flush: {_debug_interval_ms:.1f}ms"
-                f"\n  ╚═════════════════════════════════════════════════════════════╝"
-            )
-            # ##########################################################################
-            # END BANDWIDTH DEBUG
-            # ##########################################################################
-
-            # Log every 20th flush to avoid spam
+            # Log every 20th flush
             if self._flush_count % 20 == 0:
                 logger.info(
-                    f"Flush #{self._flush_count}: {len(batch)} ticks "
-                    f"({self._write_count} total writes)"
+                    f"Flush #{self._flush_count}: {len(batch)} ticks, "
+                    f"{len(updated_coins)} coins, "
+                    f"~{_debug_total_bytes / 1024:.1f} KB, "
+                    f"interval: {_debug_interval_ms:.0f}ms"
                 )
 
         except Exception as e:
