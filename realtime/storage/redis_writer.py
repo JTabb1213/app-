@@ -11,8 +11,8 @@ The aggregator is injected, keeping this class focused on I/O only.
 
 Redis key schema (production):
   rt:avg:<coin_id>                  → average price across all exchanges
-  rt:best:<coin_id>                 → exchange with highest price
-  rt:worst:<coin_id>                → exchange with lowest price
+  rt:highest:<coin_id>              → exchange with highest price
+  rt:lowest:<coin_id>               → exchange with lowest price
 
 Redis key schema (debug, can be disabled):
   rt:price:<coin_id>                → latest price (from any exchange)
@@ -37,7 +37,7 @@ from compute.aggregator import PriceAggregator
 # =============================================================================
 # FEATURE FLAGS — toggle optional behaviors without code changes
 # =============================================================================
-ENABLE_DEBUG_KEYS = True      # Write rt:price, rt:ticker keys (verbose, for debugging)
+ENABLE_DEBUG_KEYS = False     # Write rt:price, rt:ticker keys (verbose, for debugging)
 ENABLE_REDIS_STREAM = False   # Write to rt:ticks Stream (for replay/recovery)
 STREAM_MAXLEN = 10_000        # Cap stream length (~10K entries, auto-trimmed)
 # =============================================================================
@@ -51,8 +51,8 @@ class RedisWriter:
 
     Production keys (always written):
       rt:avg:<coin_id>                → average price across all active exchanges
-      rt:best:<coin_id>               → exchange with highest price
-      rt:worst:<coin_id>              → exchange with lowest price
+      rt:highest:<coin_id>            → exchange with highest price
+      rt:lowest:<coin_id>             → exchange with lowest price
 
     Debug keys (controlled by ENABLE_DEBUG_KEYS):
       rt:price:<coin_id>              → latest price data (from last exchange)
@@ -188,8 +188,8 @@ class RedisWriter:
                     continue
                 
                 now = agg["timestamp"]
-                best = agg["best"]
-                worst = agg["worst"]
+                highest = agg["highest"]
+                lowest = agg["lowest"]
                 
                 # rt:avg:<coin_id> — average price across exchanges
                 avg_data = json.dumps({
@@ -201,39 +201,39 @@ class RedisWriter:
                 avg_key = f"rt:avg:{coin_id}"
                 pipe.setex(avg_key, ttl, avg_data)
                 
-                # rt:best:<coin_id> — highest priced exchange
-                best_data = json.dumps({
+                # rt:highest:<coin_id> — highest priced exchange
+                highest_data = json.dumps({
                     "coin_id": coin_id,
-                    "exchange": best.exchange,
-                    "price": best.price,
-                    "bid": best.bid,
-                    "ask": best.ask,
-                    "timestamp": best.timestamp,
+                    "exchange": highest.exchange,
+                    "price": highest.price,
+                    "bid": highest.bid,
+                    "ask": highest.ask,
+                    "timestamp": highest.timestamp,
                 })
-                best_key = f"rt:best:{coin_id}"
-                pipe.setex(best_key, ttl, best_data)
+                highest_key = f"rt:highest:{coin_id}"
+                pipe.setex(highest_key, ttl, highest_data)
                 
-                # rt:worst:<coin_id> — lowest priced exchange
-                worst_data = json.dumps({
+                # rt:lowest:<coin_id> — lowest priced exchange
+                lowest_data = json.dumps({
                     "coin_id": coin_id,
-                    "exchange": worst.exchange,
-                    "price": worst.price,
-                    "bid": worst.bid,
-                    "ask": worst.ask,
-                    "timestamp": worst.timestamp,
+                    "exchange": lowest.exchange,
+                    "price": lowest.price,
+                    "bid": lowest.bid,
+                    "ask": lowest.ask,
+                    "timestamp": lowest.timestamp,
                 })
-                worst_key = f"rt:worst:{coin_id}"
-                pipe.setex(worst_key, ttl, worst_data)
+                lowest_key = f"rt:lowest:{coin_id}"
+                pipe.setex(lowest_key, ttl, lowest_data)
                 
                 # Publish aggregate to WS stream
                 agg_msg = json.dumps({
                     "type": "aggregate",
                     "coin_id": coin_id,
                     "avg_price": agg["avg_price"],
-                    "best_exchange": best.exchange,
-                    "best_price": best.price,
-                    "worst_exchange": worst.exchange,
-                    "worst_price": worst.price,
+                    "highest_exchange": highest.exchange,
+                    "highest_price": highest.price,
+                    "lowest_exchange": lowest.exchange,
+                    "lowest_price": lowest.price,
                     "exchange_count": agg["exchange_count"],
                     "timestamp": now,
                 })
@@ -241,8 +241,8 @@ class RedisWriter:
                 
                 _debug_total_bytes += (
                     len(avg_key.encode()) + len(avg_data.encode()) + _RESP_OVERHEAD
-                    + len(best_key.encode()) + len(best_data.encode()) + _RESP_OVERHEAD
-                    + len(worst_key.encode()) + len(worst_data.encode()) + _RESP_OVERHEAD
+                    + len(highest_key.encode()) + len(highest_data.encode()) + _RESP_OVERHEAD
+                    + len(lowest_key.encode()) + len(lowest_data.encode()) + _RESP_OVERHEAD
                 )
 
             await pipe.execute()

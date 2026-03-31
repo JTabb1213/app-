@@ -9,7 +9,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "BNB",
-                "coinbase": "BNB"
+                "coinbase": "BNB",
+                "binance": "BNB"
             }
         },
         "bitcoin": {
@@ -21,7 +22,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "XBT",
-                "coinbase": "BTC"
+                "coinbase": "BTC",
+                "binance": "BTC"
             }
         },
         "cardano": {
@@ -32,7 +34,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "ADA",
-                "coinbase": "ADA"
+                "coinbase": "ADA",
+                "binance": "ADA"
             }
         },
         "dogecoin": {
@@ -44,7 +47,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "XDG",
-                "coinbase": "DOGE"
+                "coinbase": "DOGE",
+                "binance": "DOGE"
             }
         },
         "ethereum": {
@@ -56,7 +60,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "ETH",
-                "coinbase": "ETH"
+                "coinbase": "ETH",
+                "binance": "ETH"
             }
         },
         "ripple": {
@@ -67,7 +72,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "XRP",
-                "coinbase": "XRP"
+                "coinbase": "XRP",
+                "binance": "XRP"
             }
         },
         "solana": {
@@ -78,7 +84,8 @@
             ],
             "exchange_symbols": {
                 "kraken": "SOL",
-                "coinbase": "SOL"
+                "coinbase": "SOL",
+                "binance": "SOL"
             }
         },
         "tether": {

@@ -93,8 +93,8 @@ class Normalizer:
 
         Handles different exchange pair formats:
           "XBT/USD"   → ("XBT", "USD")   Kraken
-          "ETH-USD"   → ("ETH", "USD")   Coinbase (future)
-          "BTCUSDT"   → ("BTC", "USDT")  Binance  (future)
+          "ETH-USD"   → ("ETH", "USD")   Coinbase
+          "BTCUSDT"   → ("BTC", "USDT")  Binance
 
         Returns ("", "") if the pair format is not recognized.
         """
@@ -108,9 +108,14 @@ class Normalizer:
             parts = pair.split("-")
             return parts[0], parts[1]
 
-        # Future: Binance concatenated format "BTCUSDT"
-        # Would need a list of known quote currencies to split correctly.
-        # e.g. for suffix in ["USDT", "USDC", "BUSD", "USD", "BTC", "ETH"]:
-        #          if pair.endswith(suffix): return pair[:-len(suffix)], suffix
+        # Binance concatenated format: "BTCUSDT"
+        # Check known quote currencies (longest first to avoid partial matches)
+        BINANCE_QUOTES = ["USDT", "USDC", "BUSD", "TUSD", "USD", "BTC", "ETH", "BNB"]
+        pair_upper = pair.upper()
+        for quote in BINANCE_QUOTES:
+            if pair_upper.endswith(quote):
+                base = pair_upper[:-len(quote)]
+                if base:  # ensure we actually have a base
+                    return base, quote
 
         return "", ""

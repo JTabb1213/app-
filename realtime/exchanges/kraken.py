@@ -88,13 +88,42 @@ class KrakenConnector(BaseExchange):
     # Pair discovery via REST API
     # ------------------------------------------------------------------
 
-    async def _fetch_pairs(self) -> List[str]:
+    def _load_pairs_from_json(self) -> List[str]:
         """
-        Fetch all tradeable pairs from Kraken's REST API.
-        Filters to pairs quoted in our configured currencies.
+        Load trading pairs from coin_aliases.json (primary source).
+        
+        This is the source of truth for which pairs to subscribe to.
+        The JSON file is updated periodically via cron/manual refresh.
+        """
+        V1_TO_V2 = {"XBT": "BTC", "XDG": "DOGE"}
+        try:
+            with open(config.ALIAS_JSON_PATH) as fp:
+                alias_data = json.load(fp)
+            
+            pairs = []
+            for entry in alias_data.get("assets", {}).values():
+                kraken_sym = entry.get("exchange_symbols", {}).get("kraken")
+                if kraken_sym:
+                    # Translate v1 symbols (XBT) to v2 (BTC) for WS v2 compatibility
+                    base = V1_TO_V2.get(kraken_sym, kraken_sym)
+                    pairs.append(f"{base}/USD")
+            
+            pairs = sorted(set(pairs))
+            if pairs:
+                logger.info(f"[kraken] Loaded {len(pairs)} pairs from coin_aliases.json")
+                return pairs
+        except Exception as e:
+            logger.warning(f"[kraken] Failed to load pairs from JSON: {e}")
+        
+        return []
 
-        Returns a list of wsname strings like ["XBT/USD", "ETH/USD", ...].
+    async def _fetch_pairs_from_api(self) -> List[str]:
         """
+        Fetch trading pairs from Kraken's REST API (fallback).
+        
+        Used only if coin_aliases.json is missing or empty.
+        """
+        V1_TO_V2 = {"XBT": "BTC", "XDG": "DOGE"}
         try:
             async with aiohttp.ClientSession() as session:
                 timeout = aiohttp.ClientTimeout(total=10)
@@ -105,19 +134,14 @@ class KrakenConnector(BaseExchange):
             for key, val in data.get("result", {}).items():
                 wsname = val.get("wsname")
                 if not wsname or ".d" in key:
-                    continue    # skip dark-pool entries
+                    continue  # skip dark-pool entries
 
                 # Filter by quote currency: "XBT/USD" → quote is "USD"
                 quote = wsname.split("/")[-1] if "/" in wsname else None
                 if quote and quote.upper() in self._quote_currencies:
                     pairs.append(wsname)
 
-            pairs = sorted(set(pairs))
-
-            # Kraken's REST API returns wsnames in v1 format (e.g. "XBT/USD")
-            # but WS v2 requires standard symbols (e.g. "BTC/USD").
-            # Translate known v1-only codes before subscribing.
-            V1_TO_V2 = {"XBT": "BTC", "XDG": "DOGE"}
+            # Translate v1 symbols to v2
             translated = []
             for pair in pairs:
                 parts = pair.split("/")
@@ -127,40 +151,37 @@ class KrakenConnector(BaseExchange):
                     translated.append(f"{base}/{quote}")
                 else:
                     translated.append(pair)
-            pairs = sorted(set(translated))
 
-            logger.info(
-                f"[kraken] Fetched {len(pairs)} pairs "
-                f"(quote filter: {self._quote_currencies})"
-            )
+            pairs = sorted(set(translated))
+            logger.info(f"[kraken] Fetched {len(pairs)} pairs from API (fallback)")
             return pairs
 
         except Exception as e:
-            logger.error(f"[kraken] Failed to fetch pairs: {e} — using fallback")
-            # ── Fallback: build pair list from coin_aliases.json ──────────────
-            # Avoids a hardcoded list that can go stale.  We still apply the
-            # same V1→V2 translation so WS v2 symbols are correct.
-            try:
-                with open(config.ALIAS_JSON_PATH) as fp:
-                    alias_data = json.load(fp)
-                V1_TO_V2_FB = {"XBT": "BTC", "XDG": "DOGE"}
-                fb_pairs = []
-                for entry in alias_data.get("assets", {}).values():
-                    kraken_sym = entry.get("exchange_symbols", {}).get("kraken")
-                    if kraken_sym:
-                        base = V1_TO_V2_FB.get(kraken_sym, kraken_sym)
-                        fb_pairs.append(f"{base}/USD")
-                fb_pairs = sorted(set(fb_pairs))
-                if fb_pairs:
-                    logger.info(
-                        f"[kraken] Fallback: loaded {len(fb_pairs)} pairs "
-                        f"from coin_aliases.json"
-                    )
-                    return fb_pairs
-            except Exception as fb_err:
-                logger.warning(f"[kraken] coin_aliases.json fallback also failed: {fb_err}")
-            # ── Last-resort hardcoded seed (use v2 symbols, not v1 XBT) ──────
-            return ["BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "ADA/USD"]
+            logger.error(f"[kraken] API fallback failed: {e}")
+            return []
+
+    async def _fetch_pairs(self) -> List[str]:
+        """
+        Get trading pairs to subscribe to.
+        
+        Priority:
+          1. coin_aliases.json (primary, fast, offline-capable)
+          2. Kraken REST API (fallback if JSON missing/empty)
+          3. Hardcoded seed list (last resort)
+        """
+        # Primary: JSON file
+        pairs = self._load_pairs_from_json()
+        if pairs:
+            return pairs
+        
+        # Fallback: API
+        pairs = await self._fetch_pairs_from_api()
+        if pairs:
+            return pairs
+        
+        # Last resort: hardcoded seed
+        logger.warning("[kraken] Using hardcoded seed pairs (last resort)")
+        return ["BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "ADA/USD"]
 
     # ------------------------------------------------------------------
     # WebSocket streaming

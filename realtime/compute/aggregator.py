@@ -15,8 +15,8 @@ Usage:
     result = aggregator.get_aggregates("bitcoin")
     # {
     #     "avg_price": 67890.12,
-    #     "best": {"exchange": "kraken", "price": 67895.50, ...},
-    #     "worst": {"exchange": "coinbase", "price": 67884.74, ...},
+    #     "highest": {"exchange": "kraken", "price": 67895.50, ...},
+    #     "lowest": {"exchange": "coinbase", "price": 67884.74, ...},
     #     "exchange_count": 2,
     # }
 """
@@ -129,8 +129,8 @@ class PriceAggregator:
             {
                 "coin_id": str,
                 "avg_price": float,
-                "best": ExchangeSnapshot (highest price),
-                "worst": ExchangeSnapshot (lowest price),
+                "highest": ExchangeSnapshot (highest price),
+                "lowest": ExchangeSnapshot (lowest price),
                 "exchange_count": int,
                 "exchanges": {exchange: ExchangeSnapshot, ...},
                 "timestamp": float,
@@ -156,15 +156,15 @@ class PriceAggregator:
         prices = [snap.price for snap in valid.values()]
         avg_price = sum(prices) / len(prices)
         
-        # Find best (highest) and worst (lowest)
-        best_ex = max(valid, key=lambda ex: valid[ex].price)
-        worst_ex = min(valid, key=lambda ex: valid[ex].price)
+        # Find highest and lowest priced exchanges
+        highest_ex = max(valid, key=lambda ex: valid[ex].price)
+        lowest_ex = min(valid, key=lambda ex: valid[ex].price)
         
         return {
             "coin_id": coin_id,
             "avg_price": round(avg_price, 8),
-            "best": valid[best_ex],
-            "worst": valid[worst_ex],
+            "highest": valid[highest_ex],
+            "lowest": valid[lowest_ex],
             "exchange_count": len(valid),
             "exchanges": valid,
             "timestamp": time.time(),

@@ -74,12 +74,38 @@ class CoinbaseConnector(BaseExchange):
     # Product discovery via REST API
     # ------------------------------------------------------------------
 
-    async def _fetch_products(self) -> List[str]:
+    def _load_products_from_json(self) -> List[str]:
         """
-        Fetch all tradeable products from Coinbase's REST API.
-        Filters to products quoted in our configured currencies.
+        Load trading products from coin_aliases.json (primary source).
+        
+        This is the source of truth for which products to subscribe to.
+        The JSON file is updated periodically via cron/manual refresh.
+        """
+        try:
+            with open(config.ALIAS_JSON_PATH) as fp:
+                alias_data = json.load(fp)
+            
+            products = []
+            for entry in alias_data.get("assets", {}).values():
+                coinbase_sym = entry.get("exchange_symbols", {}).get("coinbase")
+                if coinbase_sym:
+                    # Coinbase uses "BTC-USD" format
+                    products.append(f"{coinbase_sym}-USD")
+            
+            products = sorted(set(products))
+            if products:
+                logger.info(f"[coinbase] Loaded {len(products)} products from coin_aliases.json")
+                return products
+        except Exception as e:
+            logger.warning(f"[coinbase] Failed to load products from JSON: {e}")
+        
+        return []
 
-        Returns a list of product IDs like ["BTC-USD", "ETH-USD", ...].
+    async def _fetch_products_from_api(self) -> List[str]:
+        """
+        Fetch trading products from Coinbase's REST API (fallback).
+        
+        Used only if coin_aliases.json is missing or empty.
         """
         try:
             async with aiohttp.ClientSession() as session:
@@ -98,19 +124,38 @@ class CoinbaseConnector(BaseExchange):
                     products.append(product_id)
 
             products = sorted(set(products))
-            logger.info(
-                f"[coinbase] Fetched {len(products)} products "
-                f"(quote filter: {self._quote_currencies})"
-            )
+            logger.info(f"[coinbase] Fetched {len(products)} products from API (fallback)")
             return products
 
         except Exception as e:
-            logger.error(f"[coinbase] Failed to fetch products: {e} — using fallback")
-            # Fallback to common pairs
-            return [
-                "BTC-USD", "ETH-USD", "SOL-USD", "XRP-USD", "ADA-USD",
-                "DOGE-USD", "AVAX-USD", "DOT-USD", "LINK-USD", "LTC-USD",
-            ]
+            logger.error(f"[coinbase] API fallback failed: {e}")
+            return []
+
+    async def _fetch_products(self) -> List[str]:
+        """
+        Get trading products to subscribe to.
+        
+        Priority:
+          1. coin_aliases.json (primary, fast, offline-capable)
+          2. Coinbase REST API (fallback if JSON missing/empty)
+          3. Hardcoded seed list (last resort)
+        """
+        # Primary: JSON file
+        products = self._load_products_from_json()
+        if products:
+            return products
+        
+        # Fallback: API
+        products = await self._fetch_products_from_api()
+        if products:
+            return products
+        
+        # Last resort: hardcoded seed
+        logger.warning("[coinbase] Using hardcoded seed products (last resort)")
+        return [
+            "BTC-USD", "ETH-USD", "SOL-USD", "XRP-USD", "ADA-USD",
+            "DOGE-USD", "AVAX-USD", "DOT-USD", "LINK-USD", "LTC-USD",
+        ]
 
     # ------------------------------------------------------------------
     # WebSocket streaming

@@ -47,9 +47,9 @@ RT_PRICE_TTL = int(os.getenv("RT_PRICE_TTL", "300")) # 43200 = 12 hours if neede
 BATCH_MAX_SIZE = int(os.getenv("BATCH_MAX_SIZE", "100"))
 # ...or when this many milliseconds have elapsed since the last flush,
 # whichever comes first.
-# 1000ms (1 second) gives enough time to capture multiple exchanges per coin
-# before computing aggregates (avg price, best/worst exchange).
-BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "1000"))
+# 2000ms (2 seconds) gives enough time to capture multiple exchanges per coin
+# before computing aggregates (avg price, highest/lowest exchange).
+BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "2000"))
 
 # ---------------------------------------------------------------------------
 # Kraken exchange settings
@@ -67,6 +67,16 @@ KRAKEN_CHUNK_SIZE = int(os.getenv("KRAKEN_CHUNK_SIZE", "200"))
 COINBASE_WS_URL = os.getenv("COINBASE_WS_URL", "wss://ws-feed.exchange.coinbase.com")
 COINBASE_REST_URL = os.getenv(
     "COINBASE_REST_URL", "https://api.exchange.coinbase.com/products",
+)
+
+# ---------------------------------------------------------------------------
+# Binance.US exchange settings (US-compliant endpoint)
+# ---------------------------------------------------------------------------
+# Note: Regular Binance (binance.com) is not available in the US.
+# Binance.US has a different product set and endpoints.
+BINANCE_WS_URL = os.getenv("BINANCE_WS_URL", "wss://stream.binance.us:9443")
+BINANCE_REST_URL = os.getenv(
+    "BINANCE_REST_URL", "https://api.binance.us/api/v3/exchangeInfo",
 )
 
 # ---------------------------------------------------------------------------

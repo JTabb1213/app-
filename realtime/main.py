@@ -26,6 +26,7 @@ import config
 from core.pipeline import Pipeline
 from exchanges.kraken import KrakenConnector
 from exchanges.coinbase import CoinbaseConnector
+from exchanges.binance import BinanceConnector
 from normalizer.normalizer import Normalizer
 from normalizer.aliases import AliasResolver
 from storage.redis_writer import RedisWriter
@@ -107,11 +108,11 @@ async def main():
     ingestion_queue = asyncio.Queue(maxsize=10_000)
 
     # 5. Exchange connectors
-    #    Add more exchanges here as you build them:
-    #      binance  = BinanceConnector(ingestion_queue)
+    #    Add more exchanges here as you build them
     kraken = KrakenConnector(ingestion_queue)
     coinbase = CoinbaseConnector(ingestion_queue)
-    connectors = [kraken, coinbase]
+    binance = BinanceConnector(ingestion_queue)
+    connectors = [kraken, coinbase, binance]
 
     # 6. Wire up the pipeline
     _pipeline = Pipeline(
