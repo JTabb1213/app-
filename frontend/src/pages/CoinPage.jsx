@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCoinStatic, getTokenomics } from "../services/api";
+import { useRealtimePrice } from "../hooks/useRealtimePrice";
 import Tokenomics from "../components/Tokenomics";
 import Score from "../components/Score";
+import ExchangeComparison from "../components/ExchangeComparison";
 import "./CoinPage.css"
 
 function CoinPage() {
@@ -14,26 +16,34 @@ function CoinPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Real-time price data via WebSocket (independent of REST fetches)
+    const { priceData: realtimeData, connectionState: wsState, error: wsError } = useRealtimePrice(coinId);
+
     useEffect(() => {
         setLoading(true);
         setError(null);
 
         const fetchAll = async () => {
-            try {
-                // Fetch DB static data and tokenomics (which may be cached)
-                const [dbData, tokenData] = await Promise.all([
-                    getCoinStatic(coinId),
-                    getTokenomics(coinId),
-                ]);
+            // Fetch each source independently — a REST failure (e.g. CORS in dev)
+            // must never block the page from rendering or the WS section from showing.
+            const [dbData, tokenData] = await Promise.allSettled([
+                getCoinStatic(coinId),
+                getTokenomics(coinId),
+            ]);
 
-                setStaticData(dbData);
-                setTokenomics(tokenData);
-            } catch (err) {
-                console.error("Fetch error:", err);
-                setError(err.message || "Failed to load coin data. Please check the coin name and try again.");
-            } finally {
-                setLoading(false);
+            const resolvedStatic = dbData.status === "fulfilled" ? dbData.value : null;
+            const resolvedTokens = tokenData.status === "fulfilled" ? tokenData.value : null;
+
+            setStaticData(resolvedStatic);
+            setTokenomics(resolvedTokens);
+
+            // Only show a blocking error if BOTH sources failed AND there's no name to show
+            if (!resolvedStatic && !resolvedTokens) {
+                const firstErr = dbData.reason || tokenData.reason;
+                setError(firstErr?.message || "Could not load coin data from the API.");
             }
+
+            setLoading(false);
         };
 
         if (coinId) {
@@ -50,30 +60,7 @@ function CoinPage() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="page-container error">
-                <h2>⚠️ Error Loading Coin</h2>
-                <p className="error-message">{error}</p>
-                <button onClick={() => navigate("/")} className="back-btn">
-                    ← Back to Search
-                </button>
-            </div>
-        );
-    }
-
-    if (!tokenomics && !staticData) {
-        return (
-            <div className="page-container">
-                <p>No coin data available</p>
-                <button onClick={() => navigate("/")} className="back-btn">
-                    ← Back to Search
-                </button>
-            </div>
-        );
-    }
-
-    // Derive display values
+    // Derive display values — fall back to coinId if API data unavailable
     const coinName = tokenomics?.name || staticData?.name || coinId;
     const coinSymbol = tokenomics?.symbol || staticData?.symbol || "";
 
@@ -82,6 +69,13 @@ function CoinPage() {
             <button onClick={() => navigate("/")} className="back-btn small">
                 ← Back
             </button>
+
+            {/* Non-blocking API error banner — page still renders with WS data */}
+            {error && (
+                <div className="api-error-banner">
+                    ⚠️ API unavailable: {error}. Live exchange data below is still active.
+                </div>
+            )}
 
             <div className="coin-header-section">
                 {staticData?.image_url && (
@@ -92,7 +86,20 @@ function CoinPage() {
                     />
                 )}
                 <h1>{coinName} <span className="symbol">({coinSymbol.toUpperCase()})</span></h1>
+                {realtimeData?.avg_price != null && (
+                    <span className="current-price live-price">
+                        ${realtimeData.avg_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <span className="live-tag">LIVE</span>
+                    </span>
+                )}
             </div>
+
+            {/* Live exchange comparison (cheapest / most expensive) */}
+            <ExchangeComparison
+                priceData={realtimeData}
+                connectionState={wsState}
+                error={wsError}
+            />
 
             {/* Description from DB (user-editable later) */}
             <div className="description-section">

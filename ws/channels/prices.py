@@ -196,6 +196,13 @@ class PriceChannel(Channel):
         Route a Redis pub/sub message to the correct subscribers.
         
         Overrides base class to add multi-exchange aggregation.
+        
+        Handles two message formats from the realtime service:
+          1. Aggregate messages (type="aggregate") — pre-computed by the
+             realtime service's PriceAggregator. Forwarded directly.
+          2. Individual tick messages (exchange-specific) — fed into the
+             local ExchangePriceTracker for per-ws-instance aggregation.
+             Only sent when ENABLE_DEBUG_KEYS is True in the realtime service.
         """
         try:
             data = json.loads(message)
@@ -207,6 +214,27 @@ class PriceChannel(Channel):
         if not coin_id:
             return
 
+        # ── Aggregate messages from realtime service ──────────────
+        # These are already computed (avg, highest, lowest) — just forward.
+        if data.get("type") == "aggregate":
+            subscribers = self._subscriptions.get(coin_id, set())
+            if not subscribers:
+                return
+
+            outgoing = json.dumps({"channel": self.name, "data": data})
+
+            disconnected: Set[websockets.WebSocketServerProtocol] = set()
+            for ws in subscribers:
+                try:
+                    await ws.send(outgoing)
+                except websockets.ConnectionClosed:
+                    disconnected.add(ws)
+
+            for ws in disconnected:
+                self.remove_client(ws)
+            return
+
+        # ── Individual tick messages (debug mode only) ────────────
         exchange = data.get("exchange", "unknown")
         
         # Update the tracker with this exchange's data

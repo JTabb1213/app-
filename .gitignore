@@ -45,6 +45,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+
+tools/populate_aliases/sources/exchange_symbols/kraken_symbols.json
+
 # Misc
 .idea/
 *.swp
@@ -62,3 +65,5 @@ python main.py --sources binance
 # Docker image archives
 *.tar.gz
 *.tgz
+
+oci iam region list

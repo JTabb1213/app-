@@ -236,6 +236,7 @@ class RedisWriter:
                     "lowest_price": lowest.price,
                     "exchange_count": agg["exchange_count"],
                     "timestamp": now,
+                    "published_at": int(time.time() * 1000),  # Unix ms — for frontend latency measurement
                 })
                 pipe.publish("rt:stream:prices", agg_msg)
                 

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "binancecoin",
+    "symbol": "BNB",
+    "name": "Binancecoin",
+    "aliases": [
+      "binancecoin",
+      "bnb",
+      "binance coin"
+    ]
+  },
+  {
+    "id": "bitcoin",
+    "symbol": "BTC",
+    "name": "Bitcoin",
+    "aliases": [
+      "bitcoin",
+      "btc",
+      "xbt"
+    ]
+  },
+  {
+    "id": "cardano",
+    "symbol": "ADA",
+    "name": "Cardano",
+    "aliases": [
+      "cardano",
+      "ada"
+    ]
+  },
+  {
+    "id": "dogecoin",
+    "symbol": "DOGE",
+    "name": "Dogecoin",
+    "aliases": [
+      "dogecoin",
+      "doge",
+      "xdg"
+    ]
+  },
+  {
+    "id": "ethereum",
+    "symbol": "ETH",
+    "name": "Ethereum",
+    "aliases": [
+      "ethereum",
+      "eth",
+      "ether"
+    ]
+  },
+  {
+    "id": "ripple",
+    "symbol": "XRP",
+    "name": "Ripple",
+    "aliases": [
+      "ripple",
+      "xrp"
+    ]
+  },
+  {
+    "id": "solana",
+    "symbol": "SOL",
+    "name": "Solana",
+    "aliases": [
+      "solana",
+      "sol"
+    ]
+  },
+  {
+    "id": "tether",
+    "symbol": "USDT",
+    "name": "Tether",
+    "aliases": [
+      "tether",
+      "usdt"
+    ]
+  },
+  {
+    "id": "usd-coin",
+    "symbol": "USDC",
+    "name": "Usd Coin",
+    "aliases": [
+      "usd coin",
+      "usdc"
+    ]
+  }
+]

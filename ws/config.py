@@ -18,7 +18,8 @@ REDIS_URL = os.getenv("REDIS_URL")
 # WebSocket server
 # ---------------------------------------------------------------------------
 WS_HOST = os.getenv("WS_HOST", "0.0.0.0")
-WS_PORT = int(os.getenv("WS_PORT", "8765"))
+# Cloud Run injects PORT; fall back to WS_PORT, then 8765 for local/VM use
+WS_PORT = int(os.getenv("PORT") or os.getenv("WS_PORT", "8765"))
 
 # Maximum subscriptions a single client can have at once.
 # Prevents abuse — a client subscribing to 10,000 coins would

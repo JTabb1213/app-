@@ -20,6 +20,7 @@ import asyncio
 import logging
 import signal
 import sys
+from http import HTTPStatus
 
 import websockets
 
@@ -63,6 +64,19 @@ async def start_health_server():
     return server
 
 
+async def process_request(connection, request):
+    """Handle HTTP health-check requests on the WebSocket port.
+
+    Cloud Run (and other container platforms) probe the single exposed port
+    with a plain HTTP GET.  We return 200 OK so the startup probe passes;
+    all other requests fall through to the normal WebSocket handshake.
+    """
+    if request.path in ("/", "/health", "/healthz"):
+        body = f'{{"status":"ok","clients":{len(connected_clients)}}}'.encode()
+        return connection.respond(HTTPStatus.OK, body)
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -95,10 +109,13 @@ async def main():
         config.WS_PORT,
         ping_interval=20,
         ping_timeout=10,
+        process_request=process_request,
     )
     logger.info(f"WebSocket server listening on ws://{config.WS_HOST}:{config.WS_PORT}")
 
-    # -- 4. Start health check -----------------------------------------------
+    # -- 4. Start health check (extra TCP port for VM/bare-metal deployments) --
+    # On Cloud Run only one port is exposed (WS_PORT), so this may be
+    # unreachable externally — that's fine, health checks hit / on WS_PORT.
     health_server = await start_health_server()
 
     # -- 5. Start Redis listener (runs forever) ------------------------------

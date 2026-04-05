@@ -1,23 +1,10 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import CoinSearch from "../components/CoinSearch"
 import "./Home.css"
 
 function Home() {
-    const [coin, setCoin] = useState("")
-    const [error, setError] = useState("")
     const navigate = useNavigate()
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        setError("")
-
-        if (!coin.trim()) {
-            setError("Please enter a coin name")
-            return
-        }
-
-        navigate(`/coin/${coin.toLowerCase().trim()}`)
-    }
 
     return (
         <div className="home-page">
@@ -25,24 +12,7 @@ function Home() {
                 <h1 className="home-title">Crypto Rating</h1>
                 <p className="home-subtitle">Search for any cryptocurrency to see its safety rating and tokenomics</p>
 
-                <form className="search-form" onSubmit={handleSubmit}>
-                    <input
-                        className="search-input"
-                        type="text"
-                        placeholder="bitcoin, ethereum, cardano..."
-                        value={coin}
-                        onChange={(e) => {
-                            setCoin(e.target.value)
-                            setError("")
-                        }}
-                        autoFocus
-                    />
-                    <button className="search-button" type="submit" disabled={!coin.trim()}>
-                        🔍 Search
-                    </button>
-                </form>
-
-                {error && <p className="error-message">{error}</p>}
+                <CoinSearch />
             </div>
 
             <div className="info-section">

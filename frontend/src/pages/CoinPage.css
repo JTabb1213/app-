@@ -234,6 +234,18 @@
   }
 }
 
+/* ─── Non-blocking API error banner ─────────────────────────── */
+
+.api-error-banner {
+  padding: 0.75rem 1.25rem;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  border-radius: 10px;
+  color: #fcd34d;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
 /* ─── Coin header with logo & price ─────────────────────────── */
 
 .coin-header-section {
@@ -261,6 +273,36 @@
   font-weight: 700;
   color: var(--secondary);
   margin-left: auto;
+}
+
+.live-price {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.live-tag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ─── Description ────────────────────────────────────────────── */
