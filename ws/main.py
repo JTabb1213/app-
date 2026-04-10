@@ -72,7 +72,7 @@ async def process_request(connection, request):
     all other requests fall through to the normal WebSocket handshake.
     """
     if request.path in ("/", "/health", "/healthz"):
-        body = f'{{"status":"ok","clients":{len(connected_clients)}}}'.encode()
+        body = f'{{"status":"ok","clients":{len(connected_clients)}}}'
         return connection.respond(HTTPStatus.OK, body)
     return None
 

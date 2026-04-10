@@ -1,0 +1,22 @@
+{
+    "_meta": {
+        "description": "Mapping of MEXC base currency symbols to CoinGecko canonical IDs. MEXC uses concatenated pairs like BTCUSDT (no separator, identical to Binance). Symbol is the base currency only.",
+        "mexc_endpoint": "https://api.mexc.com/api/v3/exchangeInfo",
+        "updated_at": "2026-04-09"
+    },
+    "symbols": {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "SOL": "solana",
+        "XRP": "ripple",
+        "ADA": "cardano",
+        "DOGE": "dogecoin",
+        "AVAX": "avalanche-2",
+        "LTC": "litecoin",
+        "NEAR": "near",
+        "FIL": "filecoin",
+        "INJ": "injective-protocol",
+        "AAVE": "aave",
+        "OP": "optimism"
+    }
+}

@@ -1,0 +1,77 @@
+# Local development stack — Redis + all realtime microservices.
+#
+# Usage:
+#   cd /path/to/app
+#
+#   # Start just Redis (for manual service development):
+#   docker compose -f realtime/docker-compose.dev.yml up redis
+#
+#   # Start everything:
+#   docker compose -f realtime/docker-compose.dev.yml up --build
+#
+# Each service's .env.example defaults to redis://localhost:6379.
+# When running inside Docker Compose, services use redis://redis:6379 instead.
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  collectors-primary:
+    build:
+      context: ..
+      dockerfile: realtime/collectors-primary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_TRADES_KEY=stream:trades
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8081
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  collectors-secondary:
+    build:
+      context: ..
+      dockerfile: realtime/collectors-secondary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_TRADES_KEY=stream:trades
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8082
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+  live-price-ingestor:
+    build:
+      context: ..
+      dockerfile: realtime/live-price-ingestor/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_TRADES_KEY=stream:trades
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8083
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+
+volumes:
+  redis-data:

@@ -1,0 +1,22 @@
+{
+    "_meta": {
+        "description": "Mapping of Gate.io base currency symbols to CoinGecko canonical IDs. Gate.io uses underscore-separated pairs like BTC_USDT. Symbol is the base currency only.",
+        "gateio_endpoint": "https://api.gateio.ws/api/v4/spot/currency_pairs",
+        "updated_at": "2026-04-09"
+    },
+    "symbols": {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "SOL": "solana",
+        "XRP": "ripple",
+        "ADA": "cardano",
+        "DOGE": "dogecoin",
+        "AVAX": "avalanche-2",
+        "LTC": "litecoin",
+        "NEAR": "near",
+        "FIL": "filecoin",
+        "INJ": "injective-protocol",
+        "AAVE": "aave",
+        "OP": "optimism"
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "_meta": {
+        "description": "Mapping of Pionex base currency symbols to CoinGecko canonical IDs. Pionex uses underscore-separated pairs like BTC_USDT.",
+        "pionex_endpoint": "https://api.pionex.com/api/v1/common/symbols",
+        "updated_at": "2026-04-09"
+    },
+    "symbols": {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "SOL": "solana",
+        "XRP": "ripple",
+        "ADA": "cardano",
+        "DOGE": "dogecoin",
+        "DOT": "polkadot",
+        "LINK": "chainlink",
+        "AVAX": "avalanche-2",
+        "LTC": "litecoin",
+        "NEAR": "near",
+        "FIL": "filecoin",
+        "INJ": "injective-protocol",
+        "AAVE": "aave",
+        "OP": "optimism"
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "_meta": {
+        "description": "Mapping of OKX base currency symbols to CoinGecko canonical IDs. OKX uses dash-separated pairs like BTC-USDT.",
+        "okx_endpoint": "https://www.okx.com/api/v5/public/instruments?instType=SPOT",
+        "updated_at": "2026-04-09"
+    },
+    "symbols": {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "SOL": "solana",
+        "XRP": "ripple",
+        "ADA": "cardano",
+        "DOGE": "dogecoin",
+        "DOT": "polkadot",
+        "LINK": "chainlink",
+        "AVAX": "avalanche-2",
+        "LTC": "litecoin",
+        "NEAR": "near",
+        "FIL": "filecoin",
+        "INJ": "injective-protocol",
+        "AAVE": "aave",
+        "OP": "optimism"
+    }
+}
