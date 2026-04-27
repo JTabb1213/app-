@@ -56,6 +56,9 @@ class GateioConnector(BaseExchange):
                 symbol = entry.get("symbol", "")
                 if symbol:
                     for quote in self._quote_currencies:
+                        # Skip invalid self-referencing pairs like USDT_USDT, USDC_USDT
+                        if symbol.upper() == quote.upper():
+                            continue
                         pairs.append(f"{symbol}_{quote}")
             pairs = sorted(set(pairs))
             if pairs:
@@ -110,19 +113,24 @@ class GateioConnector(BaseExchange):
         logger.info(f"[gateio] Subscribing to {len(self._pairs)} pairs")
 
         async with websockets.connect(self._ws_url, ping_interval=None) as ws:
-            # Subscribe to spot.tickers for all pairs
-            subscribe_msg = json.dumps({
-                "time": int(time.time()),
-                "channel": "spot.tickers",
-                "event": "subscribe",
-                "payload": self._pairs,
-            })
-            await ws.send(subscribe_msg)
-            logger.info("[gateio] Subscribed to spot.tickers channel")
+            # Subscribe one pair at a time — Gate.io rejects the entire batch
+            # if any single pair is invalid (e.g. EOS_USDT not listed)
+            for pair in self._pairs:
+                await ws.send(json.dumps({
+                    "time": int(time.time()),
+                    "channel": "spot.tickers",
+                    "event": "subscribe",
+                    "payload": [pair],
+                }))
+                await asyncio.sleep(0.02)  # 20ms between subs
+
+            logger.info("[gateio] Sent individual subscribe messages for all pairs")
 
             last_ping = time.time()
+            tick_count = 0
 
             async for message in ws:
+                tick_count += 1
                 # Manual ping every N seconds (Gate.io doesn't use standard WS ping)
                 if time.time() - last_ping >= self._ping_interval:
                     await ws.send(json.dumps({
@@ -135,11 +143,22 @@ class GateioConnector(BaseExchange):
                 channel = data.get("channel", "")
                 event = data.get("event", "")
 
-                # Skip pong, ack, error messages
-                if channel in ("spot.pong",) or event in ("subscribe", "unsubscribe"):
+                # Skip pong messages
+                if channel == "spot.pong":
+                    continue
+
+                # Log subscribe acks — surface any errors from Gate.io
+                if event == "subscribe":
+                    error = data.get("error")
+                    if error:
+                        logger.warning(f"[gateio] Subscribe error: {error}")
+                    continue
+
+                if event == "unsubscribe":
                     continue
 
                 if channel != "spot.tickers" or event != "update":
+                    logger.debug(f"[gateio] Unhandled message: channel={channel!r} event={event!r}")
                     continue
 
                 result = data.get("result", {})
@@ -165,3 +184,4 @@ class GateioConnector(BaseExchange):
                     received_at=time.time(),
                 )
                 await self._emit(tick)
+        logger.warning(f"[gateio] WebSocket closed after {tick_count} messages — will reconnect")

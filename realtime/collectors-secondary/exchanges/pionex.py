@@ -117,13 +117,18 @@ class PionexConnector(BaseExchange):
 
         # Disable library ping — Pionex uses custom PING/PONG protocol
         async with websockets.connect(self._ws_url, ping_interval=None) as ws:
-            # Subscribe to TRADE for each symbol
-            for pair in self._pairs:
-                await ws.send(json.dumps({
-                    "op": "SUBSCRIBE",
-                    "topic": "TRADE",
-                    "symbol": pair,
-                }))
+            # Subscribe in batches of 10 with a pause between batches.
+            # Sending all 51 subs rapidly causes the server to send CLOSE.
+            BATCH = 10
+            for i in range(0, len(self._pairs), BATCH):
+                batch = self._pairs[i:i + BATCH]
+                for pair in batch:
+                    await ws.send(json.dumps({
+                        "op": "SUBSCRIBE",
+                        "topic": "TRADE",
+                        "symbol": pair,
+                    }))
+                await asyncio.sleep(0.5)  # 500ms between batches
 
             logger.info(f"[pionex] Sent {len(self._pairs)} TRADE subscriptions")
 

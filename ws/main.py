@@ -68,10 +68,10 @@ async def process_request(connection, request):
     """Handle HTTP health-check requests on the WebSocket port.
 
     Cloud Run (and other container platforms) probe the single exposed port
-    with a plain HTTP GET.  We return 200 OK so the startup probe passes;
-    all other requests fall through to the normal WebSocket handshake.
+    with a plain HTTP GET.  We respond to /health and /healthz so startup
+    probes pass; all other paths (including /) fall through to WebSocket handshake.
     """
-    if request.path in ("/", "/health", "/healthz"):
+    if request.path in ("/health", "/healthz"):
         body = f'{{"status":"ok","clients":{len(connected_clients)}}}'
         return connection.respond(HTTPStatus.OK, body)
     return None

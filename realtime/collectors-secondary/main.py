@@ -33,6 +33,7 @@ import redis.asyncio as aioredis
 
 import config
 from shared.stream.producer import StreamProducer
+from exchanges.bybit import BybitConnector
 from exchanges.gateio import GateioConnector
 from exchanges.mexc import MexcConnector
 from exchanges.okx import OkxConnector
@@ -61,7 +62,7 @@ async def _health_handler(request):
     info = {
         "status": "healthy",
         "service": "collectors-secondary",
-        "exchanges": ["gateio", "mexc", "okx", "pionex"],
+        "exchanges": ["bybit", "gateio", "mexc", "okx", "pionex"],
         "producer": _producer.stats if _producer else {},
         "connectors": {
             c.NAME: {"last_message": c.last_message_time}
@@ -89,7 +90,7 @@ async def main():
     global _connectors, _producer
 
     logger.info("=" * 60)
-    logger.info("  Collectors-Secondary (Gate.io, MEXC, OKX, Pionex)")
+    logger.info("  Collectors-Secondary (Bybit, Gate.io, MEXC, OKX, Pionex)")
     logger.info("=" * 60)
 
     if not config.REDIS_URL:
@@ -107,11 +108,12 @@ async def main():
         max_stream_len=config.STREAM_MAX_LEN,
     )
 
+    bybit = BybitConnector(_producer)
     gateio = GateioConnector(_producer)
-    mexc = MexcConnector(_producer)
+    mexc = MexcConnector(_producer)  # wont work for usa ip addresses
     okx = OkxConnector(_producer)
     pionex = PionexConnector(_producer)
-    _connectors = [gateio, mexc, okx, pionex]
+    _connectors = [bybit, gateio, okx, pionex]  # MEXC is blocked for US IPs — excluded
 
     await _start_health_server()
 

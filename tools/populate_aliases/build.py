@@ -6,6 +6,7 @@ Usage:
     python build.py                           # all coins from coin_aliases.json
     python build.py bitcoin cardano solana     # only specific coins
 """
+import glob
 import json
 import sys
 import os
@@ -14,47 +15,49 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))  # app/
 
 COIN_ALIASES_PATH = os.path.join(SCRIPT_DIR, "sources", "coin_aliases", "coin_aliases.json")
-KRAKEN_SYMBOLS_PATH = os.path.join(SCRIPT_DIR, "sources", "exchange_symbols", "kraken_symbols.json")
-COINBASE_SYMBOLS_PATH = os.path.join(SCRIPT_DIR, "sources", "exchange_symbols", "coinbase_symbols.json")
-BINANCE_SYMBOLS_PATH = os.path.join(SCRIPT_DIR, "sources", "exchange_symbols", "binance_symbols.json")
 SYMBOLS_PATH = os.path.join(SCRIPT_DIR, "sources", "symbols", "symbols.json")
+EXCHANGE_SYMBOLS_DIR = os.path.join(SCRIPT_DIR, "sources", "exchange_symbols")
 OUTPUT_PATH = os.path.join(ROOT_DIR, "data", "coin_aliases.json")
+
+
+def load_exchange_mappings() -> dict[str, dict[str, str]]:
+    """Load all exchange symbol source files into canonical_id -> symbol maps."""
+    exchange_maps: dict[str, dict[str, str]] = {}
+    pattern = os.path.join(EXCHANGE_SYMBOLS_DIR, "*_symbols.json")
+
+    for path in glob.glob(pattern):
+        name = os.path.basename(path)
+        exchange = name.replace("_symbols.json", "").lower()
+
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        raw_symbols = data.get("symbols", {})
+        if not isinstance(raw_symbols, dict):
+            continue
+
+        exchange_map: dict[str, str] = {}
+        for symbol, canonical_id in raw_symbols.items():
+            if canonical_id is None:
+                continue
+            if canonical_id not in exchange_map:
+                exchange_map[canonical_id] = symbol
+
+        if exchange_map:
+            exchange_maps[exchange] = exchange_map
+
+    return exchange_maps
 
 
 def main():
     # ── Load sources ──
-    with open(COIN_ALIASES_PATH) as f:
+    with open(COIN_ALIASES_PATH, "r", encoding="utf-8") as f:
         coin_aliases = json.load(f)["aliases"]
 
-    with open(KRAKEN_SYMBOLS_PATH) as f:
-        kraken_raw = json.load(f)["symbols"]
-
-    with open(COINBASE_SYMBOLS_PATH) as f:
-        coinbase_raw = json.load(f)["symbols"]
-
-    with open(BINANCE_SYMBOLS_PATH) as f:
-        binance_raw = json.load(f)["symbols"]
-
-    with open(SYMBOLS_PATH) as f:
+    with open(SYMBOLS_PATH, "r", encoding="utf-8") as f:
         symbols = json.load(f)["symbols"]
 
-    # Invert kraken: altname -> canonical_id  =>  canonical_id -> altname
-    kraken_map = {}
-    for altname, canonical_id in kraken_raw.items():
-        if canonical_id is not None and canonical_id not in kraken_map:
-            kraken_map[canonical_id] = altname
-
-    # Invert coinbase: symbol -> canonical_id  =>  canonical_id -> symbol
-    coinbase_map = {}
-    for symbol, canonical_id in coinbase_raw.items():
-        if canonical_id is not None and canonical_id not in coinbase_map:
-            coinbase_map[canonical_id] = symbol
-
-    # Invert binance: symbol -> canonical_id  =>  canonical_id -> symbol
-    binance_map = {}
-    for symbol, canonical_id in binance_raw.items():
-        if canonical_id is not None and canonical_id not in binance_map:
-            binance_map[canonical_id] = symbol
+    exchange_maps = load_exchange_mappings()
 
     # ── Determine which coins to include ──
     if len(sys.argv) > 1:
@@ -70,35 +73,33 @@ def main():
 
     # ── Build output ──
     output = {}
+    exchange_counts = {exchange: 0 for exchange in exchange_maps}
+
     for cid in sorted(canonical_ids):
         entry = {
             "symbol": symbols.get(cid, "???"),
             "aliases": coin_aliases.get(cid, []),
             "exchange_symbols": {}
         }
-        if cid in kraken_map:
-            entry["exchange_symbols"]["kraken"] = kraken_map[cid]
-        if cid in coinbase_map:
-            entry["exchange_symbols"]["coinbase"] = coinbase_map[cid]
-        if cid in binance_map:
-            entry["exchange_symbols"]["binance"] = binance_map[cid]
+
+        for exchange, exchange_map in exchange_maps.items():
+            if cid in exchange_map:
+                entry["exchange_symbols"][exchange] = exchange_map[cid]
+                exchange_counts[exchange] += 1
+
         output[cid] = entry
 
     # ── Write ──
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    with open(OUTPUT_PATH, "w") as f:
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump({"assets": output}, f, indent=4)
         f.write("\n")
 
     # ── Summary ──
-    with_kraken = sum(1 for e in output.values() if "kraken" in e["exchange_symbols"])
-    with_coinbase = sum(1 for e in output.values() if "coinbase" in e["exchange_symbols"])
-    with_binance = sum(1 for e in output.values() if "binance" in e["exchange_symbols"])
     print(f"  ✓ Written {len(output)} coins to {OUTPUT_PATH}")
     print(f"    Symbols:  {sum(1 for e in output.values() if e['symbol'] != '???')}/{len(output)}")
-    print(f"    Kraken:   {with_kraken}/{len(output)}")
-    print(f"    Coinbase: {with_coinbase}/{len(output)}")
-    print(f"    Binance:  {with_binance}/{len(output)}")
+    for exchange, count in sorted(exchange_counts.items()):
+        print(f"    {exchange.capitalize():10s}: {count}/{len(output)}")
 
 
 if __name__ == "__main__":

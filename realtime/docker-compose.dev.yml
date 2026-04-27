@@ -73,5 +73,53 @@ services:
       - "8083:8083"
     restart: unless-stopped
 
+  trade-collectors-primary:
+    build:
+      context: ..
+      dockerfile: realtime/trade-collectors-primary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_KEY=stream:trades:volume
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8084
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+
+  trade-collectors-secondary:
+    build:
+      context: ..
+      dockerfile: realtime/trade-collectors-secondary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_KEY=stream:trades:volume
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8085
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+
+  volume-aggregator:
+    build:
+      context: ..
+      dockerfile: realtime/volume-aggregator/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - VOLUME_STREAM_KEY=stream:trades:volume
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8086
+    ports:
+      - "8086:8086"
+    restart: unless-stopped
+
 volumes:
   redis-data:

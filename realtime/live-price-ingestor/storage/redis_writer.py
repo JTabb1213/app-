@@ -5,9 +5,7 @@ Groups incoming NormalizedTick writes into batches and flushes them
 to Redis using pipelining for maximum efficiency.
 
 Redis key schema (production):
-  rt:avg:<coin_id>                  → average price across all exchanges
-  rt:highest:<coin_id>              → exchange with highest price
-  rt:lowest:<coin_id>               → exchange with lowest price
+  rt:coin:<coin_id>                 → consolidated JSON cache entry per coin
 
 Pub/sub channel:
   rt:stream:prices                  → aggregate updates for WebSocket service
@@ -100,7 +98,7 @@ class RedisWriter:
                     pipe.publish("rt:stream:prices", tick_data)
                     pipe.setex(f"rt:ticker:{tick.exchange}:{tick.coin_id}", ttl, tick_data)
 
-            # ── Production: aggregates ──
+            # ── Production: aggregates (one JSON key per coin) ──
             for coin_id in updated_coins:
                 agg = self._aggregator.get_aggregates(coin_id)
                 if not agg:
@@ -110,33 +108,29 @@ class RedisWriter:
                 highest = agg["highest"]
                 lowest = agg["lowest"]
 
-                avg_data = json.dumps({
+                # Single consolidated cache entry per coin
+                coin_data = json.dumps({
                     "coin_id": coin_id,
                     "avg_price": agg["avg_price"],
+                    "highest": {
+                        "exchange": highest.exchange,
+                        "price": highest.price,
+                        "bid": highest.bid,
+                        "ask": highest.ask,
+                        "timestamp": highest.timestamp,
+                    },
+                    "lowest": {
+                        "exchange": lowest.exchange,
+                        "price": lowest.price,
+                        "bid": lowest.bid,
+                        "ask": lowest.ask,
+                        "timestamp": lowest.timestamp,
+                    },
                     "exchange_count": agg["exchange_count"],
+                    "exchanges": sorted(agg["exchanges"].keys()),
                     "timestamp": now,
                 })
-                pipe.setex(f"rt:avg:{coin_id}", ttl, avg_data)
-
-                highest_data = json.dumps({
-                    "coin_id": coin_id,
-                    "exchange": highest.exchange,
-                    "price": highest.price,
-                    "bid": highest.bid,
-                    "ask": highest.ask,
-                    "timestamp": highest.timestamp,
-                })
-                pipe.setex(f"rt:highest:{coin_id}", ttl, highest_data)
-
-                lowest_data = json.dumps({
-                    "coin_id": coin_id,
-                    "exchange": lowest.exchange,
-                    "price": lowest.price,
-                    "bid": lowest.bid,
-                    "ask": lowest.ask,
-                    "timestamp": lowest.timestamp,
-                })
-                pipe.setex(f"rt:lowest:{coin_id}", ttl, lowest_data)
+                pipe.setex(f"rt:coin:{coin_id}", ttl, coin_data)
 
                 # Publish aggregate to WS service
                 agg_msg = json.dumps({

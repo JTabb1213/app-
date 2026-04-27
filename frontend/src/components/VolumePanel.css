@@ -1,0 +1,247 @@
+/* ─── Volume Panel ───────────────────────────────────────────── */
+
+.volume-panel {
+    padding: 0;
+}
+
+/* ── Window selector ───────────────────────────────────────── */
+
+.volume-window-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.window-btn {
+    padding: 0.3rem 0.85rem;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.window-btn:hover {
+    border-color: rgba(148, 163, 184, 0.5);
+    color: var(--text-primary);
+}
+
+.window-btn.active {
+    background: rgba(97, 218, 251, 0.15);
+    border-color: rgba(97, 218, 251, 0.5);
+    color: #93c5fd;
+}
+
+.volume-refresh-hint {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* ── Loading / error ───────────────────────────────────────── */
+
+.volume-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.volume-error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    color: #fca5a5;
+}
+
+.volume-error-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.volume-error-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* ── Content ───────────────────────────────────────────────── */
+
+.volume-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+}
+
+.volume-total-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.volume-total-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.volume-unit {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ── Exchange count ────────────────────────────────────────── */
+
+.volume-exchange-count {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(100, 200, 255, 0.08);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.exchange-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.exchange-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background: linear-gradient(135deg, #64c8ff 0%, #3fa9e5 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 99px;
+}
+
+/* ── Total row ─────────────────────────────────────────────── */
+
+.volume-bar-container {
+    display: flex;
+    height: 10px;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.volume-bar-fill.buy {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    transition: width 0.5s ease;
+}
+
+.volume-bar-fill.sell {
+    background: linear-gradient(90deg, #f87171, #ef4444);
+    transition: width 0.5s ease;
+}
+
+/* ── Breakdown ─────────────────────────────────────────────── */
+
+.volume-breakdown {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.volume-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.buy-side {
+    align-items: flex-start;
+}
+
+.sell-side {
+    align-items: flex-end;
+}
+
+.side-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.side-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.buy-side .side-pct {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4ade80;
+}
+
+.sell-side .side-pct {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #f87171;
+}
+
+.volume-divider {
+    width: 1px;
+    height: 3rem;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+/* ── Pressure badge ────────────────────────────────────────── */
+
+.pressure-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.pressure-badge.bullish {
+    background: rgba(34, 197, 94, 0.12);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.pressure-badge.bearish {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.pressure-badge.neutral {
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}

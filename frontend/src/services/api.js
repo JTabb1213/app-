@@ -78,6 +78,22 @@ export async function getTopCoinsStatic(limit = 50) {
     }
 }
 
+// ─── Volume (buy/sell pressure from Redis) ──────────────────────
+
+export async function getVolume(coinId, window = "5m") {
+    try {
+        const res = await fetch(`${BASE_URL}/volume/${coinId}?window=${window}`)
+        if (!res.ok) {
+            const err = await res.json()
+            throw new Error(err.error || "Volume not found")
+        }
+        return await res.json()
+    } catch (err) {
+        console.error(`[API] Volume fetch error:`, err)
+        throw err
+    }
+}
+
 // ─── Real-time cache update trigger ─────────────────────────────
 
 // ─── Real-time cache update trigger ─────────────────────────────

@@ -11,7 +11,7 @@ from typing import Dict, Optional, Set
 
 from shared.models import NormalizedTick
 
-EXCHANGE_STALENESS_TTL = 30.0
+EXCHANGE_STALENESS_TTL = 120.0  # 2 min — accommodates slower exchanges like Gate.io
 
 
 @dataclass

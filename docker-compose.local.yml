@@ -1,0 +1,187 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# docker-compose.local.yml — Full local dev stack
+#
+# Starts every service you need to run the app locally:
+#   redis, backend API, WebSocket server, frontend (Vite dev server),
+#   and all six realtime microservices.
+#
+# Usage (from the repo root):
+#   docker compose -f docker-compose.local.yml up --build
+#
+# Then open:
+#   Frontend  →  http://localhost:5173
+#   Backend   →  http://localhost:8000
+#   WS server →  ws://localhost:8765
+#
+# Env vars you MUST supply (create a .env file at the repo root or export them):
+#   DATABASE_URL   — postgres connection string (Supabase / local pg)
+#   REDIS_URL      — overridden internally to redis://redis:6379, but needed by
+#                    backend at startup for the "external" redis (Upstash) path.
+#                    Set it to redis://redis:6379 for fully local dev.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Backend Flask API ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8080"
+    environment:
+      - PORT=8080
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=${DATABASE_URL}
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── WebSocket broadcast server ──────────────────────────────────────────────
+  ws:
+    build:
+      context: ./ws
+      dockerfile: Dockerfile
+    ports:
+      - "8765:8765"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Frontend (Vite dev server) ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+      - VITE_WS_URL=ws://localhost:8765
+    depends_on:
+      - backend
+      - ws
+    restart: unless-stopped
+
+  # ── Realtime: collectors-primary (live ticker prices) ──────────────────────
+  collectors-primary:
+    build:
+      context: .
+      dockerfile: realtime/collectors-primary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_TRADES_KEY=stream:trades
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8081
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  # ── Realtime: collectors-secondary ─────────────────────────────────────────
+  collectors-secondary:
+    build:
+      context: .
+      dockerfile: realtime/collectors-secondary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_TRADES_KEY=stream:trades
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8082
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+  # ── Realtime: live-price-ingestor ──────────────────────────────────────────
+  live-price-ingestor:
+    build:
+      context: .
+      dockerfile: realtime/live-price-ingestor/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_TRADES_KEY=stream:trades
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8083
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+
+  # ── Realtime: trade-collectors-primary (volume trades) ─────────────────────
+  trade-collectors-primary:
+    build:
+      context: .
+      dockerfile: realtime/trade-collectors-primary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_KEY=stream:trades:volume
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8084
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+
+  # ── Realtime: trade-collectors-secondary ───────────────────────────────────
+  trade-collectors-secondary:
+    build:
+      context: .
+      dockerfile: realtime/trade-collectors-secondary/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - STREAM_KEY=stream:trades:volume
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8085
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+
+  # ── Realtime: volume-aggregator ────────────────────────────────────────────
+  volume-aggregator:
+    build:
+      context: .
+      dockerfile: realtime/volume-aggregator/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - VOLUME_STREAM_KEY=stream:trades:volume
+      - LOG_LEVEL=INFO
+      - HEALTH_PORT=8086
+    ports:
+      - "8086:8086"
+    restart: unless-stopped
+
+volumes:
+  redis-data:

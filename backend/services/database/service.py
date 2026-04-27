@@ -12,29 +12,25 @@ from config import DATABASE_URL
 class DatabaseService:
     """
     Manages a PostgreSQL connection pool.
-    All database operations should acquire connections through this service.
+    Connection is deferred until the first actual database call so that
+    a cold/unreachable Postgres does not crash the Flask worker at startup.
     """
 
     def __init__(self, database_url: str = DATABASE_URL, min_conn: int = 1, max_conn: int = 10):
-        """
-        Initialize the connection pool.
-
-        Args:
-            database_url: PostgreSQL connection string
-            min_conn: Minimum connections in the pool
-            max_conn: Maximum connections in the pool
-        """
         self.database_url = database_url
+        self._min_conn = min_conn
+        self._max_conn = max_conn
         self._pool: Optional[pool.SimpleConnectionPool] = None
-        self._connect(min_conn, max_conn)
 
-    def _connect(self, min_conn: int, max_conn: int):
-        """Create the connection pool."""
+    def _ensure_connected(self):
+        """Lazily create the connection pool on first use."""
+        if self._pool is not None:
+            return
         try:
             self._pool = pool.SimpleConnectionPool(
-                min_conn,
-                max_conn,
-                self.database_url
+                self._min_conn,
+                self._max_conn,
+                self.database_url,
             )
             # Quick connectivity check
             conn = self._pool.getconn()
@@ -42,6 +38,7 @@ class DatabaseService:
             self._pool.putconn(conn)
             print("[DatabaseService] ✓ Connected to PostgreSQL")
         except Exception as e:
+            self._pool = None
             print(f"[DatabaseService] ✗ PostgreSQL connection failed: {e}")
             raise
 
@@ -50,8 +47,7 @@ class DatabaseService:
         Get a connection from the pool.
         Caller MUST return it via put_connection() when done.
         """
-        if self._pool is None:
-            raise RuntimeError("Database pool not initialised")
+        self._ensure_connected()
         return self._pool.getconn()
 
     def put_connection(self, conn):
@@ -66,5 +62,5 @@ class DatabaseService:
             print("[DatabaseService] ✓ All connections closed")
 
 
-# Singleton instance
+# Singleton instance — connection is deferred until first use
 db_service = DatabaseService()

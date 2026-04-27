@@ -1,12 +1,56 @@
 [
   {
-    "id": "binancecoin",
-    "symbol": "BNB",
-    "name": "Binancecoin",
+    "id": "aave",
+    "symbol": "AAVE",
+    "name": "Aave",
     "aliases": [
-      "binancecoin",
-      "bnb",
-      "binance coin"
+      "aave"
+    ]
+  },
+  {
+    "id": "algorand",
+    "symbol": "ALGO",
+    "name": "Algorand",
+    "aliases": [
+      "algorand",
+      "algo"
+    ]
+  },
+  {
+    "id": "aptos",
+    "symbol": "APT",
+    "name": "Aptos",
+    "aliases": [
+      "aptos",
+      "apt"
+    ]
+  },
+  {
+    "id": "arbitrum",
+    "symbol": "ARB",
+    "name": "Arbitrum",
+    "aliases": [
+      "arbitrum",
+      "arb"
+    ]
+  },
+  {
+    "id": "avalanche-2",
+    "symbol": "AVAX",
+    "name": "Avalanche 2",
+    "aliases": [
+      "avalanche",
+      "avalanche-2",
+      "avax"
+    ]
+  },
+  {
+    "id": "basic-attention-token",
+    "symbol": "BAT",
+    "name": "Basic Attention Token",
+    "aliases": [
+      "basic attention token",
+      "bat"
     ]
   },
   {
@@ -20,12 +64,77 @@
     ]
   },
   {
+    "id": "bitcoin-cash",
+    "symbol": "BCH",
+    "name": "Bitcoin Cash",
+    "aliases": [
+      "bitcoin cash",
+      "bch",
+      "bitcoincash",
+      "bitcoin-cash"
+    ]
+  },
+  {
     "id": "cardano",
     "symbol": "ADA",
     "name": "Cardano",
     "aliases": [
       "cardano",
       "ada"
+    ]
+  },
+  {
+    "id": "chainlink",
+    "symbol": "LINK",
+    "name": "Chainlink",
+    "aliases": [
+      "chainlink",
+      "link"
+    ]
+  },
+  {
+    "id": "compound-governance-token",
+    "symbol": "COMP",
+    "name": "Compound Governance Token",
+    "aliases": [
+      "compound",
+      "comp"
+    ]
+  },
+  {
+    "id": "cosmos",
+    "symbol": "ATOM",
+    "name": "Cosmos",
+    "aliases": [
+      "cosmos",
+      "atom"
+    ]
+  },
+  {
+    "id": "curve-dao-token",
+    "symbol": "CRV",
+    "name": "Curve Dao Token",
+    "aliases": [
+      "curve",
+      "crv",
+      "curve dao"
+    ]
+  },
+  {
+    "id": "dash",
+    "symbol": "DASH",
+    "name": "Dash",
+    "aliases": [
+      "dash"
+    ]
+  },
+  {
+    "id": "decentraland",
+    "symbol": "MANA",
+    "name": "Decentraland",
+    "aliases": [
+      "decentraland",
+      "mana"
     ]
   },
   {
@@ -39,6 +148,24 @@
     ]
   },
   {
+    "id": "enjincoin",
+    "symbol": "ENJ",
+    "name": "Enjincoin",
+    "aliases": [
+      "enjin coin",
+      "enjin",
+      "enj"
+    ]
+  },
+  {
+    "id": "eos",
+    "symbol": "EOS",
+    "name": "Eos",
+    "aliases": [
+      "eos"
+    ]
+  },
+  {
     "id": "ethereum",
     "symbol": "ETH",
     "name": "Ethereum",
@@ -46,6 +173,177 @@
       "ethereum",
       "eth",
       "ether"
+    ]
+  },
+  {
+    "id": "ethereum-classic",
+    "symbol": "ETC",
+    "name": "Ethereum Classic",
+    "aliases": [
+      "ethereum classic",
+      "etc"
+    ]
+  },
+  {
+    "id": "ethereum-name-service",
+    "symbol": "ENS",
+    "name": "Ethereum Name Service",
+    "aliases": [
+      "ens",
+      "ethereum name service"
+    ]
+  },
+  {
+    "id": "fantom",
+    "symbol": "FTM",
+    "name": "Fantom",
+    "aliases": [
+      "fantom",
+      "ftm"
+    ]
+  },
+  {
+    "id": "filecoin",
+    "symbol": "FIL",
+    "name": "Filecoin",
+    "aliases": [
+      "filecoin",
+      "fil"
+    ]
+  },
+  {
+    "id": "flow",
+    "symbol": "FLOW",
+    "name": "Flow",
+    "aliases": [
+      "flow"
+    ]
+  },
+  {
+    "id": "havven",
+    "symbol": "SNX",
+    "name": "Havven",
+    "aliases": [
+      "synthetix",
+      "snx"
+    ]
+  },
+  {
+    "id": "hedera-hashgraph",
+    "symbol": "HBAR",
+    "name": "Hedera Hashgraph",
+    "aliases": [
+      "hedera",
+      "hedera hashgraph",
+      "hbar"
+    ]
+  },
+  {
+    "id": "hyperliquid",
+    "symbol": "HYPE",
+    "name": "Hyperliquid",
+    "aliases": [
+      "hyperliquid",
+      "hype"
+    ]
+  },
+  {
+    "id": "immutable-x",
+    "symbol": "IMX",
+    "name": "Immutable X",
+    "aliases": [
+      "immutable x",
+      "imx",
+      "immutable"
+    ]
+  },
+  {
+    "id": "injective-protocol",
+    "symbol": "INJ",
+    "name": "Injective Protocol",
+    "aliases": [
+      "injective",
+      "inj"
+    ]
+  },
+  {
+    "id": "kusama",
+    "symbol": "KSM",
+    "name": "Kusama",
+    "aliases": [
+      "kusama",
+      "ksm"
+    ]
+  },
+  {
+    "id": "lido-dao",
+    "symbol": "LDO",
+    "name": "Lido Dao",
+    "aliases": [
+      "lido",
+      "ldo"
+    ]
+  },
+  {
+    "id": "litecoin",
+    "symbol": "LTC",
+    "name": "Litecoin",
+    "aliases": [
+      "litecoin",
+      "ltc"
+    ]
+  },
+  {
+    "id": "loopring",
+    "symbol": "LRC",
+    "name": "Loopring",
+    "aliases": [
+      "loopring",
+      "lrc"
+    ]
+  },
+  {
+    "id": "near",
+    "symbol": "NEAR",
+    "name": "Near",
+    "aliases": [
+      "near",
+      "near protocol"
+    ]
+  },
+  {
+    "id": "ocean-protocol",
+    "symbol": "OCEAN",
+    "name": "Ocean Protocol",
+    "aliases": [
+      "ocean protocol",
+      "ocean"
+    ]
+  },
+  {
+    "id": "optimism",
+    "symbol": "OP",
+    "name": "Optimism",
+    "aliases": [
+      "optimism",
+      "op"
+    ]
+  },
+  {
+    "id": "pepe",
+    "symbol": "PEPE",
+    "name": "Pepe",
+    "aliases": [
+      "pepe"
+    ]
+  },
+  {
+    "id": "polkadot",
+    "symbol": "DOT",
+    "name": "Polkadot",
+    "aliases": [
+      "polkadot",
+      "dot"
     ]
   },
   {
@@ -58,6 +356,16 @@
     ]
   },
   {
+    "id": "shiba-inu",
+    "symbol": "SHIB",
+    "name": "Shiba Inu",
+    "aliases": [
+      "shiba inu",
+      "shib",
+      "shiba"
+    ]
+  },
+  {
     "id": "solana",
     "symbol": "SOL",
     "name": "Solana",
@@ -67,21 +375,94 @@
     ]
   },
   {
-    "id": "tether",
-    "symbol": "USDT",
-    "name": "Tether",
+    "id": "stellar",
+    "symbol": "XLM",
+    "name": "Stellar",
     "aliases": [
-      "tether",
-      "usdt"
+      "stellar",
+      "xlm",
+      "stellar lumens"
     ]
   },
   {
-    "id": "usd-coin",
-    "symbol": "USDC",
-    "name": "Usd Coin",
+    "id": "sui",
+    "symbol": "SUI",
+    "name": "Sui",
     "aliases": [
-      "usd coin",
-      "usdc"
+      "sui"
+    ]
+  },
+  {
+    "id": "sushi",
+    "symbol": "SUSHI",
+    "name": "Sushi",
+    "aliases": [
+      "sushi",
+      "sushiswap"
+    ]
+  },
+  {
+    "id": "tezos",
+    "symbol": "XTZ",
+    "name": "Tezos",
+    "aliases": [
+      "tezos",
+      "xtz"
+    ]
+  },
+  {
+    "id": "the-graph",
+    "symbol": "GRT",
+    "name": "The Graph",
+    "aliases": [
+      "the graph",
+      "grt"
+    ]
+  },
+  {
+    "id": "the-sandbox",
+    "symbol": "SAND",
+    "name": "The Sandbox",
+    "aliases": [
+      "the sandbox",
+      "sand"
+    ]
+  },
+  {
+    "id": "thorchain",
+    "symbol": "thorchain",
+    "name": "Thorchain",
+    "aliases": [
+      "thorchain",
+      "rune",
+      "thor"
+    ]
+  },
+  {
+    "id": "uniswap",
+    "symbol": "UNI",
+    "name": "Uniswap",
+    "aliases": [
+      "uniswap",
+      "uni"
+    ]
+  },
+  {
+    "id": "yearn-finance",
+    "symbol": "yearn-finance",
+    "name": "Yearn Finance",
+    "aliases": [
+      "yearn finance",
+      "yfi"
+    ]
+  },
+  {
+    "id": "zcash",
+    "symbol": "ZEC",
+    "name": "Zcash",
+    "aliases": [
+      "zcash",
+      "zec"
     ]
   }
 ]

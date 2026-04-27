@@ -57,6 +57,15 @@ OKX_REST_URL = os.getenv(
 )
 
 # ---------------------------------------------------------------------------
+# Bybit
+# ---------------------------------------------------------------------------
+BYBIT_WS_URL = os.getenv("BYBIT_WS_URL", "wss://stream.bybit.com/v5/public/spot")
+BYBIT_REST_URL = os.getenv(
+    "BYBIT_REST_URL",
+    "https://api.bybit.com/v5/market/instruments-info?category=spot",
+)
+
+# ---------------------------------------------------------------------------
 # Pionex  (use .us domain for US users)
 # ---------------------------------------------------------------------------
 PIONEX_WS_URL = os.getenv("PIONEX_WS_URL", "wss://ws.pionex.us/wsPub")

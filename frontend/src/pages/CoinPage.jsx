@@ -4,7 +4,7 @@ import { getCoinStatic, getTokenomics } from "../services/api";
 import { useRealtimePrice } from "../hooks/useRealtimePrice";
 import Tokenomics from "../components/Tokenomics";
 import Score from "../components/Score";
-import ExchangeComparison from "../components/ExchangeComparison";
+import LiveDataPanel from "../components/LiveDataPanel";
 import "./CoinPage.css"
 
 function CoinPage() {
@@ -94,11 +94,12 @@ function CoinPage() {
                 )}
             </div>
 
-            {/* Live exchange comparison (cheapest / most expensive) */}
-            <ExchangeComparison
+            {/* Live price + volume switcher */}
+            <LiveDataPanel
+                coinId={coinId}
                 priceData={realtimeData}
                 connectionState={wsState}
-                error={wsError}
+                wsError={wsError}
             />
 
             {/* Description from DB (user-editable later) */}

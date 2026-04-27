@@ -4,7 +4,7 @@ FROM python:3.11-slim AS builder
 WORKDIR /app
 
 # Install dependencies into a separate prefix so we can copy them cleanly
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 
@@ -17,11 +17,12 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 
 # Copy application source
-COPY . .
+COPY backend/ .
 
-# Copy shared data directory (coin_aliases.json lives at project root /data/)
-# Build context should be the repo root; or mount at deploy time.
-COPY ../data ./data/ 
+# Copy shared data directory — resolver.py navigates ../../../data from
+# services/alias/, so with WORKDIR=/app the file must be at /app/data/
+# (three levels up from /app/services/alias/ is still /app/).
+COPY data/ ./data/
 
 # Cloud Run injects $PORT at runtime (default 8080).
 # Gunicorn picks it up via the shell form of CMD.

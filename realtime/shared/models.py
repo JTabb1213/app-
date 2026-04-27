@@ -65,3 +65,35 @@ class NormalizedTick:
             "spread_pct": self.spread_pct,
             "timestamp": self.timestamp,
         }
+
+
+@dataclass
+class NormalizedTrade:
+    """
+    Unified trade format after normalization.
+
+    Represents a single executed trade with buy/sell side information.
+    Used by the volume aggregation pipeline.
+    """
+
+    coin_id: str            # canonical ID, e.g. "bitcoin"
+    quote: str              # quote currency, e.g. "usd"
+    exchange: str           # source exchange, e.g. "kraken"
+    price: float            # execution price
+    size: float             # trade quantity in base currency
+    side: str               # "buy" or "sell"
+    notional: float         # price * size (USD value)
+    timestamp: float = field(default_factory=time.time)
+
+    def to_dict(self) -> dict:
+        """Serialize for Redis storage."""
+        return {
+            "coin_id": self.coin_id,
+            "quote": self.quote,
+            "exchange": self.exchange,
+            "price": self.price,
+            "size": self.size,
+            "side": self.side,
+            "notional": self.notional,
+            "timestamp": self.timestamp,
+        }

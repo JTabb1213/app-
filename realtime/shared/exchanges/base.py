@@ -44,11 +44,6 @@ class BaseExchange(ABC):
 
     @abstractmethod
     async def _connect_and_stream(self) -> None:
-        """
-        Connect to the exchange websocket, subscribe to channels,
-        and stream messages forever.  Must call self._emit(tick)
-        for each parsed RawTick.
-        """
         ...
 
     async def _emit(self, tick: RawTick) -> None:

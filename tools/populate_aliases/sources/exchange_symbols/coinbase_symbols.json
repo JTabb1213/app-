@@ -61,6 +61,7 @@
         "NEAR": "near",
         "OP": "optimism",
         "ONDO": "ondo-finance",
+        "HYPE": "hyperliquid",
         "PEPE": "pepe",
         "POL": "polygon-ecosystem-token",
         "PYTH": "pyth-network",
@@ -89,7 +90,7 @@
         "XLM": "stellar",
         "XRP": "ripple",
         "XTZ": "tezos",
-        "YFI": "yfi",
+        "YFI": "yearn-finance",
         "ZEC": "zcash",
         "ZRX": "0x"
     }
