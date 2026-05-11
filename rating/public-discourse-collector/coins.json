@@ -1,0 +1,649 @@
+[
+    {
+        "coin_id": "aave",
+        "symbol": "AAVE",
+        "name": "Aave",
+        "search_queries": [
+            "aave",
+            "AAVE"
+        ],
+        "subreddits": [
+            "Aave",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "algorand",
+        "symbol": "ALGO",
+        "name": "Algorand",
+        "search_queries": [
+            "algorand",
+            "ALGO"
+        ],
+        "subreddits": [
+            "algorand",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "aptos",
+        "symbol": "APT",
+        "name": "Aptos",
+        "search_queries": [
+            "aptos",
+            "APT"
+        ],
+        "subreddits": [
+            "Aptos",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "arbitrum",
+        "symbol": "ARB",
+        "name": "Arbitrum",
+        "search_queries": [
+            "arbitrum",
+            "ARB"
+        ],
+        "subreddits": [
+            "arbitrum",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "avalanche-2",
+        "symbol": "AVAX",
+        "name": "Avalanche",
+        "search_queries": [
+            "avalanche",
+            "AVAX"
+        ],
+        "subreddits": [
+            "Avax",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "axie-infinity",
+        "symbol": "AXS",
+        "name": "Axie Infinity",
+        "search_queries": [
+            "axie infinity",
+            "AXS"
+        ],
+        "subreddits": [
+            "AxieInfinity",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "basic-attention-token",
+        "symbol": "BAT",
+        "name": "Basic Attention Token",
+        "search_queries": [
+            "basic attention token",
+            "BAT"
+        ],
+        "subreddits": [
+            "BATProject",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "binancecoin",
+        "symbol": "BNB",
+        "name": "BNB",
+        "search_queries": [
+            "BNB",
+            "binance coin"
+        ],
+        "subreddits": [
+            "binance",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "bitcoin",
+        "symbol": "BTC",
+        "name": "Bitcoin",
+        "search_queries": [
+            "bitcoin",
+            "BTC"
+        ],
+        "subreddits": [
+            "Bitcoin",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "bitcoin-cash",
+        "symbol": "BCH",
+        "name": "Bitcoin Cash",
+        "search_queries": [
+            "bitcoin cash",
+            "BCH"
+        ],
+        "subreddits": [
+            "Bitcoincash",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "cardano",
+        "symbol": "ADA",
+        "name": "Cardano",
+        "search_queries": [
+            "cardano",
+            "ADA"
+        ],
+        "subreddits": [
+            "cardano",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "chainlink",
+        "symbol": "LINK",
+        "name": "Chainlink",
+        "search_queries": [
+            "chainlink",
+            "LINK"
+        ],
+        "subreddits": [
+            "Chainlink",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "compound-governance-token",
+        "symbol": "COMP",
+        "name": "Compound",
+        "search_queries": [
+            "compound finance",
+            "COMP"
+        ],
+        "subreddits": [
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "cosmos",
+        "symbol": "ATOM",
+        "name": "Cosmos",
+        "search_queries": [
+            "cosmos ATOM",
+            "ATOM crypto"
+        ],
+        "subreddits": [
+            "cosmosnetwork",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "curve-dao-token",
+        "symbol": "CRV",
+        "name": "Curve",
+        "search_queries": [
+            "curve finance",
+            "CRV"
+        ],
+        "subreddits": [
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "decentraland",
+        "symbol": "MANA",
+        "name": "Decentraland",
+        "search_queries": [
+            "decentraland",
+            "MANA"
+        ],
+        "subreddits": [
+            "decentraland",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "dogecoin",
+        "symbol": "DOGE",
+        "name": "Dogecoin",
+        "search_queries": [
+            "dogecoin",
+            "DOGE"
+        ],
+        "subreddits": [
+            "dogecoin",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "ethereum",
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "search_queries": [
+            "ethereum",
+            "ETH"
+        ],
+        "subreddits": [
+            "ethereum",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "ethereum-classic",
+        "symbol": "ETC",
+        "name": "Ethereum Classic",
+        "search_queries": [
+            "ethereum classic",
+            "ETC"
+        ],
+        "subreddits": [
+            "EthereumClassic",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "ethereum-name-service",
+        "symbol": "ENS",
+        "name": "ENS",
+        "search_queries": [
+            "ethereum name service",
+            "ENS"
+        ],
+        "subreddits": [
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "fantom",
+        "symbol": "FTM",
+        "name": "Fantom",
+        "search_queries": [
+            "fantom",
+            "FTM"
+        ],
+        "subreddits": [
+            "FantomFoundation",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "filecoin",
+        "symbol": "FIL",
+        "name": "Filecoin",
+        "search_queries": [
+            "filecoin",
+            "FIL"
+        ],
+        "subreddits": [
+            "filecoin",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "havven",
+        "symbol": "SNX",
+        "name": "Synthetix",
+        "search_queries": [
+            "synthetix",
+            "SNX"
+        ],
+        "subreddits": [
+            "synthetix_io",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "hedera-hashgraph",
+        "symbol": "HBAR",
+        "name": "Hedera",
+        "search_queries": [
+            "hedera hashgraph",
+            "HBAR"
+        ],
+        "subreddits": [
+            "Hedera",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "hyperliquid",
+        "symbol": "HYPE",
+        "name": "Hyperliquid",
+        "search_queries": [
+            "hyperliquid",
+            "HYPE"
+        ],
+        "subreddits": [
+            "hyperliquid",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "immutable-x",
+        "symbol": "IMX",
+        "name": "Immutable X",
+        "search_queries": [
+            "immutable x",
+            "IMX"
+        ],
+        "subreddits": [
+            "ImmutableX",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "injective-protocol",
+        "symbol": "INJ",
+        "name": "Injective",
+        "search_queries": [
+            "injective protocol",
+            "INJ"
+        ],
+        "subreddits": [
+            "injective",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "kusama",
+        "symbol": "KSM",
+        "name": "Kusama",
+        "search_queries": [
+            "kusama",
+            "KSM"
+        ],
+        "subreddits": [
+            "Kusama",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "lido-dao",
+        "symbol": "LDO",
+        "name": "Lido",
+        "search_queries": [
+            "lido finance",
+            "LDO"
+        ],
+        "subreddits": [
+            "lidofinance",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "litecoin",
+        "symbol": "LTC",
+        "name": "Litecoin",
+        "search_queries": [
+            "litecoin",
+            "LTC"
+        ],
+        "subreddits": [
+            "litecoin",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "loopring",
+        "symbol": "LRC",
+        "name": "Loopring",
+        "search_queries": [
+            "loopring",
+            "LRC"
+        ],
+        "subreddits": [
+            "loopringorg",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "near",
+        "symbol": "NEAR",
+        "name": "NEAR Protocol",
+        "search_queries": [
+            "near protocol",
+            "NEAR"
+        ],
+        "subreddits": [
+            "nearprotocol",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "ocean-protocol",
+        "symbol": "OCEAN",
+        "name": "Ocean Protocol",
+        "search_queries": [
+            "ocean protocol",
+            "OCEAN"
+        ],
+        "subreddits": [
+            "oceanprotocol",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "optimism",
+        "symbol": "OP",
+        "name": "Optimism",
+        "search_queries": [
+            "optimism crypto",
+            "OP token"
+        ],
+        "subreddits": [
+            "optimismFND",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "pepe",
+        "symbol": "PEPE",
+        "name": "Pepe",
+        "search_queries": [
+            "pepe coin",
+            "PEPE crypto"
+        ],
+        "subreddits": [
+            "pepecoin",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "polkadot",
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "search_queries": [
+            "polkadot",
+            "DOT"
+        ],
+        "subreddits": [
+            "dot",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "ripple",
+        "symbol": "XRP",
+        "name": "XRP",
+        "search_queries": [
+            "XRP",
+            "ripple"
+        ],
+        "subreddits": [
+            "XRP",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "shiba-inu",
+        "symbol": "SHIB",
+        "name": "Shiba Inu",
+        "search_queries": [
+            "shiba inu",
+            "SHIB"
+        ],
+        "subreddits": [
+            "SHIBArmy",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "solana",
+        "symbol": "SOL",
+        "name": "Solana",
+        "search_queries": [
+            "solana",
+            "SOL"
+        ],
+        "subreddits": [
+            "solana",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "stellar",
+        "symbol": "XLM",
+        "name": "Stellar",
+        "search_queries": [
+            "stellar lumens",
+            "XLM"
+        ],
+        "subreddits": [
+            "Stellar",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "sui",
+        "symbol": "SUI",
+        "name": "Sui",
+        "search_queries": [
+            "sui blockchain",
+            "SUI"
+        ],
+        "subreddits": [
+            "SuiNetwork",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "sushi",
+        "symbol": "SUSHI",
+        "name": "SushiSwap",
+        "search_queries": [
+            "sushiswap",
+            "SUSHI"
+        ],
+        "subreddits": [
+            "SushiSwap",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "the-graph",
+        "symbol": "GRT",
+        "name": "The Graph",
+        "search_queries": [
+            "the graph",
+            "GRT"
+        ],
+        "subreddits": [
+            "thegraph",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "the-open-network",
+        "symbol": "TON",
+        "name": "Toncoin",
+        "search_queries": [
+            "toncoin",
+            "TON"
+        ],
+        "subreddits": [
+            "Toncoin",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "the-sandbox",
+        "symbol": "SAND",
+        "name": "The Sandbox",
+        "search_queries": [
+            "the sandbox",
+            "SAND"
+        ],
+        "subreddits": [
+            "TheSandboxGaming",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "thorchain",
+        "symbol": "RUNE",
+        "name": "THORChain",
+        "search_queries": [
+            "thorchain",
+            "RUNE"
+        ],
+        "subreddits": [
+            "THORChain",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "tron",
+        "symbol": "TRX",
+        "name": "Tron",
+        "search_queries": [
+            "tron crypto",
+            "TRX"
+        ],
+        "subreddits": [
+            "Tronix",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "uniswap",
+        "symbol": "UNI",
+        "name": "Uniswap",
+        "search_queries": [
+            "uniswap",
+            "UNI"
+        ],
+        "subreddits": [
+            "Uniswap",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "yearn-finance",
+        "symbol": "YFI",
+        "name": "Yearn Finance",
+        "search_queries": [
+            "yearn finance",
+            "YFI"
+        ],
+        "subreddits": [
+            "yearn_finance",
+            "CryptoCurrency"
+        ]
+    },
+    {
+        "coin_id": "zcash",
+        "symbol": "ZEC",
+        "name": "Zcash",
+        "search_queries": [
+            "zcash",
+            "ZEC"
+        ],
+        "subreddits": [
+            "zec",
+            "CryptoCurrency"
+        ]
+    }
+]

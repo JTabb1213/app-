@@ -55,6 +55,10 @@
         "APT": "aptos",
         "SHIB": "shiba-inu",
         "KSM": "kusama",
-        "DASH": "dash"
+        "DASH": "dash",
+        "AXS": "axie-infinity",
+        "BNB": "binancecoin",
+        "TON": "the-open-network",
+        "TRX": "tron"
     }
 }

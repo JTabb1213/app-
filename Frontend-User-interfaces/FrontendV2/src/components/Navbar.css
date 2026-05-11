@@ -1,0 +1,117 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 56px;
+  background: rgba(13, 13, 18, 0.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-brand {
+  text-decoration: none;
+  display: flex;
+  align-items: baseline;
+}
+
+.brand-c {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-s {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--blue);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-dot {
+  color: var(--blue);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 0;
+  margin-left: 1px;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 24px;
+  /* Override CoinSearch styles to fit in the navbar */
+}
+
+.navbar-search .search-form {
+  gap: 8px;
+}
+
+.navbar-search .search-input {
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  border-radius: 10px;
+}
+
+.navbar-search .search-button {
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  border-radius: 10px;
+}
+
+.navbar-search .cs-results-dropdown {
+  top: calc(100% + 4px);
+}
+
+.nav-link {
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  color: var(--white);
+  background: rgba(26, 63, 212, 0.18);
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0 16px;
+  }
+
+  .brand-c,
+  .brand-s {
+    font-size: 1.1rem;
+  }
+
+  .nav-link {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+}

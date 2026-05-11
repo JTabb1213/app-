@@ -37,6 +37,7 @@ from shared.stream.consumer import StreamConsumer
 from normalizer.normalizer import Normalizer
 from normalizer.aliases import AliasResolver
 from storage.redis_writer import RedisWriter
+from storage.candle_writer import CandleWriter
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -55,6 +56,7 @@ logging.getLogger("aiohttp").setLevel(logging.WARNING)
 # ---------------------------------------------------------------------------
 _consumer: StreamConsumer = None
 _writer: RedisWriter = None
+_candle_writer: CandleWriter = None
 _raw_count = 0
 _normalized_count = 0
 _dropped_count = 0
@@ -75,6 +77,7 @@ async def _health_handler(request):
         "dropped_ticks": _dropped_count,
         "consumer": _consumer.stats if _consumer else {},
         "writer": _writer.stats if _writer else {},
+        "candle_writer": _candle_writer.stats if _candle_writer else {},
     }
     return web.json_response(info)
 
@@ -208,6 +211,16 @@ async def main():
     # Redis writer (includes aggregator internally)
     _writer = RedisWriter()
     await _writer.connect()
+
+    # Candle writer — persists completed hourly candles to Postgres
+    _candle_writer = CandleWriter()
+    if config.DATABASE_URL or config.DATABASE_URL_IPV4:
+        await _candle_writer.connect(_writer._client)
+    else:
+        logger.warning("DATABASE_URL not set — candle persistence disabled")
+
+    # Wire candle writer into redis writer so it receives every price tick
+    _writer.set_candle_writer(_candle_writer)
 
     await _start_health_server()
 

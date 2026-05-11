@@ -18,9 +18,34 @@ Environment:
 
 import asyncio
 import logging
+import os
 import signal
 import sys
 from http import HTTPStatus
+from pathlib import Path
+
+# Load root .env first, then local .env for overrides
+def load_env_files():
+    """Load .env files in order of priority (highest to lowest)."""
+    root_env = Path(__file__).resolve().parents[1] / ".env"
+    local_env = Path(__file__).resolve().parent / ".env"
+    
+    for env_file in [root_env, local_env]:
+        if not env_file.exists():
+            continue
+        for line in env_file.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key, value = key.strip(), value.strip()
+            if (value.startswith('"') and value.endswith('"')) or \
+               (value.startswith("'") and value.endswith("'")):
+                value = value[1:-1]
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+load_env_files()
 
 import websockets
 

@@ -1,0 +1,137 @@
+.candle-chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 0 4px;
+}
+
+.candle-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 4px;
+}
+
+.candle-mode-switcher {
+    display: flex;
+    gap: 4px;
+    margin-right: 4px;
+}
+
+.candle-mode-btn {
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #9ca3af;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.candle-mode-btn:hover {
+    background: #374151;
+    color: #e5e7eb;
+}
+
+.candle-mode-btn.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+
+.candle-chart-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.candle-res-switcher {
+    display: flex;
+    gap: 4px;
+}
+
+.candle-res-btn {
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #9ca3af;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.candle-res-btn:hover {
+    background: #374151;
+    color: #e5e7eb;
+}
+
+.candle-res-btn.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+.candle-res-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.candle-res-btn.disabled:hover {
+    background: #1f2937;
+    color: #9ca3af;
+}
+
+.candle-chart-body {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0f1117;
+    min-height: 320px;
+}
+
+.candle-chart-canvas {
+    width: 100%;
+}
+
+/* Floating price tooltip that follows the crosshair */
+.candle-price-tooltip {
+    position: absolute;
+    background: rgba(17, 24, 39, 0.92);
+    border: 1px solid #374151;
+    color: #f3f4f6;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.candle-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #6b7280;
+    background: #0f1117;
+    z-index: 10;
+}
+
+.candle-empty {
+    font-size: 1rem;
+    color: #4b5563;
+}
+
+.candle-error {
+    color: #ef4444;
+}

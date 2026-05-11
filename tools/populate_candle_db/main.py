@@ -63,10 +63,12 @@ BINANCE_BASE = "https://api.binance.us/api/v3/klines"
 
 # Binance interval string → our table name + seconds per candle
 RESOLUTION_MAP = {
-    "1m":  {"table": "price_candles_1m",  "seconds": 60},
-    "5m":  {"table": "price_candles_5m",  "seconds": 300},
-    "1h":  {"table": "price_candles_1h",  "seconds": 3600},
-    "1d":  {"table": "price_candles_1d",  "seconds": 86400},
+    "1m":  {"table": "price_candles_1m",     "seconds": 60},
+    "5m":  {"table": "price_candles_5m",     "seconds": 300},
+    "1h":  {"table": "price_candles_1h",     "seconds": 3600},
+    "1d":  {"table": "price_candles_1d",     "seconds": 86400},
+    "1w":  {"table": "price_candles_1w",     "seconds": 604800},
+    "1M":  {"table": "price_candles_1month", "seconds": 2592000},
 }
 
 # Max candles Binance returns per request
@@ -213,7 +215,7 @@ def main():
     parser.add_argument(
         "--resolutions", nargs="+", default=["1h", "1d"],
         choices=list(RESOLUTION_MAP.keys()),
-        help="Candle resolutions to fetch. Default: 1h 1d"
+        help="Candle resolutions to fetch. Default: 1h 1d. Use 1w for weekly, 1M for monthly."
     )
     parser.add_argument(
         "--days", type=int, default=365,
@@ -265,7 +267,7 @@ def main():
         for resolution in args.resolutions:
             cfg = RESOLUTION_MAP[resolution]
             table = cfg["table"]
-            is_daily = (resolution == "1d")
+            is_daily = (resolution == "1d")  # only 1d table uses DATE; 1w/1M use TIMESTAMPTZ
 
             print(f"  [{coin_id}] {resolution} ({binance_symbol}) ...", end=" ", flush=True)
 

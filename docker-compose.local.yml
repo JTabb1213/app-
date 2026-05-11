@@ -2,7 +2,7 @@
 # docker-compose.local.yml — Full local dev stack
 #
 # Starts every service you need to run the app locally:
-#   redis, backend API, WebSocket server, frontend (Vite dev server),
+#   redis, backend API, WebSocket server, frontend (FrontendV2 via nginx),
 #   and all six realtime microservices.
 #
 # Usage (from the repo root):
@@ -66,16 +66,16 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # ── Frontend (Vite dev server) ──────────────────────────────────────────────
+  # ── Frontend (FrontendV2 — production build served by nginx) ──────────────
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Frontend-User-interfaces/FrontendV2/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000/api
+        VITE_WS_URL: ws://localhost:8765
     ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8000/api
-      - VITE_WS_URL=ws://localhost:8765
+      - "5173:80"
     depends_on:
       - backend
       - ws
@@ -128,6 +128,8 @@ services:
       - STREAM_TRADES_KEY=stream:trades
       - LOG_LEVEL=INFO
       - HEALTH_PORT=8083
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL_IPV4=${DATABASE_URL_IPV4}
     ports:
       - "8083:8083"
     restart: unless-stopped
@@ -181,6 +183,18 @@ services:
       - HEALTH_PORT=8086
     ports:
       - "8086:8086"
+    restart: unless-stopped
+
+  # ── Realtime: candle-aggregator ───────────────────────────────────────────
+  candle-aggregator:
+    build:
+      context: .
+      dockerfile: realtime/candle-aggregator/Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL_IPV4=${DATABASE_URL_IPV4}
+      - RUN_INTERVAL_MINUTES=60
+      - LOG_LEVEL=INFO
     restart: unless-stopped
 
 volumes:

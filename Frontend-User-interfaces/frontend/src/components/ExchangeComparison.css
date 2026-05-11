@@ -1,0 +1,247 @@
+/* ─── Exchange Comparison Section ────────────────────────────── */
+
+.exchange-section {
+    margin-bottom: 2rem;
+    animation: slideUp 0.6s ease-out;
+}
+
+.exchange-section h2 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.4rem;
+}
+
+/* ── Status indicator ──────────────────────────────────────── */
+
+.exchange-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-dot.connected {
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ── Three-card grid ───────────────────────────────────────── */
+
+.exchange-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+.exchange-card {
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(30, 41, 59, 0.45);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.exchange-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border-color: rgba(148, 163, 184, 0.4);
+}
+
+/* ── Card variants ─────────────────────────────────────────── */
+
+.exchange-card.cheapest {
+    border-color: rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.06);
+}
+
+.exchange-card.cheapest:hover {
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.15);
+}
+
+.exchange-card.expensive {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.06);
+}
+
+.exchange-card.expensive:hover {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
+}
+
+.exchange-card.average {
+    border-color: rgba(97, 218, 251, 0.3);
+    background: rgba(97, 218, 251, 0.05);
+}
+
+.exchange-card.average:hover {
+    border-color: rgba(97, 218, 251, 0.6);
+    box-shadow: 0 10px 30px rgba(97, 218, 251, 0.12);
+}
+
+/* ── Badge ─────────────────────────────────────────────────── */
+
+.card-badge {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+}
+
+.cheapest-badge {
+    background: rgba(34, 197, 94, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.average-badge {
+    background: rgba(97, 218, 251, 0.12);
+    color: var(--secondary);
+    border: 1px solid rgba(97, 218, 251, 0.25);
+}
+
+.expensive-badge {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ── Card content ──────────────────────────────────────────── */
+
+.exchange-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.exchange-price {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
+}
+
+.card-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+/* ── Loading state ─────────────────────────────────────────── */
+
+.exchange-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem;
+    background: rgba(51, 65, 85, 0.2);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    color: var(--text-secondary);
+}
+
+.spinner.small {
+    width: 28px;
+    height: 28px;
+    border-width: 3px;
+}
+
+/* ── Error state ───────────────────────────────────────────── */
+
+.exchange-error {
+    padding: 1.5rem;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 14px;
+}
+
+.exchange-error-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.exchange-error-icon {
+    font-size: 1.25rem;
+}
+
+.exchange-error-title {
+    font-weight: 700;
+    color: #fca5a5;
+    font-size: 1rem;
+}
+
+.exchange-error-detail {
+    font-size: 0.85rem;
+    color: #fca5a5;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+    line-height: 1.5;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.exchange-error-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+    .exchange-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .exchange-card {
+        padding: 1.25rem;
+    }
+
+    .exchange-price {
+        font-size: 1.3rem;
+    }
+
+    .exchange-card h3 {
+        font-size: 1rem;
+    }
+}

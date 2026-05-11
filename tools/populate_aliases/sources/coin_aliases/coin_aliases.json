@@ -1,7 +1,7 @@
 {
     "_meta": {
-        "description": "Curated coin aliases for 50-coin tracking set. Derived from bybit_symbols.json",
-        "updated_at": "2026-04-23"
+        "description": "Curated coin aliases for 50-coin tracking set. 25 top by market cap + 25 curated picks.",
+        "updated_at": "2026-05-09"
     },
     "aliases": {
         "aave": [
@@ -24,9 +24,19 @@
             "avalanche-2",
             "avax"
         ],
+        "axie-infinity": [
+            "axie infinity",
+            "axie",
+            "axs"
+        ],
         "basic-attention-token": [
             "basic attention token",
             "bat"
+        ],
+        "binancecoin": [
+            "binancecoin",
+            "bnb",
+            "binance coin"
         ],
         "bitcoin": [
             "bitcoin",
@@ -60,9 +70,6 @@
             "crv",
             "curve dao"
         ],
-        "dash": [
-            "dash"
-        ],
         "decentraland": [
             "decentraland",
             "mana"
@@ -71,14 +78,6 @@
             "dogecoin",
             "doge",
             "xdg"
-        ],
-        "enjincoin": [
-            "enjin coin",
-            "enjin",
-            "enj"
-        ],
-        "eos": [
-            "eos"
         ],
         "ethereum": [
             "ethereum",
@@ -100,9 +99,6 @@
         "filecoin": [
             "filecoin",
             "fil"
-        ],
-        "flow": [
-            "flow"
         ],
         "havven": [
             "synthetix",
@@ -186,13 +182,14 @@
             "sushi",
             "sushiswap"
         ],
-        "tezos": [
-            "tezos",
-            "xtz"
-        ],
         "the-graph": [
             "the graph",
             "grt"
+        ],
+        "the-open-network": [
+            "ton",
+            "toncoin",
+            "the open network"
         ],
         "the-sandbox": [
             "the sandbox",
@@ -202,6 +199,10 @@
             "thorchain",
             "rune",
             "thor"
+        ],
+        "tron": [
+            "tron",
+            "trx"
         ],
         "uniswap": [
             "uniswap",

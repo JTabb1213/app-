@@ -1,0 +1,303 @@
+[
+    {
+        "coin_id": "aave",
+        "symbol": "AAVE",
+        "owner": "aave",
+        "repo": "aave-v3-core"
+    },
+    {
+        "coin_id": "algorand",
+        "symbol": "ALGO",
+        "owner": "algorand",
+        "repo": "go-algorand"
+    },
+    {
+        "coin_id": "aptos",
+        "symbol": "APT",
+        "owner": "aptos-labs",
+        "repo": "aptos-core"
+    },
+    {
+        "coin_id": "arbitrum",
+        "symbol": "ARB",
+        "owner": "OffchainLabs",
+        "repo": "nitro"
+    },
+    {
+        "coin_id": "avalanche-2",
+        "symbol": "AVAX",
+        "owner": "ava-labs",
+        "repo": "avalanchego"
+    },
+    {
+        "coin_id": "axie-infinity",
+        "symbol": "AXS",
+        "owner": "axieinfinity",
+        "repo": "ronin-smart-contracts"
+    },
+    {
+        "coin_id": "basic-attention-token",
+        "symbol": "BAT",
+        "owner": "brave",
+        "repo": "brave-browser"
+    },
+    {
+        "coin_id": "binancecoin",
+        "symbol": "BNB",
+        "owner": "bnb-chain",
+        "repo": "bsc"
+    },
+    {
+        "coin_id": "bitcoin",
+        "symbol": "BTC",
+        "owner": "bitcoin",
+        "repo": "bitcoin"
+    },
+    {
+        "coin_id": "bitcoin-cash",
+        "symbol": "BCH",
+        "owner": "bitcoin-cash-node",
+        "repo": "bitcoin-cash-node"
+    },
+    {
+        "coin_id": "cardano",
+        "symbol": "ADA",
+        "owner": "input-output-hk",
+        "repo": "cardano-node"
+    },
+    {
+        "coin_id": "chainlink",
+        "symbol": "LINK",
+        "owner": "smartcontractkit",
+        "repo": "chainlink"
+    },
+    {
+        "coin_id": "compound-governance-token",
+        "symbol": "COMP",
+        "owner": "compound-finance",
+        "repo": "compound-protocol"
+    },
+    {
+        "coin_id": "cosmos",
+        "symbol": "ATOM",
+        "owner": "cosmos",
+        "repo": "cosmos-sdk"
+    },
+    {
+        "coin_id": "curve-dao-token",
+        "symbol": "CRV",
+        "owner": "curvefi",
+        "repo": "curve-contract"
+    },
+    {
+        "coin_id": "decentraland",
+        "symbol": "MANA",
+        "owner": "decentraland",
+        "repo": "unity-renderer"
+    },
+    {
+        "coin_id": "dogecoin",
+        "symbol": "DOGE",
+        "owner": "dogecoin",
+        "repo": "dogecoin"
+    },
+    {
+        "coin_id": "ethereum",
+        "symbol": "ETH",
+        "owner": "ethereum",
+        "repo": "go-ethereum"
+    },
+    {
+        "coin_id": "ethereum-classic",
+        "symbol": "ETC",
+        "owner": "ethereumclassic",
+        "repo": "go-ethereum"
+    },
+    {
+        "coin_id": "ethereum-name-service",
+        "symbol": "ENS",
+        "owner": "ensdomains",
+        "repo": "ens-contracts"
+    },
+    {
+        "coin_id": "fantom",
+        "symbol": "FTM",
+        "owner": "Fantom-foundation",
+        "repo": "go-opera"
+    },
+    {
+        "coin_id": "filecoin",
+        "symbol": "FIL",
+        "owner": "filecoin-project",
+        "repo": "lotus"
+    },
+    {
+        "coin_id": "havven",
+        "symbol": "SNX",
+        "owner": "Synthetixio",
+        "repo": "synthetix"
+    },
+    {
+        "coin_id": "hedera-hashgraph",
+        "symbol": "HBAR",
+        "owner": "hashgraph",
+        "repo": "hedera-services"
+    },
+    {
+        "coin_id": "hyperliquid",
+        "symbol": "HYPE",
+        "owner": "hyperliquid",
+        "repo": "hyperliquid-python-sdk"
+    },
+    {
+        "coin_id": "immutable-x",
+        "symbol": "IMX",
+        "owner": "immutable",
+        "repo": "imx-core-sdk"
+    },
+    {
+        "coin_id": "injective-protocol",
+        "symbol": "INJ",
+        "owner": "InjectiveLabs",
+        "repo": "injective-core"
+    },
+    {
+        "coin_id": "kusama",
+        "symbol": "KSM",
+        "owner": "paritytech",
+        "repo": "polkadot-sdk"
+    },
+    {
+        "coin_id": "lido-dao",
+        "symbol": "LDO",
+        "owner": "lidofinance",
+        "repo": "lido-dao"
+    },
+    {
+        "coin_id": "litecoin",
+        "symbol": "LTC",
+        "owner": "litecoin-project",
+        "repo": "litecoin"
+    },
+    {
+        "coin_id": "loopring",
+        "symbol": "LRC",
+        "owner": "Loopring",
+        "repo": "loopring-web3-utils"
+    },
+    {
+        "coin_id": "near",
+        "symbol": "NEAR",
+        "owner": "near",
+        "repo": "nearcore"
+    },
+    {
+        "coin_id": "ocean-protocol",
+        "symbol": "OCEAN",
+        "owner": "oceanprotocol",
+        "repo": "ocean.py"
+    },
+    {
+        "coin_id": "optimism",
+        "symbol": "OP",
+        "owner": "ethereum-optimism",
+        "repo": "optimism"
+    },
+    {
+        "coin_id": "pepe",
+        "symbol": "PEPE",
+        "owner": "",
+        "repo": "",
+        "note": "No official GitHub repository"
+    },
+    {
+        "coin_id": "polkadot",
+        "symbol": "DOT",
+        "owner": "paritytech",
+        "repo": "polkadot-sdk"
+    },
+    {
+        "coin_id": "ripple",
+        "symbol": "XRP",
+        "owner": "XRPLF",
+        "repo": "rippled"
+    },
+    {
+        "coin_id": "shiba-inu",
+        "symbol": "SHIB",
+        "owner": "shytoshikusama",
+        "repo": "shibaswap-backend"
+    },
+    {
+        "coin_id": "solana",
+        "symbol": "SOL",
+        "owner": "solana-labs",
+        "repo": "solana"
+    },
+    {
+        "coin_id": "stellar",
+        "symbol": "XLM",
+        "owner": "stellar",
+        "repo": "stellar-core"
+    },
+    {
+        "coin_id": "sui",
+        "symbol": "SUI",
+        "owner": "MystenLabs",
+        "repo": "sui"
+    },
+    {
+        "coin_id": "sushi",
+        "symbol": "SUSHI",
+        "owner": "sushiswap",
+        "repo": "sushiswap"
+    },
+    {
+        "coin_id": "the-graph",
+        "symbol": "GRT",
+        "owner": "graphprotocol",
+        "repo": "graph-node"
+    },
+    {
+        "coin_id": "the-open-network",
+        "symbol": "TON",
+        "owner": "ton-blockchain",
+        "repo": "ton"
+    },
+    {
+        "coin_id": "the-sandbox",
+        "symbol": "SAND",
+        "owner": "thesandboxgame",
+        "repo": "sandbox-smart-contracts"
+    },
+    {
+        "coin_id": "thorchain",
+        "symbol": "RUNE",
+        "owner": "thorchain",
+        "repo": "thornode"
+    },
+    {
+        "coin_id": "tron",
+        "symbol": "TRX",
+        "owner": "tronprotocol",
+        "repo": "java-tron"
+    },
+    {
+        "coin_id": "uniswap",
+        "symbol": "UNI",
+        "owner": "Uniswap",
+        "repo": "v3-core"
+    },
+    {
+        "coin_id": "yearn-finance",
+        "symbol": "YFI",
+        "owner": "yearn",
+        "repo": "yearn-vaults"
+    },
+    {
+        "coin_id": "zcash",
+        "symbol": "ZEC",
+        "owner": "zcash",
+        "repo": "zcash"
+    }
+]

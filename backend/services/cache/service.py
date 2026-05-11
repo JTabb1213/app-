@@ -29,13 +29,12 @@ class CacheService:
         self._check_connection()
     
     def _check_connection(self):
-        """Verify Redis connection on startup."""
+        """Verify Redis connection on startup (non-fatal)."""
         try:
             self.redis_client.ping()
             print("[CacheService] ✓ Connected to Redis")
         except Exception as e:
-            print(f"[CacheService] ✗ Redis connection failed: {e}")
-            raise
+            print(f"[CacheService] ✗ Redis connection failed (non-fatal): {e}")
     
     def _make_key(self, data_type: str, coin_id: str) -> str:
         """

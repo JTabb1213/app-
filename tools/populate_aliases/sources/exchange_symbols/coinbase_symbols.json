@@ -92,6 +92,9 @@
         "XTZ": "tezos",
         "YFI": "yearn-finance",
         "ZEC": "zcash",
-        "ZRX": "0x"
+        "ZRX": "0x",
+        "KSM": "kusama",
+        "OCEAN": "ocean-protocol",
+        "TON": "the-open-network"
     }
 }

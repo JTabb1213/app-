@@ -8,6 +8,12 @@
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+Frontend-User-interfaces/frontend/node_modules/
+Frontend-User-interfaces/frontend/dist/
+Frontend-User-interfaces/frontend/.vite/
+Frontend-User-interfaces/FrontendV2/node_modules/
+Frontend-User-interfaces/FrontendV2/dist/
+Frontend-User-interfaces/FrontendV2/.vite/
 
 # ── Admin build artifacts / deps ────────────────────────────────
 admin/node_modules/

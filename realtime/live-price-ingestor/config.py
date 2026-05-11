@@ -40,6 +40,12 @@ BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "2000"))
 RT_PRICE_TTL = int(os.getenv("RT_PRICE_TTL", "300"))
 
 # ---------------------------------------------------------------------------
+# PostgreSQL (for candle persistence)
+# ---------------------------------------------------------------------------
+DATABASE_URL      = os.getenv("DATABASE_URL")
+DATABASE_URL_IPV4 = os.getenv("DATABASE_URL_IPV4")
+
+# ---------------------------------------------------------------------------
 # Logging & Health
 # ---------------------------------------------------------------------------
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

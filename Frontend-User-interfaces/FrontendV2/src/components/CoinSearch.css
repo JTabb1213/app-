@@ -1,0 +1,120 @@
+.coin-search-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--white);
+    font-size: 0.95rem;
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    border-color: var(--blue);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-button {
+    padding: 12px 20px;
+    background: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.search-button:hover:not(:disabled) {
+    background: #3a8ef5;
+}
+
+.search-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── Dropdown ──────────────────────────────────────────────────────── */
+
+.cs-results-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #16181f;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    z-index: 1000;
+    max-height: 280px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.cs-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.cs-result-item:hover,
+.cs-result-item.active {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.cs-result-symbol {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--blue);
+    min-width: 44px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cs-result-name {
+    font-size: 0.9rem;
+    color: var(--white);
+    flex: 1;
+}
+
+.cs-result-id {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.cs-no-match {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}

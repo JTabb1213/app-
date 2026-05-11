@@ -85,6 +85,24 @@
                 "mexc": "AVAX"
             }
         },
+        "axie-infinity": {
+            "symbol": "AXS",
+            "aliases": [
+                "axie infinity",
+                "axie",
+                "axs"
+            ],
+            "exchange_symbols": {
+                "pionex": "AXS",
+                "coinbase": "AXS",
+                "gateio": "AXS",
+                "okx": "AXS",
+                "bybit": "AXS",
+                "kraken": "AXS",
+                "binance": "AXS",
+                "mexc": "AXS"
+            }
+        },
         "basic-attention-token": {
             "symbol": "BAT",
             "aliases": [
@@ -100,6 +118,24 @@
                 "kraken": "BAT",
                 "binance": "BAT",
                 "mexc": "BAT"
+            }
+        },
+        "binancecoin": {
+            "symbol": "BNB",
+            "aliases": [
+                "binancecoin",
+                "bnb",
+                "binance coin"
+            ],
+            "exchange_symbols": {
+                "pionex": "BNB",
+                "coinbase": "BNB",
+                "gateio": "BNB",
+                "okx": "BNB",
+                "bybit": "BNB",
+                "kraken": "BNB",
+                "binance": "BNB",
+                "mexc": "BNB"
             }
         },
         "bitcoin": {
@@ -225,22 +261,6 @@
                 "mexc": "CRV"
             }
         },
-        "dash": {
-            "symbol": "DASH",
-            "aliases": [
-                "dash"
-            ],
-            "exchange_symbols": {
-                "pionex": "DASH",
-                "coinbase": "DASH",
-                "gateio": "DASH",
-                "okx": "DASH",
-                "bybit": "DASH",
-                "kraken": "DASH",
-                "binance": "DASH",
-                "mexc": "DASH"
-            }
-        },
         "decentraland": {
             "symbol": "MANA",
             "aliases": [
@@ -274,40 +294,6 @@
                 "kraken": "DOGE",
                 "binance": "DOGE",
                 "mexc": "DOGE"
-            }
-        },
-        "enjincoin": {
-            "symbol": "ENJ",
-            "aliases": [
-                "enjin coin",
-                "enjin",
-                "enj"
-            ],
-            "exchange_symbols": {
-                "pionex": "ENJ",
-                "coinbase": "ENJ",
-                "gateio": "ENJ",
-                "okx": "ENJ",
-                "bybit": "ENJ",
-                "kraken": "ENJ",
-                "binance": "ENJ",
-                "mexc": "ENJ"
-            }
-        },
-        "eos": {
-            "symbol": "EOS",
-            "aliases": [
-                "eos"
-            ],
-            "exchange_symbols": {
-                "pionex": "EOS",
-                "coinbase": "EOS",
-                "gateio": "EOS",
-                "okx": "EOS",
-                "bybit": "EOS",
-                "kraken": "EOS",
-                "binance": "EOS",
-                "mexc": "EOS"
             }
         },
         "ethereum": {
@@ -394,22 +380,6 @@
                 "kraken": "FIL",
                 "binance": "FIL",
                 "mexc": "FIL"
-            }
-        },
-        "flow": {
-            "symbol": "FLOW",
-            "aliases": [
-                "flow"
-            ],
-            "exchange_symbols": {
-                "pionex": "FLOW",
-                "coinbase": "FLOW",
-                "gateio": "FLOW",
-                "okx": "FLOW",
-                "bybit": "FLOW",
-                "kraken": "FLOW",
-                "binance": "FLOW",
-                "mexc": "FLOW"
             }
         },
         "havven": {
@@ -507,6 +477,7 @@
             ],
             "exchange_symbols": {
                 "pionex": "KSM",
+                "coinbase": "KSM",
                 "gateio": "KSM",
                 "okx": "KSM",
                 "bybit": "KSM",
@@ -591,6 +562,7 @@
             ],
             "exchange_symbols": {
                 "pionex": "OCEAN",
+                "coinbase": "OCEAN",
                 "gateio": "OCEAN",
                 "okx": "OCEAN",
                 "bybit": "OCEAN",
@@ -752,23 +724,6 @@
                 "mexc": "SUSHI"
             }
         },
-        "tezos": {
-            "symbol": "XTZ",
-            "aliases": [
-                "tezos",
-                "xtz"
-            ],
-            "exchange_symbols": {
-                "pionex": "XTZ",
-                "coinbase": "XTZ",
-                "gateio": "XTZ",
-                "okx": "XTZ",
-                "bybit": "XTZ",
-                "kraken": "XTZ",
-                "binance": "XTZ",
-                "mexc": "XTZ"
-            }
-        },
         "the-graph": {
             "symbol": "GRT",
             "aliases": [
@@ -784,6 +739,24 @@
                 "kraken": "GRT",
                 "binance": "GRT",
                 "mexc": "GRT"
+            }
+        },
+        "the-open-network": {
+            "symbol": "TON",
+            "aliases": [
+                "ton",
+                "toncoin",
+                "the open network"
+            ],
+            "exchange_symbols": {
+                "pionex": "TON",
+                "coinbase": "TON",
+                "gateio": "TON",
+                "okx": "TON",
+                "bybit": "TON",
+                "kraken": "TON",
+                "binance": "TON",
+                "mexc": "TON"
             }
         },
         "the-sandbox": {
@@ -804,7 +777,7 @@
             }
         },
         "thorchain": {
-            "symbol": "thorchain",
+            "symbol": "RUNE",
             "aliases": [
                 "thorchain",
                 "rune",
@@ -819,6 +792,23 @@
                 "kraken": "RUNE",
                 "binance": "RUNE",
                 "mexc": "RUNE"
+            }
+        },
+        "tron": {
+            "symbol": "TRX",
+            "aliases": [
+                "tron",
+                "trx"
+            ],
+            "exchange_symbols": {
+                "pionex": "TRX",
+                "coinbase": "TRX",
+                "gateio": "TRX",
+                "okx": "TRX",
+                "bybit": "TRX",
+                "kraken": "TRX",
+                "binance": "TRX",
+                "mexc": "TRX"
             }
         },
         "uniswap": {
@@ -839,7 +829,7 @@
             }
         },
         "yearn-finance": {
-            "symbol": "yearn-finance",
+            "symbol": "YFI",
             "aliases": [
                 "yearn finance",
                 "yfi"

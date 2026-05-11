@@ -1,0 +1,164 @@
+/* ─── CCS Design System ─── */
+:root {
+  --bg: #0d0d12;
+  --bg-surface: #14141c;
+  --bg-card: #1a1a26;
+  --blue: #1a3fd4;
+  --blue-light: #2a52e8;
+  --blue-glow: rgba(26, 63, 212, 0.25);
+  --white: #ffffff;
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.38);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --neutral: rgba(255, 255, 255, 0.18);
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Subtle grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: var(--blue-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--white);
+}
+
+/* ─── Staggered fade-in animation ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.fade-in-1 { animation-delay: 0.05s; }
+.fade-in-2 { animation-delay: 0.1s; }
+.fade-in-3 { animation-delay: 0.15s; }
+.fade-in-4 { animation-delay: 0.2s; }
+.fade-in-5 { animation-delay: 0.25s; }
+.fade-in-6 { animation-delay: 0.3s; }
+.fade-in-7 { animation-delay: 0.35s; }
+.fade-in-8 { animation-delay: 0.4s; }
+
+/* ─── Shared utilities ─── */
+.page-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 100px 24px 80px;
+  flex: 1;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--white);
+  background: var(--blue);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--blue-light);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Score badge colors ─── */
+.score-excellent { color: var(--green); }
+.score-good { color: var(--blue-light); }
+.score-fair { color: var(--yellow); }
+.score-poor { color: var(--red); }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }

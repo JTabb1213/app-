@@ -15,13 +15,16 @@ import asyncio
 import json
 import logging
 import time
-from typing import List, Optional, Set
+from typing import TYPE_CHECKING, List, Optional, Set
 
 import redis.asyncio as aioredis
 
 import config
 from shared.models import NormalizedTick
 from compute.aggregator import PriceAggregator
+
+if TYPE_CHECKING:
+    from storage.candle_writer import CandleWriter
 
 # Feature flags
 ENABLE_DEBUG_KEYS = False       # Write rt:price, rt:ticker keys (verbose)
@@ -50,6 +53,11 @@ class RedisWriter:
         self._flush_count: int = 0
         self._write_count: int = 0
         self._aggregator = aggregator or PriceAggregator()
+        self._candle_writer: Optional["CandleWriter"] = None
+
+    def set_candle_writer(self, cw: "CandleWriter") -> None:
+        """Wire in the candle writer so every tick also updates OHLC windows."""
+        self._candle_writer = cw
 
     async def connect(self) -> None:
         if not config.REDIS_URL:
@@ -80,6 +88,12 @@ class RedisWriter:
         self._last_flush = time.time()
 
         updated_coins = self._aggregator.update_batch(batch)
+
+        # Feed each tick into the candle writer (non-blocking — just updates in-memory windows)
+        if self._candle_writer is not None:
+            for tick in batch:
+                if tick.price and tick.price > 0:
+                    self._candle_writer.update(tick.coin_id, tick.price, tick.timestamp)
 
         try:
             pipe = self._client.pipeline(transaction=False)
