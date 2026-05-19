@@ -33,6 +33,12 @@ STREAM_MAXLEN = 10_000
 
 logger = logging.getLogger(__name__)
 
+# Minimum price change (fraction) required to publish a new aggregate.
+# 0.0001 = 0.01% — suppresses no-op publishes and saves Redis bandwidth.
+_MIN_PRICE_CHANGE_PCT = float(getattr(config, "MIN_PRICE_CHANGE_PCT", "0.0001"))
+# Last published avg_price per coin — used for dedup
+_last_published: dict[str, float] = {}
+
 
 class RedisWriter:
     """
@@ -144,20 +150,25 @@ class RedisWriter:
                 })
                 pipe.setex(f"rt:coin:{coin_id}", ttl, coin_data)
 
-                # Publish aggregate to WS service
-                agg_msg = json.dumps({
-                    "type": "aggregate",
-                    "coin_id": coin_id,
-                    "avg_price": agg["avg_price"],
-                    "highest_exchange": highest.exchange,
-                    "highest_price": highest.price,
-                    "lowest_exchange": lowest.exchange,
-                    "lowest_price": lowest.price,
-                    "exchange_count": agg["exchange_count"],
-                    "timestamp": now,
-                    "published_at": int(time.time() * 1000),
-                })
-                pipe.publish("rt:stream:prices", agg_msg)
+                # Only publish to pub/sub if price moved enough (saves Upstash bandwidth)
+                last_price = _last_published.get(coin_id)
+                current_price = agg["avg_price"]
+                if last_price is None or last_price == 0 or \
+                        abs(current_price - last_price) / last_price >= _MIN_PRICE_CHANGE_PCT:
+                    _last_published[coin_id] = current_price
+                    agg_msg = json.dumps({
+                        "type": "aggregate",
+                        "coin_id": coin_id,
+                        "avg_price": agg["avg_price"],
+                        "highest_exchange": highest.exchange,
+                        "highest_price": highest.price,
+                        "lowest_exchange": lowest.exchange,
+                        "lowest_price": lowest.price,
+                        "exchange_count": agg["exchange_count"],
+                        "timestamp": now,
+                        "published_at": int(time.time() * 1000),
+                    })
+                    pipe.publish("rt:stream:prices", agg_msg)
 
             await pipe.execute()
 

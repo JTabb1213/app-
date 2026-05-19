@@ -8,6 +8,7 @@ Returned dict matches the shape defined in base.py.
 """
 
 import logging
+import os
 import time
 from datetime import datetime, timezone
 from typing import Optional
@@ -16,7 +17,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3"
+COINGECKO_BASE_URL = os.getenv("COINGECKO_BASE_URL", "https://api.coingecko.com/api/v3")
 BATCH_SIZE         = 100
 BATCH_DELAY_SECS   = 7
 

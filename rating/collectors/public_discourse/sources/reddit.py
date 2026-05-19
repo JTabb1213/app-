@@ -6,6 +6,7 @@ Cache key: "reddit"   TTL: DISCOURSE_REDDIT_TTL_HOURS (default 2 h)
 """
 
 import logging
+import os
 
 import requests
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -15,7 +16,7 @@ from . import cache as disk_cache
 logger    = logging.getLogger(__name__)
 _analyzer = SentimentIntensityAnalyzer()
 
-_BASE    = "https://www.reddit.com"
+_BASE    = os.getenv("REDDIT_API_BASE_URL", "https://www.reddit.com")
 _HEADERS = {"User-Agent": "ccs-discourse-collector/1.0"}
 
 

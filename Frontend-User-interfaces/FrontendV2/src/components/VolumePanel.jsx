@@ -40,6 +40,7 @@ function VolumePanel({ coinId }) {
         if (!coinId) return
         try {
             const result = await getVolume(coinId, window)
+            // console.log("[VolumePanel] API response:", JSON.stringify(result, null, 2))
             setData(result)
             setError(null)
         } catch (err) {
@@ -109,7 +110,7 @@ function VolumePanel({ coinId }) {
                     {/* Total */}
                     <div className="volume-total-row">
                         <span className="volume-total-label">Total ({WINDOW_LABELS[window]})</span>
-                        <span className="volume-total-value">{formatVolume(data.total_volume_usd)} <span className="volume-unit">coins</span></span>
+                        <span className="volume-total-value">{formatVolume(data.total_volume_coins)} <span className="volume-unit">coins</span></span>
                     </div>
 
                     {/* Buy/Sell bar */}
@@ -128,13 +129,13 @@ function VolumePanel({ coinId }) {
                     <div className="volume-breakdown">
                         <div className="volume-side buy-side">
                             <span className="side-label">🟢 Buy</span>
-                            <span className="side-value">{formatVolume(data.buy_volume_usd)}</span>
+                            <span className="side-value">{formatVolume(data.buy_volume_coins)}</span>
                             <span className="side-pct">{data.buy_pct}%</span>
                         </div>
                         <div className="volume-divider" />
                         <div className="volume-side sell-side">
                             <span className="side-label">🔴 Sell</span>
-                            <span className="side-value">{formatVolume(data.sell_volume_usd)}</span>
+                            <span className="side-value">{formatVolume(data.sell_volume_coins)}</span>
                             <span className="side-pct">{sellPct}%</span>
                         </div>
                     </div>

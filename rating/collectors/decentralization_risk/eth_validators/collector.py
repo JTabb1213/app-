@@ -14,13 +14,14 @@ Config keys used:
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 from typing import Optional
 
 import requests
 
 logger  = logging.getLogger(__name__)
-BASE    = "https://api.rated.network/v0"
+BASE    = os.getenv("RATED_API_BASE_URL", "https://api.rated.network/v0")
 TIMEOUT = 15
 
 

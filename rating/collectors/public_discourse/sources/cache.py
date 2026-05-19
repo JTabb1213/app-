@@ -24,8 +24,13 @@ logger = logging.getLogger(__name__)
 
 _CACHE_DIR = Path(os.getenv("DISCOURSE_CACHE_DIR", "/tmp/ccs_discourse"))
 TTL = {
-    "reddit": int(os.getenv("DISCOURSE_REDDIT_TTL_HOURS",  "2"))   * 3600,
-    "news":   int(os.getenv("DISCOURSE_NEWS_TTL_HOURS",    "6"))   * 3600,
+    # Orchestrator runs weekly — these TTLs only prevent duplicate API calls
+    # on manual re-runs or if SCHEDULE_INTERVAL_SECONDS is lowered.
+    # Reddit public API: free, no key needed.
+    "reddit": int(os.getenv("DISCOURSE_REDDIT_TTL_HOURS",  "24"))  * 3600,
+    # NewsAPI: ~100 req/month free tier. 24h TTL = safe for daily runs too.
+    "news":   int(os.getenv("DISCOURSE_NEWS_TTL_HOURS",    "24"))  * 3600,
+    # Google Trends: weekly data cadence, no point fetching more often.
     "trends": int(os.getenv("DISCOURSE_TRENDS_TTL_HOURS", "168"))  * 3600,
 }
 

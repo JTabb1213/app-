@@ -39,6 +39,7 @@ from routes.rating import rating_bp
 from routes.candles import candles_bp
 from routes.market import market_bp
 from routes.news import news_bp
+from routes.volume import volume_bp
 
 def create_app():
     app = Flask(__name__)
@@ -62,6 +63,7 @@ def create_app():
     app.register_blueprint(candles_bp, url_prefix="/api")
     app.register_blueprint(market_bp, url_prefix="/api")
     app.register_blueprint(news_bp, url_prefix="/api")
+    app.register_blueprint(volume_bp, url_prefix="/api")
 
     _startup_checks()
 

@@ -3,8 +3,11 @@ News collector — config
 """
 import os
 
-DATABASE_URL  = os.getenv("DATABASE_URL", "postgresql://dev:devpassword@postgres:5432/cryptorating")
-REDIS_URL     = os.getenv("REDIS_URL",    "redis://redis:6379")
+DATABASE_URL              = os.getenv("DATABASE_URL", "postgresql://dev:devpassword@postgres:5432/cryptorating")
+REDIS_URL                 = os.getenv("REDIS_URL",    "redis://redis:6379")
+
+# Base URL for the Google News RSS search feed. Override to point at a proxy.
+GOOGLE_NEWS_RSS_BASE_URL  = os.getenv("GOOGLE_NEWS_RSS_BASE_URL", "https://news.google.com/rss/search")
 
 # How long news stays fresh in Redis (seconds) — 1 hour
 REDIS_TTL     = int(os.getenv("NEWS_REDIS_TTL", str(3600)))

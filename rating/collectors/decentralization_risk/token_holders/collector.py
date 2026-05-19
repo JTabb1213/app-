@@ -12,6 +12,7 @@ Config keys used:
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -31,7 +32,7 @@ _CHAIN_SLUGS = {
 }
 
 FETCH_LIMIT = 100
-BASE_URL    = "https://api.covalenthq.com/v1"
+BASE_URL    = os.getenv("COVALENT_API_BASE_URL", "https://api.covalenthq.com/v1")
 
 
 

@@ -92,7 +92,7 @@ class WebSocketService {
 
         // ── onopen ────────────────────────────────────────────────
         this._ws.onopen = () => {
-            console.log("[WS] ✅ Connected to", WS_URL)
+            // console.log("[WS] ✅ Connected to", WS_URL)
             this._reconnectAttempts = 0
             this._error = null
             this._setState(ConnectionState.CONNECTED)

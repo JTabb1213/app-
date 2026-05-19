@@ -85,7 +85,7 @@ def _coin_name(coin_id: str) -> str:
 
 def fetch_news(coin_id: str) -> list | None:
     query = quote_plus(f"{_coin_name(coin_id)} crypto")
-    url   = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
+    url   = f"{config.GOOGLE_NEWS_RSS_BASE_URL}?q={query}&hl=en-US&gl=US&ceid=US:en"
     try:
         resp = requests.get(
             url, timeout=_TIMEOUT,

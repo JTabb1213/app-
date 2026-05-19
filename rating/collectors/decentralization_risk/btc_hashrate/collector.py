@@ -12,13 +12,14 @@ Config keys used: none (mempool.space is public).
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 from typing import Optional
 
 import requests
 
 logger  = logging.getLogger(__name__)
-BASE    = "https://mempool.space/api/v1"
+BASE    = os.getenv("MEMPOOL_API_BASE_URL", "https://mempool.space/api/v1")
 TIMEOUT = 15
 
 

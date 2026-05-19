@@ -78,7 +78,7 @@ def load_coin_ids() -> list[str]:
 
 # ── CoinGecko fetch ───────────────────────────────────────────────────────────
 
-_BASE    = "https://api.coingecko.com/api/v3"
+_BASE    = config.COINGECKO_API_BASE_URL
 _TIMEOUT = 15
 
 

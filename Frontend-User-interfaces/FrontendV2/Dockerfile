@@ -34,6 +34,11 @@ RUN printf 'server {\n\
     root /usr/share/nginx/html;\n\
     index index.html;\n\
 \n\
+    # Never cache index.html — always fetch fresh so users pick up new deploys\n\
+    location = /index.html {\n\
+        add_header Cache-Control "public, max-age=0, must-revalidate";\n\
+    }\n\
+\n\
     # All routes fall through to index.html (React Router)\n\
     location / {\n\
         try_files $uri $uri/ /index.html;\n\

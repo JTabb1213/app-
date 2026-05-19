@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # CoinGecko API (free tier, primary provider)
-COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3"
-COINGECKO_COINS_LIST_URL = "https://api.coingecko.com/api/v3/coins/list"
+COINGECKO_BASE_URL = os.getenv("COINGECKO_BASE_URL", "https://api.coingecko.com/api/v3")
+COINGECKO_COINS_LIST_URL = os.getenv("COINGECKO_COINS_LIST_URL", "https://api.coingecko.com/api/v3/coins/list")
 
 # Redis Cache Configuration
 # Set via REDIS_URL in your .env file

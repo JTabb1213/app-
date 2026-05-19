@@ -182,6 +182,11 @@ VESTING_DATA: dict[str, dict] = {
         "risk_flags":        ["Linear vesting ongoing"],
     },
     "binancecoin":      {"insider_pct": 40.0,  "circulating_ratio": 0.90},
+    "hyperliquid": {
+        "insider_pct":       23.9,   # team allocation ~238.9M / 1B total, 1yr cliff + 3yr vest
+        "circulating_ratio": 0.40,   # ~400M circulating as of mid-2026; CoinGecko overrides live
+        "risk_flags":        ["No external VC funding — team-only insider allocation", "Team tokens still vesting"],
+    },
 }
 
 # ── EVM contract addresses ─────────────────────────────────────────────────────

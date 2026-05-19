@@ -7,6 +7,7 @@ Cache key: "news"   TTL: DISCOURSE_NEWS_TTL_HOURS (default 6 h)
 """
 
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 
 import requests
@@ -17,7 +18,7 @@ from . import cache as disk_cache
 logger    = logging.getLogger(__name__)
 _analyzer = SentimentIntensityAnalyzer()
 
-_BASE = "https://newsapi.org/v2"
+_BASE = os.getenv("NEWSAPI_BASE_URL", "https://newsapi.org/v2")
 
 
 def fetch(coin: dict, newsapi_key: str, cache: dict) -> tuple[float | None, int]:

@@ -189,6 +189,16 @@ function getDiscourseMetrics(m) {
         : pending(),
       description: "Relative search volume trend over the past 7 days.",
     },
+    {
+      label: "News Sentiment",
+      value: m?.news_compound != null
+        ? {
+          label: m.news_compound > 0.1 ? "Positive" : m.news_compound < -0.1 ? "Negative" : "Neutral",
+          subtext: `score ${m.news_compound.toFixed(2)}`
+        }
+        : pending(),
+      description: "Compound sentiment score from recent news headlines (7-day window).",
+    },
   ]
 }
 
