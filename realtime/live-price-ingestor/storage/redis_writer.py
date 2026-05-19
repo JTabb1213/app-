@@ -74,9 +74,7 @@ class RedisWriter:
             logger.info("Redis connection closed")
 
     async def write(self, tick: NormalizedTick) -> None:
-        self._buffer.append(tick)
-        if len(self._buffer) >= config.BATCH_MAX_SIZE:
-            await self.flush()
+        self._buffer.append(tick)  # flush is timer-only (flush_loop); no size-based trigger
 
     async def flush(self) -> None:
         if not self._buffer:

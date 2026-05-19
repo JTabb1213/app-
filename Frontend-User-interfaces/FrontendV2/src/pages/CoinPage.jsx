@@ -1,8 +1,10 @@
-﻿import { useState } from "react"
+﻿import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { getToken, getScoreColor, MOCK_TOKENS } from "../services/mockData"
+import { getRating, getMarketData, getNews } from "../services/api"
 import { useRealtimePrice } from "../hooks/useRealtimePrice"
 import LiveDataPanel from "../components/LiveDataPanel"
+import MarketData from "../components/MarketData"
+import RecentNews from "../components/RecentNews"
 import "./CoinPage.css"
 
 const SCORE_LETTER = (score) => {
@@ -19,182 +21,278 @@ const RISK_LEVEL = (score) => {
   return "High"
 }
 
-const CATEGORY_METRICS = {
-  security: [
+// Returns method-aware security metric labels for the score breakdown panel.
+// diversity_method comes from rating.security_transparency.metrics.diversity_method
+function getSecurityMetrics(secMetrics) {
+  const method = secMetrics?.diversity_method || "token_holders"
+
+  if (method === "hashrate") {
+    return [
+      {
+        label: "Nakamoto Coefficient",
+        value: secMetrics?.nakamoto_coefficient != null
+          ? { label: String(secMetrics.nakamoto_coefficient), subtext: "pools needed to reach 51% hashrate" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Minimum number of mining pools that could collude to 51%-attack the network.",
+      },
+      {
+        label: "Largest Pool Share",
+        value: secMetrics?.largest_pool_pct != null
+          ? { label: `${secMetrics.largest_pool_pct.toFixed(1)}%`, subtext: "of total hashrate" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Single mining pool concentration risk.",
+      },
+      {
+        label: "Active Mining Pools",
+        value: secMetrics?.pool_count != null
+          ? { label: String(secMetrics.pool_count), subtext: "pools observed (7-day window)" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Breadth of mining competition.",
+      },
+    ]
+  }
+
+  if (method === "validator") {
+    return [
+      {
+        label: "Nakamoto Coefficient",
+        value: secMetrics?.nakamoto_coefficient != null
+          ? { label: String(secMetrics.nakamoto_coefficient), subtext: "entities to reach 33% stake" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Minimum staking entities needed to threaten PoS finality.",
+      },
+      {
+        label: "Largest Entity Stake",
+        value: secMetrics?.largest_entity_pct != null
+          ? { label: `${secMetrics.largest_entity_pct.toFixed(1)}%`, subtext: "of all staked ETH" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Single-entity dominance risk (e.g. Lido, Coinbase).",
+      },
+      {
+        label: "Active Staking Entities",
+        value: secMetrics?.entity_count != null
+          ? { label: String(secMetrics.entity_count), subtext: "named operators" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Number of distinct staking entities observed.",
+      },
+    ]
+  }
+
+  if (method === "vesting") {
+    return [
+      {
+        label: "Insider Allocation",
+        value: secMetrics?.insider_pct != null
+          ? { label: `${secMetrics.insider_pct.toFixed(1)}%`, subtext: "team / VC / foundation" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "Total supply allocated to insiders at genesis.",
+      },
+      {
+        label: "Circulating Ratio",
+        value: secMetrics?.circulating_ratio != null
+          ? { label: `${(secMetrics.circulating_ratio * 100).toFixed(1)}%`, subtext: "of total supply in circulation" }
+          : { label: "Data Pending", subtext: "Source integration in progress." },
+        description: "How much of the total supply has been distributed to the public.",
+      },
+      {
+        label: "Risk Flags",
+        value: { label: secMetrics?.risk_flags?.length > 0 ? `${secMetrics.risk_flags.length} flagged` : "None", subtext: secMetrics?.risk_flags?.[0] || "" },
+        description: "Notable vesting or centralisation risks from public research.",
+      },
+    ]
+  }
+
+  // Default: token_holders (ERC-20 richlist)
+  return [
     {
       label: "Holder Diversity",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "On-chain balance spread across top wallets.",
+      value: secMetrics?.top_10_pct != null
+        ? { label: `${secMetrics.top_10_pct.toFixed(1)}% in top 10`, subtext: "on-chain concentration" }
+        : { label: "Data Pending", subtext: "Source integration in progress." },
+      description: "Percentage of supply held by the top 10 wallet addresses.",
     },
     {
       label: "Top 10 Wallet Concentration",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
+      value: secMetrics?.top_10_pct != null
+        ? { label: `${secMetrics.top_10_pct.toFixed(1)}%`, subtext: "of circulating supply" }
+        : { label: "Data Pending", subtext: "Source integration in progress." },
       description: "Percentage held by the biggest 10 addresses.",
     },
     {
       label: "Largest Wallet %",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
+      value: secMetrics?.largest_wallet_pct != null
+        ? { label: `${secMetrics.largest_wallet_pct.toFixed(1)}%`, subtext: "single holder" }
+        : { label: "Data Pending", subtext: "Source integration in progress." },
       description: "Single holder concentration risk.",
     },
-  ],
-  tokenomics: [
+  ]
+}
+
+function pending() {
+  return { label: "Data Pending", subtext: "Source integration in progress." }
+}
+
+function getTokenomicsMetrics(m) {
+  return [
     {
-      label: "Circulating Supply",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Tokens currently available in the market.",
+      label: "Inflation Potential",
+      value: m?.inflation_potential_pct != null
+        ? { label: `${m.inflation_potential_pct.toFixed(1)}%`, subtext: "of max supply remaining" }
+        : pending(),
+      description: "Percentage of max supply not yet issued.",
     },
     {
-      label: "Max Supply",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Maximum token issuance cap.",
+      label: "Max Supply Cap",
+      value: m?.has_max_supply != null
+        ? { label: m.has_max_supply ? "Yes" : "No cap", subtext: m.has_max_supply ? "Fixed issuance limit" : "Uncapped inflation possible" }
+        : pending(),
+      description: "Whether a hard maximum supply limit exists.",
     },
-    {
-      label: "Inflation Rate",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Annual supply increase pressure.",
-    },
-  ],
-  community: [
+  ]
+}
+
+function getCommunityMetrics(m) {
+  return [
     {
       label: "GitHub Activity",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Code push frequency across repositories.",
+      value: m?.delta_commits != null
+        ? { label: `+${m.delta_commits} commits`, subtext: "since last cycle" }
+        : pending(),
+      description: "New commits pushed since the previous scoring cycle.",
     },
     {
       label: "Contributors",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Active developer count.",
+      value: m?.contributor_count != null
+        ? { label: `${m.contributor_count}`, subtext: "active developers" }
+        : pending(),
+      description: "Active developer count across tracked repositories.",
     },
+  ]
+}
+
+function getDiscourseMetrics(m) {
+  return [
     {
-      label: "Last Commit",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Recency of the latest code update.",
-    },
-  ],
-  market: [
-    {
-      label: "Market Cap",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Token valuation in USD.",
-    },
-    {
-      label: "24h Volume",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Trading activity over the past day.",
-    },
-    {
-      label: "Liquidity Status",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Liquidity quality across exchanges.",
-    },
-  ],
-  discourse: [
-    {
-      label: "Social Sentiment",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Community and social channel signal.",
+      label: "Reddit Sentiment",
+      value: m?.reddit_compound != null
+        ? {
+          label: m.reddit_compound > 0.1 ? "Positive" : m.reddit_compound < -0.1 ? "Negative" : "Neutral",
+          subtext: `score ${m.reddit_compound.toFixed(2)}`
+        }
+        : pending(),
+      description: "Compound sentiment score from recent Reddit activity.",
     },
     {
       label: "Search Interest",
-      value: { label: "Data Pending", subtext: "Source integration in progress." },
-      description: "Relative attention trends online.",
+      value: m?.search_interest != null
+        ? { label: `${m.search_interest}/100`, subtext: "Google Trends index" }
+        : pending(),
+      description: "Relative search volume trend over the past 7 days.",
     },
-  ],
+  ]
 }
 
 function CoinPage() {
   const { coinId } = useParams()
   const [openKey, setOpenKey] = useState("security")
-  const token = getToken(coinId)
   const { priceData, connectionState, error: wsError } = useRealtimePrice(coinId)
 
-  if (!token) {
-    return (
-      <div className="page-wrap token-page">
-        <Link to="/search" className="back-link">← Back to Search</Link>
-        <div className="token-not-found">
-          <h2>Token not found</h2>
-          <p>We don't have data for "{coinId}" yet.</p>
-        </div>
-      </div>
-    )
-  }
+  // ── Live data from API (three independent calls) ───────────────────────────
+  const [rating, setRating] = useState(null)
+  const [marketData, setMarketData] = useState(null)
+  const [news, setNews] = useState(null)
+  const [ratingLoading, setRatingLoading] = useState(true)
+  const [marketLoading, setMarketLoading] = useState(true)
+  const [newsLoading, setNewsLoading] = useState(true)
+
+  useEffect(() => {
+    setRatingLoading(true)
+    getRating(coinId)
+      .then(setRating)
+      .catch(() => setRating(null))
+      .finally(() => setRatingLoading(false))
+  }, [coinId])
+
+  useEffect(() => {
+    setMarketLoading(true)
+    getMarketData(coinId)
+      .then(setMarketData)
+      .catch(() => setMarketData(null))
+      .finally(() => setMarketLoading(false))
+  }, [coinId])
+
+  useEffect(() => {
+    setNewsLoading(true)
+    getNews(coinId)
+      .then(setNews)
+      .catch(() => setNews(null))
+      .finally(() => setNewsLoading(false))
+  }, [coinId])
+
+  // ── Derived display values (no mock fallbacks) ─────────────────────────────
+  const displayName = coinId
+    ? coinId.charAt(0).toUpperCase() + coinId.slice(1).replace(/-/g, " ")
+    : coinId
+  const displayTicker = coinId ? coinId.toUpperCase() : ""
+
+  const overallScore = rating?.overall_score ?? 0
+  const automatedTotal = rating?.automated_score ?? 0
+  const manualTotal = rating?.manual_validation != null ? rating.manual_validation : null
+  const riskLevel = rating?.risk_level ?? RISK_LEVEL(overallScore)
+
+  const secScore = rating?.security_transparency?.score ?? 0
+  const secMax = rating?.security_transparency?.max ?? 35
+  const secMetrics = rating?.security_transparency?.metrics ?? {}
+  const tokScore = rating?.tokenomics_utility?.score ?? 0
+  const tokMax = rating?.tokenomics_utility?.max ?? 20
+  const comScore = rating?.community_dev_activity?.score ?? 0
+  const comMax = rating?.community_dev_activity?.max ?? 15
+  const disScore = rating?.public_discourse?.score ?? 0
+  const disMax = rating?.public_discourse?.max ?? 5
 
   const categories = [
-    {
-      key: "security",
-      title: token.automated.security.label,
-      score: token.automated.security.score,
-      max: token.automated.security.max,
-      metrics: CATEGORY_METRICS.security,
-    },
-    {
-      key: "tokenomics",
-      title: token.automated.tokenomics.label,
-      score: token.automated.tokenomics.score,
-      max: token.automated.tokenomics.max,
-      metrics: CATEGORY_METRICS.tokenomics,
-    },
-    {
-      key: "community",
-      title: token.automated.community.label,
-      score: token.automated.community.score,
-      max: token.automated.community.max,
-      metrics: CATEGORY_METRICS.community,
-    },
-    {
-      key: "market",
-      title: token.automated.market.label,
-      score: token.automated.market.score,
-      max: token.automated.market.max,
-      metrics: CATEGORY_METRICS.market,
-    },
-    {
-      key: "discourse",
-      title: token.automated.discourse.label,
-      score: token.automated.discourse.score,
-      max: token.automated.discourse.max,
-      metrics: CATEGORY_METRICS.discourse,
-    },
+    { key: "security", title: "Security & Transparency", score: secScore, max: secMax, metrics: getSecurityMetrics(secMetrics) },
+    { key: "tokenomics", title: "Tokenomics & Utility", score: tokScore, max: tokMax, metrics: getTokenomicsMetrics(rating?.tokenomics_utility?.metrics ?? {}) },
+    { key: "community", title: "Community & Dev Activity", score: comScore, max: comMax, metrics: getCommunityMetrics(rating?.community_dev_activity?.metrics ?? {}) },
+    { key: "discourse", title: "Public Discourse", score: disScore, max: disMax, metrics: getDiscourseMetrics(rating?.public_discourse?.metrics ?? {}) },
   ]
 
-  const comparison = MOCK_TOKENS.filter((t) => t.id !== token.id).slice(0, 3)
-  const trendHistory = [token.overallScore - 6, token.overallScore - 4, token.overallScore - 2, token.overallScore - 1, token.overallScore, token.overallScore, token.overallScore]
-  const activityFeed = [
-    {
-      time: "2h ago",
-      title: "Automated signal refreshed",
-      description: "Latest market and on-chain indicators were updated.",
-    },
-    {
-      time: "8h ago",
-      title: "Manual validation in progress",
-      description: "Human review of score operators is underway.",
-    },
-    {
-      time: "1d ago",
-      title: "System health checkpoint",
-      description: "Development and reporting telemetry were assessed.",
-    },
+  // ── Score history chart ────────────────────────────────────────────────────
+  // score_history is [{score, date}, ...] sorted newest-first from the DB trigger.
+  // We reverse to get chronological (oldest→newest) for the chart.
+  const historyRaw = Array.isArray(rating?.score_history) && rating.score_history.length > 0
+    ? [...rating.score_history].sort((a, b) => a.date.localeCompare(b.date))
+    : []
+  // Always append the current score as the rightmost point
+  const trendPoints = [
+    ...historyRaw,
+    { score: overallScore, date: new Date().toISOString().slice(0, 10) },
   ]
-
-  const minTrend = Math.min(...trendHistory)
-  const maxTrend = Math.max(...trendHistory)
-  const trendCoords = trendHistory.map((value, index) => {
-    const x = index * 18
-    const y = 90 - ((value - minTrend) / (maxTrend - minTrend || 1)) * 70
-    return { x, y, value }
+  const trendScores = trendPoints.map(p => p.score)
+  const trendDates = trendPoints.map(p => p.date)
+  const minTrend = Math.min(...trendScores)
+  const maxTrend = Math.max(...trendScores)
+  const trendCoords = trendPoints.map((p, i) => {
+    const x = trendPoints.length > 1 ? (i / (trendPoints.length - 1)) * 112 + 4 : 60
+    const y = 90 - ((p.score - minTrend) / (maxTrend - minTrend || 1)) * 70
+    return { x, y, score: p.score, date: p.date }
   })
-  const linePath = trendCoords
-    .map((coord, index) => `${index === 0 ? "M" : "L"} ${coord.x} ${coord.y}`)
-    .join(" ")
+  const linePath = trendCoords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x} ${c.y}`).join(" ")
   const areaPath = `${linePath} L ${trendCoords[trendCoords.length - 1].x} 90 L ${trendCoords[0].x} 90 Z`
+  const dotRadius = trendPoints.length > 20 ? 1.2 : trendPoints.length > 10 ? 1.8 : 2.2
+  const earliestDate = trendDates[0] ?? "—"
+  const latestDate = trendDates[trendDates.length - 1] ?? "—"
+  const activityFeed = [
+    { time: "2h ago", title: "Automated signal refreshed", description: "Latest market and on-chain indicators were updated." },
+    { time: "8h ago", title: "Manual validation in progress", description: "Human review of score operators is underway." },
+    { time: "1d ago", title: "System health checkpoint", description: "Development and reporting telemetry were assessed." },
+  ]
 
-  const scorePct = Math.max(0, Math.min(token.overallScore, 100))
+  const scorePct = Math.max(0, Math.min(overallScore, 100))
   const scoreRadius = 52
   const scoreCircumference = 2 * Math.PI * scoreRadius
   const scoreOffset = scoreCircumference - (scorePct / 100) * scoreCircumference
-  const scoreRingColor = token.overallScore >= 75 ? "#22c55e" : token.overallScore >= 60 ? "#eab308" : "#ef4444"
+  const scoreRingColor = overallScore >= 75 ? "#22c55e" : overallScore >= 60 ? "#eab308" : "#ef4444"
 
   return (
     <div className="page-wrap token-page dashboard-shell">
@@ -203,10 +301,10 @@ function CoinPage() {
           <div className="token-path">
             <Link to="/" className="token-breadcrumb">Dashboard</Link>
             <span className="token-separator">/</span>
-            <span>{token.name}</span>
+            <span>{displayName}</span>
           </div>
-          <h1>{token.name}</h1>
-          <span className="token-subtitle">{token.ticker} · Utility coin intelligence</span>
+          <h1>{displayName}</h1>
+          <span className="token-subtitle">{displayTicker} · Utility coin intelligence</span>
         </div>
         <div className="token-summary-right">
           <div className="token-score-hero">
@@ -226,10 +324,10 @@ function CoinPage() {
                   }}
                 />
               </svg>
-              <span className="token-score-large">{token.overallScore}</span>
+              <span className="token-score-large">{overallScore}</span>
             </div>
             <div className="token-score-copy">
-              <span className="token-score-rating">{SCORE_LETTER(token.overallScore)} Rating</span>
+              <span className="token-score-rating">{SCORE_LETTER(overallScore)} Rating</span>
               <span className="token-score-caption">Overall CCS Score</span>
             </div>
           </div>
@@ -239,22 +337,22 @@ function CoinPage() {
       <section className="coin-kpi-row fade-in fade-in-2">
         <div className="kpi-card">
           <span className="kpi-label">CCS Score</span>
-          <span className="kpi-value">{token.overallScore}<small>/100</small></span>
-          <span className="kpi-meta">Grade {SCORE_LETTER(token.overallScore)}</span>
+          <span className="kpi-value">{overallScore}<small>/100</small></span>
+          <span className="kpi-meta">Grade {SCORE_LETTER(overallScore)}</span>
         </div>
         <div className="kpi-card">
           <span className="kpi-label">Automated Signal</span>
-          <span className="kpi-value">{token.automated.total}<small>/75</small></span>
+          <span className="kpi-value">{automatedTotal}<small>/75</small></span>
           <span className="kpi-meta">System-generated score</span>
         </div>
         <div className="kpi-card">
           <span className="kpi-label">Manual Validation</span>
-          <span className="kpi-value">{token.manual ? `${token.manual.total}/25` : "In Progress"}</span>
+          <span className="kpi-value">{manualTotal != null ? `${manualTotal}/25` : "In Progress"}</span>
           <span className="kpi-meta">Human validation</span>
         </div>
         <div className="kpi-card">
           <span className="kpi-label">Risk Level</span>
-          <span className={`kpi-value risk-${RISK_LEVEL(token.overallScore).toLowerCase()}`}>{RISK_LEVEL(token.overallScore)}</span>
+          <span className={`kpi-value risk-${riskLevel.toLowerCase()}`}>{riskLevel}</span>
           <span className="kpi-meta">Interpretive signal</span>
         </div>
       </section>
@@ -343,37 +441,22 @@ function CoinPage() {
                 <path d={areaPath} fill="url(#trendArea)" stroke="none" />
                 <path d={linePath} fill="none" stroke="url(#trendGradient)" strokeWidth="3" strokeLinecap="round" />
                 {trendCoords.map((point, index) => (
-                  <circle key={index} cx={point.x} cy={point.y} r="2.2" fill="rgba(255,255,255,0.95)" />
+                  <circle key={index} cx={point.x} cy={point.y} r={dotRadius} fill="rgba(255,255,255,0.95)">
+                    <title>{point.date}: {point.score}</title>
+                  </circle>
                 ))}
               </svg>
             </div>
             <div className="trend-meta">
-              <span>Latest score: {token.overallScore}</span>
-              <span>Week high: {Math.max(...trendHistory)}</span>
+              <span>Latest score: {overallScore}</span>
+              <span>{historyRaw.length > 0 ? `${earliestDate} → ${latestDate}` : "First cycle — history builds over time"}</span>
+              <span>All-time high: {maxTrend}</span>
             </div>
           </section>
 
           <div className="split-cards">
-            <section className="panel small-panel">
-              <div className="panel-header">
-                <h3>Market Intelligence</h3>
-              </div>
-              <div className="list-group">
-                <div className="list-item"><span>Market Cap</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-                <div className="list-item"><span>24h Volume</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-                <div className="list-item"><span>Liquidity Status</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-              </div>
-            </section>
-            <section className="panel small-panel">
-              <div className="panel-header">
-                <h3>Tokenomics</h3>
-              </div>
-              <div className="list-group">
-                <div className="list-item"><span>Circulating Supply</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-                <div className="list-item"><span>Max Supply</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-                <div className="list-item"><span>Inflation Indicator</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-              </div>
-            </section>
+            <MarketData data={marketData} loading={marketLoading} />
+            <RecentNews data={news} loading={newsLoading} />
           </div>
         </div>
 
@@ -396,21 +479,7 @@ function CoinPage() {
             <div className="dev-list">
               <div className="dev-row"><span>GitHub Activity</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
               <div className="dev-row"><span>Contributors</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-              <div className="dev-row"><span>Last Commit</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
-            </div>
-          </section>
-
-          <section className="panel compare-panel">
-            <div className="panel-header">
-              <h2>Comparison</h2>
-            </div>
-            <div className="compare-list">
-              {comparison.map((item) => (
-                <div className="compare-row" key={item.id}>
-                  <span>{item.name}</span>
-                  <strong>{item.overallScore}</strong>
-                </div>
-              ))}
+              <div className="dev-row"><span>Commits This Period</span><strong className="metric-state">Data Pending <span>Source integration in progress</span></strong></div>
             </div>
           </section>
 

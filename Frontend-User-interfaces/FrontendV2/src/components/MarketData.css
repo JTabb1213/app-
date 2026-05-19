@@ -1,0 +1,6 @@
+.market-source-tag {
+    font-size: 0.7rem;
+    color: var(--text-muted, rgba(255, 255, 255, 0.4));
+    margin-left: auto;
+    align-self: center;
+}

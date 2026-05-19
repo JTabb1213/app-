@@ -28,6 +28,10 @@ CREATE TABLE coins (
   review_count INTEGER,
   is_featured BOOLEAN DEFAULT FALSE,
 
+  -- Decentralization risk method used by the rating collector
+  -- Values: "token_holders" | "hashrate" | "validator" | "vesting"
+  diversity_method TEXT NOT NULL DEFAULT 'token_holders',
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

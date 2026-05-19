@@ -35,8 +35,8 @@ ALIAS_JSON_PATH = os.getenv(
 # ---------------------------------------------------------------------------
 # Redis writer / batching
 # ---------------------------------------------------------------------------
-BATCH_MAX_SIZE = int(os.getenv("BATCH_MAX_SIZE", "100"))
-BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "2000"))
+BATCH_MAX_SIZE = int(os.getenv("BATCH_MAX_SIZE", "100"))   # kept for stats; no longer triggers flushes
+BATCH_INTERVAL_MS = int(os.getenv("BATCH_INTERVAL_MS", "10000"))  # 10s default; tune via env (7000–15000)
 RT_PRICE_TTL = int(os.getenv("RT_PRICE_TTL", "300"))
 
 # ---------------------------------------------------------------------------

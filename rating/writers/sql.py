@@ -83,11 +83,60 @@ def get_previous_github_snapshot(coin_id: str) -> Optional[dict]:
         return None
 
 
+def get_previous_score_row(coin_id: str) -> Optional[dict]:
+    """
+    Return the full previous scoring result for a coin as a dict, or None.
+
+    Used by the orchestrator as a fallback when a collector returns None —
+    rather than writing a zero-score, the orchestrator preserves the last
+    known good value for each category that failed to refresh.
+
+    Returns a dict with keys:
+        security_transparency, tokenomics_utility,
+        community_dev_activity, public_discourse
+    Each value is the full category score dict (score, max, metrics).
+    """
+    try:
+        conn = _get_conn()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT security_transparency, tokenomics_utility,
+                       community_dev_activity, public_discourse
+                FROM rating_scores WHERE coin_id = %s
+                """,
+                (coin_id.lower(),),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            def _parse(v):
+                if v is None:
+                    return None
+                return v if isinstance(v, dict) else json.loads(v)
+
+            return {
+                "security_transparency":  _parse(row["security_transparency"]),
+                "tokenomics_utility":     _parse(row["tokenomics_utility"]),
+                "community_dev_activity": _parse(row["community_dev_activity"]),
+                "public_discourse":       _parse(row["public_discourse"]),
+            }
+    except Exception as exc:
+        logger.error(f"[SQL] get_previous_score_row({coin_id}): {exc}")
+        return None
+
+
 # ── Writes ─────────────────────────────────────────────────────────────────────
 
-def upsert_rating_score(score_row: dict) -> bool:
+def upsert_rating_score(score_row: dict) -> Optional[dict]:
     """
     Insert or update a row in rating_scores.
+
+    Returns the full DB row as a dict (SQL-first Redis strategy) so the caller
+    can write exactly what Postgres stored (including score_history, review_status,
+    last_computed_at) to Redis without a separate SELECT.
+    Returns None on failure.
 
     Expected keys: coin_id, coin_symbol, overall_score, automated_score,
     manual_validation, risk_level, security_transparency, tokenomics_utility,
@@ -96,14 +145,19 @@ def upsert_rating_score(score_row: dict) -> bool:
     coin_id = score_row.get("coin_id", "").lower()
     if not coin_id:
         logger.error("[SQL] upsert_rating_score: missing coin_id")
-        return False
+        return None
 
     def _j(v):
         return json.dumps(v) if isinstance(v, dict) else (v or "{}")
 
+    def _parse(v):
+        if v is None:
+            return {}
+        return v if isinstance(v, dict) else json.loads(v)
+
     try:
         conn = _get_conn()
-        with conn.cursor() as cur:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
                 """
                 INSERT INTO rating_scores (
@@ -128,8 +182,14 @@ def upsert_rating_score(score_row: dict) -> bool:
                     tokenomics_utility     = EXCLUDED.tokenomics_utility,
                     community_dev_activity = EXCLUDED.community_dev_activity,
                     public_discourse       = EXCLUDED.public_discourse,
-                    last_computed_at       = NOW(),
-                    updated_at             = NOW()
+                    last_computed_at       = NOW()
+                RETURNING
+                    coin_id, coin_symbol,
+                    overall_score, automated_score, manual_validation,
+                    risk_level, review_status,
+                    security_transparency, tokenomics_utility,
+                    community_dev_activity, public_discourse,
+                    score_history, last_computed_at
                 """,
                 (
                     coin_id,
@@ -144,13 +204,29 @@ def upsert_rating_score(score_row: dict) -> bool:
                     _j(score_row.get("public_discourse")),
                 ),
             )
+            returned = dict(cur.fetchone())
         conn.commit()
+
+        # Parse JSONB columns (psycopg2 may return them as strings)
+        for col in ("security_transparency", "tokenomics_utility",
+                    "community_dev_activity", "public_discourse"):
+            returned[col] = _parse(returned.get(col))
+        sh = returned.get("score_history")
+        if isinstance(sh, str):
+            returned["score_history"] = json.loads(sh)
+
+        # Serialise timestamps for JSON-safety
+        for ts_col in ("last_computed_at",):
+            v = returned.get(ts_col)
+            if hasattr(v, "isoformat"):
+                returned[ts_col] = v.isoformat()
+
         logger.debug(f"[SQL] Upserted rating_scores for {coin_id}")
-        return True
+        return returned
     except Exception as exc:
         logger.error(f"[SQL] upsert_rating_score({coin_id}): {exc}")
         try:
             _get_conn().rollback()
         except Exception:
             pass
-        return False
+        return None

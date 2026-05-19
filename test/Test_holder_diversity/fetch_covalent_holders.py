@@ -9,7 +9,6 @@ Get a free API key at: https://www.covalenthq.com/platform/auth/register/
 
 import os
 import requests
-import json
 from pathlib import Path
 from typing import Optional
 
@@ -42,49 +41,33 @@ COVALENT_API_KEY = os.getenv("COVALENT_API_KEY")
 
 COVALENT_BASE_URL = "https://api.covalenthq.com/v1"
 
-CHAIN_IDS = {
-    "ethereum": 1,
-    "polygon": 137,
-    "bsc": 56,
-    "avalanche": 43114,
-    "arbitrum": 42161,
-    "optimism": 10,
-    "base": 8453,
-}
-
-COINS_PATH = ROOT / "rating" / "holder-diversity-collector" / "coins.json"
-
-
-def load_coin_list(path: Path) -> list:
-    if not path.exists():
-        raise FileNotFoundError(f"coins.json not found at {path}")
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def build_token_list(coins: list) -> list:
-    tokens = []
-    for coin in coins:
-        symbol = coin.get("coin_id", "?").upper()
-        contract = coin.get("contract_address")
-        chain = coin.get("chain", "ethereum")
-        chain_id = CHAIN_IDS.get(chain)
-        if chain_id is None:
-            print(f"  ⚠ Skipping unknown chain '{chain}' for {symbol}")
-            continue
-        if not contract:
-            print(f"  ⚠ Skipping {symbol}: contract_address missing")
-            continue
-
-        tokens.append({
-            "symbol": symbol,
-            "contract": contract.lower(),
-            "chain_id": chain_id,
-        })
-    return tokens
-
-
-TOKENS = build_token_list(load_coin_list(COINS_PATH))
+# ─────────────────────────────────────────────────────────────────────────────
+# Token list — ERC-20 tokens from your coin_aliases.json that have known
+# Ethereum contract addresses. Covalent needs (chain_id, contract_address).
+# Native coins (BTC, SOL, ADA, etc.) are NOT ERC-20 tokens and cannot be
+# looked up this way — use the dedicated fetchers for those.
+# ─────────────────────────────────────────────────────────────────────────────
+TOKENS = [
+    # coin_id (matches coin_aliases.json)  symbol   chain_id  contract_address
+    {"coin_id": "chainlink",          "symbol": "LINK",  "chain_id": 1,  "contract": "0x514910771af9ca656af840dff83e8264ecf986ca"},
+    {"coin_id": "uniswap",            "symbol": "UNI",   "chain_id": 1,  "contract": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"},
+    {"coin_id": "aave",               "symbol": "AAVE",  "chain_id": 1,  "contract": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9"},
+    {"coin_id": "shiba-inu",          "symbol": "SHIB",  "chain_id": 1,  "contract": "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce"},
+    {"coin_id": "pepe",               "symbol": "PEPE",  "chain_id": 1,  "contract": "0x6982508145454ce325ddbe47a25d4ec3d2311933"},
+    {"coin_id": "lido-dao",           "symbol": "LDO",   "chain_id": 1,  "contract": "0x5a98fcbea516cf06857215779fd812ca3bef1b32"},
+    {"coin_id": "the-graph",          "symbol": "GRT",   "chain_id": 1,  "contract": "0xc944e90c64b2c07662a292be6244bdf05cda44a7"},
+    {"coin_id": "curve-dao-token",    "symbol": "CRV",   "chain_id": 1,  "contract": "0xd533a949740bb3306d119cc777fa900ba034cd52"},
+    {"coin_id": "loopring",           "symbol": "LRC",   "chain_id": 1,  "contract": "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd"},
+    {"coin_id": "basic-attention-token", "symbol": "BAT","chain_id": 1,  "contract": "0x0d8775f648430679a709e98d2b0cb6250d2887ef"},
+    {"coin_id": "sushi",              "symbol": "SUSHI", "chain_id": 1,  "contract": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"},
+    {"coin_id": "yearn-finance",      "symbol": "YFI",   "chain_id": 1,  "contract": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e"},
+    {"coin_id": "decentraland",       "symbol": "MANA",  "chain_id": 1,  "contract": "0x0f5d2fb29fb7d3cfee444a200298f468908cc942"},
+    {"coin_id": "the-sandbox",        "symbol": "SAND",  "chain_id": 1,  "contract": "0x3845badade8e6dff049820680d1f14bd3903a5d0"},
+    {"coin_id": "ocean-protocol",     "symbol": "OCEAN", "chain_id": 1,  "contract": "0x967da4048cd07ab37855c090aaf366e4ce1b9f48"},
+    {"coin_id": "immutable-x",        "symbol": "IMX",   "chain_id": 1,  "contract": "0xf57e7e7c23978c3caec3c3548e3d615c346e79ff"},
+    {"coin_id": "havven",             "symbol": "SNX",   "chain_id": 1,  "contract": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f"},
+    {"coin_id": "compound-governance-token", "symbol": "COMP", "chain_id": 1, "contract": "0xc00e94cb662c3520282e6f5717214004a7f26888"},
+]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -143,10 +126,12 @@ def calculate_metrics(holders: list) -> Optional[dict]:
         return None
 
     n = len(balances)
-    top_1_pct  = balances[0]    / total * 100 if n >= 1   else 0
-    top_10_pct = sum(balances[:10])  / total * 100 if n >= 10  else 0
+    top_1_pct   = balances[0]         / total * 100 if n >= 1   else 0
+    top_10_pct  = sum(balances[:10])  / total * 100 if n >= 10  else 0
     top_100_pct = sum(balances[:100]) / total * 100 if n >= 100 else 0
-    gini = (2 * sum((i + 1) * b for i, b in enumerate(balances))) / (n * total) - (n + 1) / n
+    # Gini: must sort ASCENDING for the standard formula → result in [0, 1]
+    balances_asc = sorted(balances)
+    gini = (2 * sum((i + 1) * b for i, b in enumerate(balances_asc))) / (n * total) - (n + 1) / n
     hhi  = sum((b / total) ** 2 for b in balances)
 
     return {

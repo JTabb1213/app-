@@ -1,0 +1,73 @@
+# =============================================================================
+# docker-compose.db.yml — Local Postgres + pgAdmin
+# =============================================================================
+# Spins up a local Postgres 16 instance with every table pre-created and
+# seeded with placeholder data. Use this instead of Supabase while developing.
+#
+# Usage (from the repo root):
+#   docker compose -f docker-compose.db.yml up -d
+#
+# Then connect with any SQL client:
+#   Host:     localhost
+#   Port:     5432
+#   Database: cryptorating
+#   User:     dev
+#   Password: devpassword
+#
+# Or open pgAdmin in your browser:
+#   http://localhost:5050
+#   Email:    admin@local.dev
+#   Password: admin
+#   (Add Server → host: postgres, port: 5432, db: cryptorating, user: dev)
+#
+# Use this DATABASE_URL in your .env when running other services locally:
+#   DATABASE_URL=postgresql://dev:devpassword@localhost:5432/cryptorating
+#
+# To reset the database completely (wipe all data and recreate):
+#   docker compose -f docker-compose.db.yml down -v
+#   docker compose -f docker-compose.db.yml up -d
+# =============================================================================
+
+services:
+
+  # ── Postgres 16 ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: cryptorating-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB:       cryptorating
+      POSTGRES_USER:     dev
+      POSTGRES_PASSWORD: devpassword
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Mount the init script — Postgres runs all *.sql files in /docker-entrypoint-initdb.d/
+      # on first start (only when the data volume is empty).
+      - ./sql/init_local.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d cryptorating"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── pgAdmin 4 (visual SQL explorer) ─────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cryptorating-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+volumes:
+  postgres-data:
+  pgadmin-data:

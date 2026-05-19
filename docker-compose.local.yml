@@ -12,17 +12,53 @@
 #   Frontend  →  http://localhost:5173
 #   Backend   →  http://localhost:8000
 #   WS server →  ws://localhost:8765
+#   pgAdmin   →  http://localhost:5050  (admin@local.dev / admin)
 #
 # Env vars you MUST supply (create a .env file at the repo root or export them):
-#   DATABASE_URL   — postgres connection string (Supabase / local pg)
-#   REDIS_URL      — overridden internally to redis://redis:6379, but needed by
-#                    backend at startup for the "external" redis (Upstash) path.
-#                    Set it to redis://redis:6379 for fully local dev.
+#   DATABASE_URL   — set to the local postgres URL below for fully local dev:
+#                    postgresql://dev:devpassword@postgres:5432/cryptorating
+#   REDIS_URL      — overridden internally to redis://redis:6379
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
 
-  # ── Redis ──────────────────────────────────────────────────────────────────
+  # ── Postgres 16 (local dev database) ───────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: cryptorating-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB:       cryptorating
+      POSTGRES_USER:     dev
+      POSTGRES_PASSWORD: devpassword
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/init_local.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d cryptorating"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── pgAdmin 4 ───────────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cryptorating-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     ports:
@@ -45,10 +81,12 @@ services:
     environment:
       - PORT=8080
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://dev:devpassword@postgres:5432/cryptorating}
       - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
     depends_on:
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
@@ -197,5 +235,69 @@ services:
       - LOG_LEVEL=INFO
     restart: unless-stopped
 
+  # ── Rating Score Orchestrator ─────────────────────────────────────────────
+  rating-orchestrator:
+    build:
+      context: ./rating
+      dockerfile: score-orchestrator/Dockerfile
+    volumes:
+      - ./data:/rating/data:ro
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://dev:devpassword@postgres:5432/cryptorating}
+      - REDIS_URL=redis://redis:6379
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - COVALENT_API_KEY=${COVALENT_API_KEY:-}
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY:-}
+      - NEWSAPI_KEY=${NEWSAPI_KEY:-}
+      - SERPAPI_KEY=${SERPAPI_KEY:-}
+      - RATED_API_KEY=${RATED_API_KEY:-}
+      - REDIS_TTL=691200
+      - LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Market Data Collector (refreshes market_data every 6 h) ─────────────────
+  market-collector:
+    build:
+      context: .
+      dockerfile: collectors/market/Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://dev:devpassword@postgres:5432/cryptorating}
+      - REDIS_URL=redis://redis:6379
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY:-}
+      - MARKET_RUN_INTERVAL=21600
+      - MARKET_REQUEST_DELAY=1.5
+      - LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── News Collector (refreshes news_cache every 2 h) ──────────────────────
+  news-collector:
+    build:
+      context: .
+      dockerfile: collectors/news/Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://dev:devpassword@postgres:5432/cryptorating}
+      - REDIS_URL=redis://redis:6379
+      - NEWS_RUN_INTERVAL=7200
+      - NEWS_REQUEST_DELAY=2.0
+      - LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   redis-data:
+  postgres-data:
+  pgadmin-data:

@@ -22,9 +22,20 @@ REDIS_URL: str    = os.getenv("REDIS_URL", "")
 REDIS_TTL: int = int(os.getenv("REDIS_TTL", str(8 * 24 * 3600)))
 
 # ── External APIs ──────────────────────────────────────────────────────────────
-COVALENT_API_KEY: str  = os.getenv("COVALENT_API_KEY", "")
-GITHUB_TOKEN: str      = os.getenv("GITHUB_TOKEN", "")
+COVALENT_API_KEY: str   = os.getenv("COVALENT_API_KEY", "")
+COINGECKO_API_KEY: str  = os.getenv("COINGECKO_API_KEY", "")
+GITHUB_TOKEN: str       = os.getenv("GITHUB_TOKEN", "")
 NEWSAPI_KEY: str       = os.getenv("NEWSAPI_KEY", "")
+SERPAPI_KEY: str       = os.getenv("SERPAPI_KEY", "")
+
+# ── Discourse rate-limit cache ─────────────────────────────────────────────────
+# Per-coin JSON files are written here after every successful API call.
+# If a call fails (or the cache is still fresh), the cached result is reused
+# so the orchestrator never writes a zero-score due to a transient rate limit.
+DISCOURSE_CACHE_DIR: str        = os.getenv("DISCOURSE_CACHE_DIR", "/tmp/ccs_discourse")
+DISCOURSE_REDDIT_TTL_HOURS: int = int(os.getenv("DISCOURSE_REDDIT_TTL_HOURS",  "2"))
+DISCOURSE_NEWS_TTL_HOURS: int   = int(os.getenv("DISCOURSE_NEWS_TTL_HOURS",    "6"))
+DISCOURSE_TRENDS_TTL_HOURS: int = int(os.getenv("DISCOURSE_TRENDS_TTL_HOURS", "168"))
 
 # ── Scheduler ─────────────────────────────────────────────────────────────────
 # How often to run the full scoring cycle. Default: 7 days.
@@ -32,23 +43,5 @@ SCHEDULE_INTERVAL_SECONDS: int = int(
     os.getenv("SCHEDULE_INTERVAL_SECONDS", str(7 * 24 * 3600))
 )
 
-# ── Coins files ────────────────────────────────────────────────────────────────
-# Each collector has its own coin list with the fields it needs.
-_rating_dir = Path(__file__).resolve().parents[1]
-
-GITHUB_COINS_FILE: str = os.getenv(
-    "GITHUB_COINS_FILE",
-    str(_rating_dir / "github-collector" / "coins.json"),
-)
-HOLDER_DIVERSITY_COINS_FILE: str = os.getenv(
-    "HOLDER_DIVERSITY_COINS_FILE",
-    str(_rating_dir / "holder-diversity-collector" / "coins.json"),
-)
-TOKENOMICS_COINS_FILE: str = os.getenv(
-    "TOKENOMICS_COINS_FILE",
-    str(_rating_dir / "tokenomics-collector" / "coins.json"),
-)
-PUBLIC_DISCOURSE_COINS_FILE: str = os.getenv(
-    "PUBLIC_DISCOURSE_COINS_FILE",
-    str(_rating_dir / "public-discourse-collector" / "coins.json"),
-)
+# Coin lists are sourced exclusively from CoinRegistry (data/coin_aliases.json).
+# The old per-collector coins.json files have been removed.

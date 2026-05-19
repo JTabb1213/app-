@@ -39,7 +39,7 @@ function Home() {
         <div className="feature-card">
           <div className="feature-icon">🏆</div>
           <h3>CCS Score</h3>
-          <p>Our composite scoring model evaluates security, tokenomics, community, market, and discourse.</p>
+          <p>Our composite scoring model evaluates decentralization, tokenomics, community activity, and public discourse.</p>
         </div>
       </section>
 
@@ -47,29 +47,29 @@ function Home() {
         <h2 className="section-title">How the CCS Score Works</h2>
         <div className="score-breakdown">
           <div className="score-row">
-            <span className="score-label">Security</span>
-            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "30%" }} /></div>
-            <span className="score-pct">30 pts</span>
+            <span className="score-label">Security &amp; Transparency</span>
+            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "46.7%" }} /></div>
+            <span className="score-pct">35 pts</span>
           </div>
           <div className="score-row">
-            <span className="score-label">Community</span>
-            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "20%" }} /></div>
+            <span className="score-label">Tokenomics &amp; Utility</span>
+            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "26.7%" }} /></div>
             <span className="score-pct">20 pts</span>
           </div>
           <div className="score-row">
-            <span className="score-label">Market</span>
+            <span className="score-label">Community &amp; Dev Activity</span>
             <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "20%" }} /></div>
-            <span className="score-pct">20 pts</span>
-          </div>
-          <div className="score-row">
-            <span className="score-label">Tokenomics</span>
-            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "15%" }} /></div>
             <span className="score-pct">15 pts</span>
           </div>
           <div className="score-row">
-            <span className="score-label">Discourse</span>
-            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "15%" }} /></div>
-            <span className="score-pct">15 pts</span>
+            <span className="score-label">Public Discourse</span>
+            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "6.7%" }} /></div>
+            <span className="score-pct">5 pts</span>
+          </div>
+          <div className="score-row">
+            <span className="score-label">Human Review</span>
+            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: "33.3%" }} /></div>
+            <span className="score-pct">25 pts</span>
           </div>
         </div>
       </section>

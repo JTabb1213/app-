@@ -1,3 +1,0 @@
-"""
-Holder Diversity service package.
-"""

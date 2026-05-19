@@ -61,10 +61,11 @@ from writers import sql as sql_writer
 from writers import redis_writer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from collectors.coin_registry import CoinRegistry
 from collectors import github as github_collector
-from collectors import holder_diversity as hd_collector
 from collectors import tokenomics as tok_collector
 from collectors import public_discourse as pd_collector
+from collectors.decentralization_risk import base as decentral_collector
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -112,43 +113,115 @@ def _seed_redis_from_sql():
 # ── Per-coin scoring ───────────────────────────────────────────────────────────
 
 def score_coin(
-    coin_id:         str,
-    coin_symbol:     str,
-    holder_data:     dict | None,
-    tokenomics_data: dict | None,
-    github_data:     dict | None,
-    discourse_data:  dict | None,
+    coin_id:               str,
+    coin_symbol:           str,
+    decentralization_data: dict | None,
+    tokenomics_data:       dict | None,
+    github_data:           dict | None,
+    discourse_data:        dict | None,
+    # Legacy alias
+    holder_data:           dict | None = None,
 ) -> bool:
-    """Score a single coin and write results to SQL + Redis."""
-    # Read analyst score and previous GitHub data from SQL
+    """
+    Score a single coin and write results to SQL + Redis.
+
+    If any collector returned None, the previous score for that category is
+    preserved from SQL.  A WARNING is logged but nothing crashes and the
+    frontend never sees a zero or an error — it just shows the last known data.
+    """
+    # Read analyst score and previous snapshots from SQL
     manual_validation = sql_writer.get_manual_validation(coin_id)
     prev_community    = sql_writer.get_previous_github_snapshot(coin_id)
+    prev_row          = sql_writer.get_previous_score_row(coin_id)
 
-    score_row = scorer.calculate(
-        coin_id           = coin_id,
-        coin_symbol       = coin_symbol,
-        holder_data       = holder_data,
-        tokenomics_data   = tokenomics_data,
-        github_data       = github_data,
-        discourse_data    = discourse_data,
-        prev_community    = prev_community,
-        manual_validation = manual_validation,
-    )
+    # ── Score each category, falling back to previous when collector returned None ──
+
+    def _prev(key: str) -> dict | None:
+        return prev_row.get(key) if prev_row else None
+
+    # Security / decentralization
+    _dec = decentralization_data or holder_data
+    if _dec is not None:
+        sec = scorer._score_security(_dec)
+    elif _prev("security_transparency"):
+        logger.warning(
+            f"⚠  [{coin_id}] decentralization collector returned None — "
+            f"reusing previous security score ({_prev('security_transparency').get('score')})"
+        )
+        sec = _prev("security_transparency")
+    else:
+        sec = {"score": 0, "max": 35, "metrics": {}, "note": "no data (first run)"}
+
+    # Tokenomics
+    if tokenomics_data is not None:
+        tok = scorer._score_tokenomics(tokenomics_data)
+    elif _prev("tokenomics_utility"):
+        logger.warning(
+            f"⚠  [{coin_id}] tokenomics collector returned None — "
+            f"reusing previous tokenomics score ({_prev('tokenomics_utility').get('score')})"
+        )
+        tok = _prev("tokenomics_utility")
+    else:
+        tok = {"score": 0, "max": 20, "metrics": {}, "note": "no data (first run)"}
+
+    # Community / GitHub
+    if github_data is not None:
+        com = scorer._score_community(github_data, prev_community)
+    elif _prev("community_dev_activity"):
+        logger.warning(
+            f"⚠  [{coin_id}] GitHub collector returned None — "
+            f"reusing previous community score ({_prev('community_dev_activity').get('score')})"
+        )
+        com = _prev("community_dev_activity")
+    else:
+        com = {"score": 0, "max": 15, "metrics": {}, "note": "no data (first run)"}
+
+    # Public discourse
+    if discourse_data is not None:
+        disc = scorer._score_discourse(discourse_data)
+    elif _prev("public_discourse"):
+        logger.warning(
+            f"⚠  [{coin_id}] discourse collector returned None — "
+            f"reusing previous discourse score ({_prev('public_discourse').get('score')})"
+        )
+        disc = _prev("public_discourse")
+    else:
+        # scorer gives 2.5 neutral default when there is no data at all
+        disc = scorer._score_discourse(None)
+
+    automated = round(sec["score"] + tok["score"] + com["score"] + disc["score"], 2)
+    overall   = round(min(automated + manual_validation, 100.0), 2)
+
+    score_row = {
+        "coin_id":                coin_id.lower(),
+        "coin_symbol":            coin_symbol.upper(),
+        "overall_score":          overall,
+        "automated_score":        automated,
+        "manual_validation":      round(manual_validation, 2),
+        "risk_level":             scorer._risk_level(overall),
+        "security_transparency":  sec,
+        "tokenomics_utility":     tok,
+        "community_dev_activity": com,
+        "public_discourse":       disc,
+    }
 
     logger.info(
-        f"[{coin_id}] overall={score_row['overall_score']} "
-        f"(auto={score_row['automated_score']} + manual={manual_validation})"
+        f"[{coin_id}] overall={overall} "
+        f"(auto={automated} + manual={manual_validation})"
     )
 
-    sql_ok   = sql_writer.upsert_rating_score(score_row)
-    redis_ok = redis_writer.write_score(score_row, config.REDIS_TTL)
+    # SQL-first: write to Postgres, then populate Redis from the returned row
+    # (guarantees Redis has exactly what the DB stored: score_history, review_status, etc.)
+    returned_row = sql_writer.upsert_rating_score(score_row)
+    if returned_row is None:
+        logger.error(f"✗  [{coin_id}] SQL write failed — score NOT persisted")
+        return False
 
-    if not sql_ok:
-        logger.error(f"[{coin_id}] SQL write failed")
+    redis_ok = redis_writer.write_score(returned_row, config.REDIS_TTL)
     if not redis_ok:
-        logger.warning(f"[{coin_id}] Redis write failed — data still in SQL")
+        logger.warning(f"⚠  [{coin_id}] Redis write failed — data still in SQL")
 
-    return sql_ok
+    return True
 
 
 # ── Main run ───────────────────────────────────────────────────────────────────
@@ -158,81 +231,148 @@ def run_once():
     logger.info("Starting scoring cycle")
 
     # ── Load coin lists ──────────────────────────────────────────────────────
-    github_coins    = _load_json(config.GITHUB_COINS_FILE)
-    hd_coins        = _load_json(config.HOLDER_DIVERSITY_COINS_FILE)
-    tok_raw         = _load_json(config.TOKENOMICS_COINS_FILE)
-    pd_coins        = _load_json(config.PUBLIC_DISCOURSE_COINS_FILE)
+    registry        = CoinRegistry()
+    github_coins    = registry.get_github_coins()
+    decentral_coins = registry.get_decentralization_coins()
+    tok_raw         = registry.get_tokenomics_coins()
+    pd_coins        = registry.get_discourse_coins()
 
     # ── Run tokenomics batch (single API call for all coins) ─────────────────
-    tok_ids        = [c["coin_id"] for c in tok_raw if c.get("coin_id")]
+    tok_ids       = [c["coin_id"] for c in tok_raw if c.get("coin_id")]
     logger.info(f"Fetching tokenomics for {len(tok_ids)} coins …")
-    tok_snapshots  = tok_collector.fetch_batch(tok_ids)
-    tok_by_id      = {s["coin_id"]: s for s in tok_snapshots}
+    tok_by_id: dict[str, dict | None] = {}
+    try:
+        tok_snapshots = tok_collector.fetch_batch(tok_ids)
+        tok_by_id     = {s["coin_id"]: s for s in tok_snapshots}
+    except Exception as exc:
+        logger.error(
+            f"✗  tokenomics batch CRASHED — previous scores will be reused. Error: {exc}",
+            exc_info=True,
+        )
 
     # ── Run GitHub concurrently ───────────────────────────────────────────────
     logger.info(f"Fetching GitHub data for {len(github_coins)} coins …")
     github_by_id: dict[str, dict | None] = {}
 
     def _fetch_github(coin):
-        return coin["coin_id"], github_collector.fetch(
-            coin, token=config.GITHUB_TOKEN
-        )
+        try:
+            return coin["coin_id"], github_collector.fetch(
+                coin, token=config.GITHUB_TOKEN
+            )
+        except Exception as exc:
+            logger.error(
+                f"✗  [{coin['coin_id']}] GitHub collector CRASHED: {exc}",
+                exc_info=True,
+            )
+            return coin["coin_id"], None
 
     with ThreadPoolExecutor(max_workers=8) as ex:
         futures = {ex.submit(_fetch_github, c): c for c in github_coins}
         for fut in as_completed(futures):
-            cid, result = fut.result()
-            github_by_id[cid] = result
+            try:
+                cid, result = fut.result()
+                if result is None:
+                    logger.warning(f"⚠  [{cid}] GitHub collector returned None")
+                github_by_id[cid] = result
+            except Exception as exc:
+                cid = futures[fut].get("coin_id", "?")
+                logger.error(f"✗  [{cid}] GitHub future raised: {exc}", exc_info=True)
+                github_by_id[cid] = None
 
-    # ── Run holder diversity (sequential — Covalent can be rate-sensitive) ───
-    logger.info(f"Fetching holder diversity for {len(hd_coins)} coins …")
-    hd_by_id: dict[str, dict | None] = {}
-    for coin in hd_coins:
-        hd_by_id[coin["coin_id"]] = hd_collector.fetch(coin, config.COVALENT_API_KEY)
+    # ── Run decentralization risk (sequential — external APIs can be rate-sensitive) ─
+    logger.info(f"Fetching decentralization risk for {len(decentral_coins)} coins …")
+    decentral_by_id: dict[str, dict | None] = {}
+    _decentral_config = {
+        "COVALENT_API_KEY":  config.COVALENT_API_KEY,
+        "RATED_API_KEY":     getattr(config, "RATED_API_KEY", ""),
+        "COINGECKO_API_KEY": config.COINGECKO_API_KEY,
+    }
+    for coin in decentral_coins:
+        if "diversity_method" not in coin:
+            coin["diversity_method"] = decentral_collector.get_method_for_coin(coin["coin_id"])
+        try:
+            result = decentral_collector.fetch(coin, _decentral_config)
+            if result is None:
+                logger.warning(
+                    f"⚠  [{coin['coin_id']}] decentralization collector returned None "
+                    f"— previous score will be reused"
+                )
+            decentral_by_id[coin["coin_id"]] = result
+        except Exception as exc:
+            logger.error(
+                f"✗  [{coin['coin_id']}] decentralization collector CRASHED: {exc} "
+                f"— previous score will be reused",
+                exc_info=True,
+            )
+            decentral_by_id[coin["coin_id"]] = None
 
     # ── Run public discourse (sequential — Trends has strict rate limits) ────
     logger.info(f"Fetching public discourse for {len(pd_coins)} coins …")
     pd_by_id: dict[str, dict | None] = {}
+    # Pre-fetch all Trends data in batches of 5 (one pass, cache results to disk)
+    pd_collector.prefetch_trends_batch(pd_coins, config.SERPAPI_KEY)
     for coin in pd_coins:
-        pd_by_id[coin["coin_id"]] = pd_collector.fetch(coin, config.NEWSAPI_KEY)
+        try:
+            result = pd_collector.fetch(coin, config.NEWSAPI_KEY, serpapi_key=config.SERPAPI_KEY)
+            if result is None:
+                logger.warning(
+                    f"⚠  [{coin['coin_id']}] discourse collector returned None "
+                    f"— previous score will be reused"
+                )
+            pd_by_id[coin["coin_id"]] = result
+        except Exception as exc:
+            logger.error(
+                f"✗  [{coin['coin_id']}] discourse collector CRASHED: {exc} "
+                f"— previous score will be reused",
+                exc_info=True,
+            )
+            pd_by_id[coin["coin_id"]] = None
 
     # ── Build master coin list (union of all coin IDs seen) ──────────────────
     all_ids = sorted({
         *[c["coin_id"] for c in github_coins],
-        *[c["coin_id"] for c in hd_coins],
+        *[c["coin_id"] for c in decentral_coins],
         *tok_ids,
         *[c["coin_id"] for c in pd_coins],
     })
 
-    # Build symbol lookup from any available source
-    symbol_lookup: dict[str, str] = {}
-    for coins_list in [github_coins, hd_coins, tok_raw, pd_coins]:
-        for c in coins_list:
-            if c.get("coin_id") and c.get("symbol"):
-                symbol_lookup[c["coin_id"]] = c["symbol"]
+    # Build symbol lookup from registry
+    symbol_lookup: dict[str, str] = {
+        cid: registry.get_symbol(cid) for cid in registry.get_all_coin_ids()
+    }
 
     # ── Score each coin ───────────────────────────────────────────────────────
     logger.info(f"Scoring {len(all_ids)} coins …")
-    ok_count = fail_count = 0
+    ok_count = fail_count = skip_count = 0
 
     for coin_id in all_ids:
         symbol = symbol_lookup.get(coin_id, coin_id.upper()[:6])
-        ok = score_coin(
-            coin_id        = coin_id,
-            coin_symbol    = symbol,
-            holder_data    = hd_by_id.get(coin_id),
-            tokenomics_data= tok_by_id.get(coin_id),
-            github_data    = github_by_id.get(coin_id),
-            discourse_data = pd_by_id.get(coin_id),
-        )
-        if ok:
-            ok_count += 1
-        else:
-            fail_count += 1
+        try:
+            ok = score_coin(
+                coin_id               = coin_id,
+                coin_symbol           = symbol,
+                decentralization_data = decentral_by_id.get(coin_id),
+                tokenomics_data       = tok_by_id.get(coin_id),
+                github_data           = github_by_id.get(coin_id),
+                discourse_data        = pd_by_id.get(coin_id),
+            )
+            if ok:
+                ok_count += 1
+            else:
+                fail_count += 1
+                logger.error(f"✗  [{coin_id}] score_coin returned False (SQL write failed)")
+        except Exception as exc:
+            skip_count += 1
+            logger.error(
+                f"✗  [{coin_id}] score_coin CRASHED — coin skipped, no DB update. "
+                f"Error: {exc}",
+                exc_info=True,
+            )
 
     logger.info(
         f"Scoring cycle complete — "
-        f"success: {ok_count}, failed: {fail_count}, total: {len(all_ids)}"
+        f"✓ {ok_count} scored  ✗ {fail_count} write-failed  ⚡ {skip_count} crashed  "
+        f"total: {len(all_ids)}"
     )
     logger.info("═" * 60)
 
@@ -256,7 +396,14 @@ def main():
     logger.info(f"Schedule: every {interval // 3600}h")
 
     while True:
-        run_once()
+        try:
+            run_once()
+        except Exception as exc:
+            logger.critical(
+                f"✗✗ run_once() CRASHED with unhandled exception — "
+                f"will retry after {interval}s. Error: {exc}",
+                exc_info=True,
+            )
         logger.info(f"Sleeping {interval}s until next run …")
         time.sleep(interval)
 

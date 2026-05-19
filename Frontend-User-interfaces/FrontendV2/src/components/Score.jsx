@@ -83,15 +83,29 @@ function Score() {
                         score={d.security_transparency.score}
                         max={d.security_transparency.max}
                     >
-                        <p className="factor-detail">
-                            Top 10 wallets: {d.security_transparency.metrics.top_10_pct}%
-                        </p>
-                        <p className="factor-detail">
-                            Largest wallet: {d.security_transparency.metrics.largest_wallet_pct}%
-                        </p>
-                        <p className="factor-detail">
-                            Holders: {d.security_transparency.metrics.holder_count.toLocaleString()}
-                        </p>
+                        {d.security_transparency.metrics.diversity_method === "hashrate" ? (
+                            <>
+                                <p className="factor-detail">Nakamoto coefficient: {d.security_transparency.metrics.nakamoto_coefficient}</p>
+                                <p className="factor-detail">Largest pool: {d.security_transparency.metrics.largest_pool_pct}%</p>
+                                <p className="factor-detail">Pool count: {d.security_transparency.metrics.pool_count}</p>
+                            </>
+                        ) : d.security_transparency.metrics.diversity_method === "validator" ? (
+                            <>
+                                <p className="factor-detail">Nakamoto coefficient: {d.security_transparency.metrics.nakamoto_coefficient}</p>
+                                <p className="factor-detail">Largest entity: {d.security_transparency.metrics.largest_entity_pct}%</p>
+                            </>
+                        ) : d.security_transparency.metrics.diversity_method === "vesting" ? (
+                            <>
+                                <p className="factor-detail">Insider allocation: {d.security_transparency.metrics.insider_pct}%</p>
+                                <p className="factor-detail">Circulating ratio: {d.security_transparency.metrics.circulating_ratio}</p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="factor-detail">Top 10 wallets: {d.security_transparency.metrics.top_10_pct}%</p>
+                                <p className="factor-detail">Largest wallet: {d.security_transparency.metrics.largest_wallet_pct}%</p>
+                                <p className="factor-detail">Holders: {d.security_transparency.metrics.holder_count?.toLocaleString()}</p>
+                            </>
+                        )}
                     </CategoryBar>
 
                     <CategoryBar
@@ -149,10 +163,10 @@ function Score() {
                         max={d.public_discourse.max}
                     >
                         <p className="factor-detail">
-                            Sentiment: {d.public_discourse.metrics.sentiment_score?.toFixed(1)}/2.5
+                            Reddit sentiment: {d.public_discourse.metrics.reddit_compound?.toFixed(2) ?? "N/A"}
                         </p>
                         <p className="factor-detail">
-                            Search interest: {d.public_discourse.metrics.interest_score?.toFixed(1)}/2.5
+                            Search interest: {d.public_discourse.metrics.search_interest ?? "N/A"}/100
                         </p>
                     </CategoryBar>
 

@@ -35,14 +35,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from routes.score import score_bp
-from routes.tokenomics import tokenomics_bp
-from routes.cache import cache_bp
-from routes.database import database_bp
-from routes.realtime import realtime_bp
-from routes.volume import volume_bp
+from routes.rating import rating_bp
 from routes.candles import candles_bp
-from routes.holder_diversity import holder_diversity_bp
+from routes.market import market_bp
+from routes.news import news_bp
 
 def create_app():
     app = Flask(__name__)
@@ -62,14 +58,10 @@ def create_app():
         print("Backend verification: hello")  # This will show in Cloud Run logs
         return jsonify({"message": "Backend deployed successfully!", "status": "hello"})
 
-    app.register_blueprint(score_bp, url_prefix="/api")
-    app.register_blueprint(tokenomics_bp, url_prefix="/api")
-    app.register_blueprint(cache_bp, url_prefix="/api")
-    app.register_blueprint(database_bp, url_prefix="/api")
-    app.register_blueprint(realtime_bp, url_prefix="/api")
-    app.register_blueprint(volume_bp, url_prefix="/api")
+    app.register_blueprint(rating_bp, url_prefix="/api")
     app.register_blueprint(candles_bp, url_prefix="/api")
-    app.register_blueprint(holder_diversity_bp, url_prefix="/api")
+    app.register_blueprint(market_bp, url_prefix="/api")
+    app.register_blueprint(news_bp, url_prefix="/api")
 
     _startup_checks()
 

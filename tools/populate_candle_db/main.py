@@ -57,7 +57,7 @@ load_dotenv(_ENV_PATH)
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-DATABASE_URL = os.getenv("DATABASE_URL_IPV4")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 BINANCE_BASE = "https://api.binance.us/api/v3/klines"
 

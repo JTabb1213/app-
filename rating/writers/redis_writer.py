@@ -10,6 +10,7 @@ TTL:          Passed in at call time (should match the orchestrator's schedule)
 
 import json
 import logging
+from decimal import Decimal
 
 import redis as redis_lib
 
@@ -37,6 +38,10 @@ def _key(coin_id: str) -> str:
     return f"{KEY_PREFIX}:{coin_id.lower()}"
 
 
+def _dumps(obj) -> str:
+    return json.dumps(obj, default=lambda o: float(o) if isinstance(o, Decimal) else str(o))
+
+
 def write_score(score_row: dict, ttl_seconds: int) -> bool:
     """
     Write a final score snapshot to Redis with the given TTL.
@@ -51,7 +56,7 @@ def write_score(score_row: dict, ttl_seconds: int) -> bool:
         return False
     try:
         r = _get_redis()
-        r.setex(_key(coin_id), ttl_seconds, json.dumps(score_row))
+        r.setex(_key(coin_id), ttl_seconds, _dumps(score_row))
         logger.debug(f"[Redis] Wrote {_key(coin_id)} TTL={ttl_seconds}s")
         return True
     except Exception as exc:
@@ -71,7 +76,7 @@ def seed_from_sql(rows: list[dict], ttl_seconds: int) -> None:
         for row in rows:
             coin_id = row.get("coin_id", "")
             if coin_id:
-                pipe.setex(_key(coin_id), ttl_seconds, json.dumps(row))
+                pipe.setex(_key(coin_id), ttl_seconds, _dumps(row))
         pipe.execute()
         logger.info(f"[Redis] Cold-start seeded {len(rows)} rating keys")
     except Exception as exc:

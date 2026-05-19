@@ -4,7 +4,7 @@ Score Orchestrator — Scoring Logic
 Converts raw collector data into category scores and an automated_score.
 
 Point allocation (75 automated total):
-  Security & Transparency   35 pts  — holder diversity
+  Security & Transparency   35 pts  — decentralization risk (method-aware)
   Tokenomics & Utility      20 pts  — supply structure
   Community & Dev Activity  15 pts  — GitHub delta commits + contributors
   Public Discourse           5 pts  — sentiment + search interest
@@ -13,6 +13,12 @@ Point allocation (75 automated total):
   Manual validation         25 pts  (set by analysts in DB)
   ─────────────────────────────────
   Overall max              100 pts
+
+Security scoring methods:
+  token_holders  — top_10_pct (18) + top_1_pct (12) + holder_count (5)
+  hashrate       — nakamoto_coefficient (35)
+  validator      — nakamoto_coefficient (25) + lido/single-entity risk (10)
+  vesting        — insider_pct (35)
 """
 
 from typing import Optional
@@ -20,24 +26,12 @@ from typing import Optional
 
 # ── Security & Transparency (35 pts) ──────────────────────────────────────────
 
-def _score_security(holder_data: Optional[dict]) -> dict:
-    """
-    Score based on holder concentration. None = no data (score 0).
+def _score_security_token_holders(data: dict) -> tuple[int, dict]:
+    """ERC-20 / richlist: top_10_pct (18) + top_1_pct (12) + holder_count (5)."""
+    top_10 = data.get("top_10_pct",   100.0)
+    top_1  = data.get("top_1_pct",    100.0)
+    count  = data.get("holder_count", 0)
 
-    top_10_pct  : 18 pts — main diversity signal
-    top_1_pct   : 12 pts — largest single wallet
-    holder_count:  5 pts — breadth of ownership
-    """
-    MAX = 35
-
-    if not holder_data:
-        return {"score": 0, "max": MAX, "metrics": {}, "note": "no data"}
-
-    top_10  = holder_data.get("top_10_pct",   100.0)
-    top_1   = holder_data.get("top_1_pct",    100.0)
-    count   = holder_data.get("holder_count", 0)
-
-    # top_10_pct (18 pts)
     if   top_10 < 20:  s10 = 18
     elif top_10 < 30:  s10 = 15
     elif top_10 < 40:  s10 = 11
@@ -45,14 +39,12 @@ def _score_security(holder_data: Optional[dict]) -> dict:
     elif top_10 < 65:  s10 = 3
     else:              s10 = 0
 
-    # top_1_pct (12 pts)
     if   top_1 < 5:    s1 = 12
     elif top_1 < 10:   s1 = 9
     elif top_1 < 20:   s1 = 6
     elif top_1 < 30:   s1 = 3
     else:              s1 = 0
 
-    # holder_count (5 pts)
     if   count > 100_000: sc = 5
     elif count > 10_000:  sc = 4
     elif count > 1_000:   sc = 3
@@ -60,18 +52,140 @@ def _score_security(holder_data: Optional[dict]) -> dict:
     elif count > 10:      sc = 1
     else:                 sc = 0
 
-    total = s10 + s1 + sc
+    return s10 + s1 + sc, {
+        "diversity_method":     "token_holders",
+        "top_10_pct":           top_10,
+        "top_10_score":         s10,
+        "largest_wallet_pct":   top_1,
+        "largest_wallet_score": s1,
+        "holder_count":         count,
+        "holder_count_score":   sc,
+    }
+
+
+def _score_security_hashrate(data: dict) -> tuple[int, dict]:
+    """BTC: Nakamoto coefficient = min pools to control >51% hashrate."""
+    nakamoto = data.get("nakamoto_coefficient")
+    top_1    = data.get("top_1_pct", 100.0)
+
+    if nakamoto is None:
+        return 0, {"diversity_method": "hashrate", "note": "no nakamoto data"}
+
+    if   nakamoto >= 5:  sn = 35
+    elif nakamoto == 4:  sn = 28
+    elif nakamoto == 3:  sn = 20
+    elif nakamoto == 2:  sn = 10
+    else:                sn = 0   # single pool could 51% attack
+
+    return sn, {
+        "diversity_method":     "hashrate",
+        "nakamoto_coefficient": nakamoto,
+        "nakamoto_score":       sn,
+        "largest_pool_pct":     top_1,
+        "pool_count":           data.get("pool_count"),
+        "hhi":                  data.get("hhi"),
+    }
+
+
+def _score_security_validator(data: dict) -> tuple[int, dict]:
+    """
+    ETH: Nakamoto coefficient (25 pts) + single-entity risk check (10 pts).
+    Uses 33% threshold (PoS finality attack), not 51%.
+    """
+    nakamoto = data.get("nakamoto_coefficient")
+    top_1    = data.get("top_1_pct", 100.0)   # largest single staking entity %
+
+    if nakamoto is None:
+        return 0, {"diversity_method": "validator", "note": "no validator data"}
+
+    # Nakamoto ≥3 entities needed to reach 33% — lower bar than BTC
+    if   nakamoto >= 5:  sn = 25
+    elif nakamoto == 4:  sn = 22
+    elif nakamoto == 3:  sn = 18
+    elif nakamoto == 2:  sn = 10
+    else:                sn = 0
+
+    # Single-entity risk (10 pts) — e.g. Lido holding >30% is a systemic risk
+    if   top_1 < 15:  se = 10
+    elif top_1 < 25:  se = 7
+    elif top_1 < 33:  se = 4
+    else:             se = 0
+
+    total = sn + se
+    return total, {
+        "diversity_method":       "validator",
+        "nakamoto_coefficient":   nakamoto,
+        "nakamoto_score":         sn,
+        "largest_entity_pct":     top_1,
+        "single_entity_score":    se,
+        "entity_count":           data.get("entity_count"),
+        "hhi":                    data.get("hhi"),
+    }
+
+
+def _score_security_vesting(data: dict) -> tuple[int, dict]:
+    """PoS L1s: insider allocation % as the primary decentralization signal."""
+    insider = data.get("insider_pct")
+    circ_r  = data.get("circulating_ratio")
+
+    if insider is None:
+        return 0, {"diversity_method": "vesting", "note": "no insider data"}
+
+    if   insider < 10:  sv = 35
+    elif insider < 20:  sv = 28
+    elif insider < 30:  sv = 20
+    elif insider < 40:  sv = 10
+    else:               sv = 4   # not 0 — coin may still be worth rating
+
+    # Bonus: very high circulating ratio (most tokens distributed) ≈ risk is behind us
+    circ_bonus = 2 if circ_r and circ_r > 0.85 else 0
+    total = min(sv + circ_bonus, 35)
+
+    return total, {
+        "diversity_method":   "vesting",
+        "insider_pct":        insider,
+        "insider_score":      sv,
+        "circulating_ratio":  circ_r,
+        "circulating_bonus":  circ_bonus,
+        "risk_flags":         data.get("risk_flags", []),
+    }
+
+
+def _score_security(decentralization_data: Optional[dict]) -> dict:
+    """
+    Route to the correct security scoring function based on diversity_method.
+    Falls back to token_holders scorer if method is missing or unrecognised.
+
+    Args:
+        decentralization_data: Output from
+            rating.collectors.decentralization_risk.base.fetch()
+
+    Returns:
+        security_transparency category dict.
+    """
+    MAX = 35
+
+    if not decentralization_data:
+        return {"score": 0, "max": MAX, "metrics": {}, "note": "no data"}
+
+    method = decentralization_data.get("diversity_method", "token_holders")
+
+    if   method == "hashrate":      score, metrics = _score_security_hashrate(decentralization_data)
+    elif method == "validator":     score, metrics = _score_security_validator(decentralization_data)
+    elif method == "vesting":       score, metrics = _score_security_vesting(decentralization_data)
+    elif method == "not_implemented":
+        # Mid-level placeholder: 17/35 (~50%) until proper data is available
+        score   = 17
+        metrics = {
+            "diversity_method": "not_implemented",
+            "note":             decentralization_data.get("note", "Method not yet implemented — mid-level placeholder score."),
+        }
+    else:                           score, metrics = _score_security_token_holders(decentralization_data)
+
     return {
-        "score": round(total, 2),
-        "max":   MAX,
-        "metrics": {
-            "top_10_pct":      top_10,
-            "top_10_score":    s10,
-            "largest_wallet_pct": top_1,
-            "largest_wallet_score": s1,
-            "holder_count":    count,
-            "holder_count_score": sc,
-        },
+        "score":   min(round(score, 2), MAX),
+        "max":     MAX,
+        "metrics": metrics,
     }
 
 
@@ -248,31 +362,38 @@ def _risk_level(overall: float) -> str:
 # ── Main entry point ──────────────────────────────────────────────────────────
 
 def calculate(
-    coin_id:          str,
-    coin_symbol:      str,
-    holder_data:      Optional[dict],
-    tokenomics_data:  Optional[dict],
-    github_data:      Optional[dict],
-    discourse_data:   Optional[dict],
-    prev_community:   Optional[dict],   # previous community_dev_activity JSONB from SQL
-    manual_validation: float = 25.0,
+    coin_id:               str,
+    coin_symbol:           str,
+    decentralization_data: Optional[dict],
+    tokenomics_data:       Optional[dict],
+    github_data:           Optional[dict],
+    discourse_data:        Optional[dict],
+    prev_community:        Optional[dict],   # previous community_dev_activity JSONB from SQL
+    manual_validation:     float = 25.0,
+    # Legacy alias kept for backwards compatibility
+    holder_data:           Optional[dict] = None,
 ) -> dict:
     """
     Calculate the full CCS score for a single coin.
 
     Args:
-        coin_id, coin_symbol: identity
-        holder_data:       raw output from collectors.holder_diversity.fetch()
-        tokenomics_data:   raw output from collectors.tokenomics.fetch_batch()
-        github_data:       raw output from collectors.github.fetch()
-        discourse_data:    raw output from collectors.public_discourse.fetch()
-        prev_community:    community_dev_activity JSONB from previous SQL row (for delta)
-        manual_validation: analyst score (0-25), read from SQL, default 25
+        coin_id, coin_symbol:  identity
+        decentralization_data: raw output from
+                               collectors.decentralization_risk.base.fetch()
+                               (replaces the old holder_data argument)
+        tokenomics_data:       raw output from collectors.tokenomics.fetch_batch()
+        github_data:           raw output from collectors.github.fetch()
+        discourse_data:        raw output from collectors.public_discourse.fetch()
+        prev_community:        community_dev_activity JSONB from previous SQL row (for delta)
+        manual_validation:     analyst score (0-25), read from SQL, default 25
+        holder_data:           deprecated legacy alias for decentralization_data
 
     Returns:
         Full score_row dict ready to write to SQL and Redis.
     """
-    sec  = _score_security(holder_data)
+    # Support legacy callers that still pass holder_data as positional arg
+    _dec_data = decentralization_data or holder_data
+    sec  = _score_security(_dec_data)
     tok  = _score_tokenomics(tokenomics_data)
     com  = _score_community(github_data, prev_community)
     disc = _score_discourse(discourse_data)
