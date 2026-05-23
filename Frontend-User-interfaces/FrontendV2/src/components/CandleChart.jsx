@@ -10,7 +10,7 @@ import "./CandleChart.css"
 const RESOLUTIONS = [
     { id: "live", label: "1H", resolution: "1h", limit: 24, disabled: true },
     { id: "1d", label: "1D", resolution: "1h", limit: 24, disabled: false },
-    { id: "1w", label: "1W", resolution: "1d", limit: 7, disabled: false },
+    { id: "1w", label: "1W", resolution: "1h", limit: 168, disabled: false },
     { id: "1month", label: "1M", resolution: "1d", limit: 30, disabled: false },
     { id: "3month", label: "3M", resolution: "1d", limit: 90, disabled: false },
     { id: "1year", label: "1Y", resolution: "1d", limit: 365, disabled: false },

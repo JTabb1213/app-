@@ -49,28 +49,43 @@ class StreamProducer:
         batch_size: int = 50,
         flush_interval_ms: int = 500,
         max_stream_len: int = 50_000,
+        deduplicate: bool = True,
     ):
         self._client = redis_client
         self._stream_key = stream_key
         self._batch_size = batch_size
         self._flush_interval = flush_interval_ms / 1000.0
         self._max_stream_len = max_stream_len
+        self._deduplicate = deduplicate
 
-        self._buffer: List[RawTick] = []
+        # When deduplication is on, the buffer is a dict keyed on
+        # (exchange, pair) — later ticks silently overwrite earlier ones
+        # within the same flush window, keeping only the most recent price.
+        # When off, it falls back to a plain list (e.g. volume trade events).
+        self._buffer: dict | List[RawTick] = {} if deduplicate else []
         self._lock = asyncio.Lock()
 
         # Stats
         self._produced = 0
+        self._dropped = 0   # ticks overwritten by a newer one in same window
         self._flushed = 0
         self._flush_count = 0
         self._errors = 0
 
     async def put(self, tick: RawTick) -> None:
         """Add a tick to the in-memory buffer (instant, no I/O)."""
-        self._buffer.append(tick)
         self._produced += 1
+        if self._deduplicate:
+            key = (tick.exchange, tick.pair)
+            if key in self._buffer:
+                self._dropped += 1
+            self._buffer[key] = tick
+            size = len(self._buffer)
+        else:
+            self._buffer.append(tick)
+            size = len(self._buffer)
 
-        if len(self._buffer) >= self._batch_size:
+        if size >= self._batch_size:
             await self.flush()
 
     async def flush(self) -> None:
@@ -79,8 +94,12 @@ class StreamProducer:
             return
 
         async with self._lock:
-            batch = self._buffer
-            self._buffer = []
+            if self._deduplicate:
+                batch = list(self._buffer.values())
+                self._buffer = {}
+            else:
+                batch = self._buffer
+                self._buffer = []
 
         try:
             pipe = self._client.pipeline(transaction=False)
@@ -109,7 +128,14 @@ class StreamProducer:
             self._errors += 1
             logger.error(f"[stream-producer] Flush failed: {e}")
             async with self._lock:
-                self._buffer = batch + self._buffer
+                if self._deduplicate:
+                    # Re-insert failed batch, but don't overwrite any newer
+                    # ticks that arrived during the failed flush.
+                    recovered = {(t.exchange, t.pair): t for t in batch}
+                    recovered.update(self._buffer)  # current wins over failed
+                    self._buffer = recovered
+                else:
+                    self._buffer = batch + self._buffer
 
     async def flush_loop(self) -> None:
         """Periodic flush — bounds max latency to flush_interval."""
@@ -139,8 +165,13 @@ class StreamProducer:
     def stats(self) -> dict:
         return {
             "produced": self._produced,
+            "dropped_as_duplicate": self._dropped,
             "flushed_to_stream": self._flushed,
             "flush_count": self._flush_count,
+            "dedup_ratio_pct": (
+                round(self._dropped / self._produced * 100, 1)
+                if self._produced else 0
+            ),
             "buffer_size": len(self._buffer),
             "errors": self._errors,
         }

@@ -57,7 +57,9 @@ load_dotenv(_ENV_PATH)
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Use IPv4 pooler URL if available (required on some networks/macOS where
+# the direct Supabase hostname fails DNS resolution).
+DATABASE_URL = os.getenv("DATABASE_URL_IPV4") or os.getenv("DATABASE_URL")
 
 BINANCE_BASE = "https://api.binance.us/api/v3/klines"
 

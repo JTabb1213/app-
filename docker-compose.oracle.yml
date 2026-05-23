@@ -2,7 +2,6 @@
 # docker-compose.oracle.yml — Oracle VM production stack
 #
 # Services running on the Oracle Ampere A1 VM (ARM64):
-#   - Redis           (local, in-memory — no Upstash needed on VM)
 #   - WebSocket server
 #   - Realtime collectors (price + trade)
 #   - Live-price ingestor
@@ -13,18 +12,19 @@
 #   - Rating score orchestrator
 #
 # NOT here (deployed separately):
-#   - Backend API     → Cloud Run
-#   - Frontend        → Firebase Hosting
-#   - PostgreSQL      → Supabase (external, set DATABASE_URL in .env)
+#   - Redis       → Upstash (set REDIS_URL=rediss://... in .env)
+#   - Backend API → Cloud Run
+#   - Frontend    → Firebase Hosting
+#   - PostgreSQL  → Supabase (set DATABASE_URL in .env)
 #
 # Usage (from the repo root on the Oracle VM):
-#   docker compose -f docker-compose.oracle.yml up --build -d
+#   docker-compose -f docker-compose.oracle.yml up --build -d
 #
 # Logs:
-#   docker compose -f docker-compose.oracle.yml logs -f
+#   docker-compose -f docker-compose.oracle.yml logs -f
 #
 # Update + restart after a git pull:
-#   docker compose -f docker-compose.oracle.yml up --build -d
+#   git pull && docker-compose -f docker-compose.oracle.yml up --build -d
 #
 # All secrets come from .env in the same directory as this file.
 # Copy .env to ~/app/.env on the VM — it is gitignored and never committed.
@@ -32,22 +32,8 @@
 
 services:
 
-  # ── Redis (local to the VM — replaces Upstash for realtime services) ────────
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   # ── WebSocket broadcast server ───────────────────────────────────────────────
-  # Reads from Redis and broadcasts live prices to connected frontend clients.
+  # Reads from Upstash Redis and broadcasts live prices to connected frontend clients.
   ws:
     build:
       context: ./ws
@@ -55,11 +41,8 @@ services:
     ports:
       - "8765:8765"
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - LOG_LEVEL=INFO
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
 
   # ── Realtime: collectors-primary ─────────────────────────────────────────────
@@ -69,11 +52,8 @@ services:
     build:
       context: .
       dockerfile: realtime/collectors-primary/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - STREAM_TRADES_KEY=stream:trades
       - LOG_LEVEL=INFO
       - HEALTH_PORT=8081
@@ -87,11 +67,8 @@ services:
     build:
       context: .
       dockerfile: realtime/collectors-secondary/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - STREAM_TRADES_KEY=stream:trades
       - LOG_LEVEL=INFO
       - HEALTH_PORT=8082
@@ -107,11 +84,8 @@ services:
     build:
       context: .
       dockerfile: realtime/live-price-ingestor/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - STREAM_TRADES_KEY=stream:trades
       - DATABASE_URL=${DATABASE_URL}
       - LOG_LEVEL=INFO
@@ -126,11 +100,8 @@ services:
     build:
       context: .
       dockerfile: realtime/trade-collectors-primary/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - STREAM_KEY=stream:trades:volume
       - LOG_LEVEL=INFO
       - HEALTH_PORT=8084
@@ -144,11 +115,8 @@ services:
     build:
       context: .
       dockerfile: realtime/trade-collectors-secondary/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - STREAM_KEY=stream:trades:volume
       - LOG_LEVEL=INFO
       - HEALTH_PORT=8085
@@ -163,11 +131,8 @@ services:
     build:
       context: .
       dockerfile: realtime/volume-aggregator/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - VOLUME_STREAM_KEY=stream:trades:volume
       - VOLUME_BUCKET_SECONDS=60
       - VOLUME_KEY_TTL_HOURS=25
@@ -186,12 +151,9 @@ services:
       dockerfile: realtime/candle-aggregator/Dockerfile
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - RUN_INTERVAL_MINUTES=60
       - LOG_LEVEL=INFO
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
 
   # ── Market Data Collector ──────────────────────────────────────────────────────
@@ -203,15 +165,12 @@ services:
       dockerfile: collectors/market/Dockerfile
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - COINGECKO_API_KEY=${COINGECKO_API_KEY}
       - COINGECKO_API_BASE_URL=${COINGECKO_API_BASE_URL}
       - MARKET_RUN_INTERVAL=21600
       - MARKET_REQUEST_DELAY=1.5
       - LOG_LEVEL=INFO
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
 
   # ── News Collector ────────────────────────────────────────────────────────────
@@ -223,20 +182,15 @@ services:
       dockerfile: collectors/news/Dockerfile
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - GOOGLE_NEWS_RSS_BASE_URL=${GOOGLE_NEWS_RSS_BASE_URL}
       - NEWS_RUN_INTERVAL=7200
       - NEWS_REQUEST_DELAY=2.0
       - LOG_LEVEL=INFO
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
 
   # ── Rating Score Orchestrator ──────────────────────────────────────────────────
   # Runs a full scoring cycle once per week (SCHEDULE_INTERVAL_SECONDS=604800).
-  # Collects on-chain, GitHub, sentiment, and tokenomics data, computes
-  # composite scores, and writes results to PostgreSQL rating_scores table.
   rating-orchestrator:
     build:
       context: ./rating
@@ -245,7 +199,7 @@ services:
       - ./data:/rating/data:ro
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - COVALENT_API_KEY=${COVALENT_API_KEY}
       - COINGECKO_API_KEY=${COINGECKO_API_KEY}
@@ -259,10 +213,4 @@ services:
       - SCHEDULE_INTERVAL_SECONDS=${SCHEDULE_INTERVAL_SECONDS:-604800}
       - REDIS_TTL=${REDIS_TTL:-691200}
       - LOG_LEVEL=INFO
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
-
-volumes:
-  redis-data:

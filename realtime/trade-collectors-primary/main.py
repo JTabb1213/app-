@@ -100,9 +100,12 @@ async def main():
         batch_size=config.STREAM_PRODUCER_BATCH_SIZE,
         flush_interval_ms=config.STREAM_PRODUCER_FLUSH_MS,
         max_stream_len=config.STREAM_MAX_LEN,
+        deduplicate=False,  # volume events are additive — every trade must be kept
     )
 
     kraken = KrakenTradeConnector(_producer)
+    coinbase = CoinbaseTradeConnector(_producer)
+    binance = BinanceTradeConnector(_producer)
     coinbase = CoinbaseTradeConnector(_producer)
     binance = BinanceTradeConnector(_producer)
     _connectors = [kraken, coinbase, binance]

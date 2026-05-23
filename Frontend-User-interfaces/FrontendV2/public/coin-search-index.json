@@ -45,12 +45,32 @@
     ]
   },
   {
+    "id": "axie-infinity",
+    "symbol": "AXS",
+    "name": "Axie Infinity",
+    "aliases": [
+      "axie infinity",
+      "axie",
+      "axs"
+    ]
+  },
+  {
     "id": "basic-attention-token",
     "symbol": "BAT",
     "name": "Basic Attention Token",
     "aliases": [
       "basic attention token",
       "bat"
+    ]
+  },
+  {
+    "id": "binancecoin",
+    "symbol": "BNB",
+    "name": "Binancecoin",
+    "aliases": [
+      "binancecoin",
+      "bnb",
+      "binance coin"
     ]
   },
   {
@@ -121,14 +141,6 @@
     ]
   },
   {
-    "id": "dash",
-    "symbol": "DASH",
-    "name": "Dash",
-    "aliases": [
-      "dash"
-    ]
-  },
-  {
     "id": "decentraland",
     "symbol": "MANA",
     "name": "Decentraland",
@@ -145,24 +157,6 @@
       "dogecoin",
       "doge",
       "xdg"
-    ]
-  },
-  {
-    "id": "enjincoin",
-    "symbol": "ENJ",
-    "name": "Enjincoin",
-    "aliases": [
-      "enjin coin",
-      "enjin",
-      "enj"
-    ]
-  },
-  {
-    "id": "eos",
-    "symbol": "EOS",
-    "name": "Eos",
-    "aliases": [
-      "eos"
     ]
   },
   {
@@ -209,14 +203,6 @@
     "aliases": [
       "filecoin",
       "fil"
-    ]
-  },
-  {
-    "id": "flow",
-    "symbol": "FLOW",
-    "name": "Flow",
-    "aliases": [
-      "flow"
     ]
   },
   {
@@ -402,21 +388,22 @@
     ]
   },
   {
-    "id": "tezos",
-    "symbol": "XTZ",
-    "name": "Tezos",
-    "aliases": [
-      "tezos",
-      "xtz"
-    ]
-  },
-  {
     "id": "the-graph",
     "symbol": "GRT",
     "name": "The Graph",
     "aliases": [
       "the graph",
       "grt"
+    ]
+  },
+  {
+    "id": "the-open-network",
+    "symbol": "TON",
+    "name": "The Open Network",
+    "aliases": [
+      "ton",
+      "toncoin",
+      "the open network"
     ]
   },
   {
@@ -430,12 +417,21 @@
   },
   {
     "id": "thorchain",
-    "symbol": "thorchain",
+    "symbol": "RUNE",
     "name": "Thorchain",
     "aliases": [
       "thorchain",
       "rune",
       "thor"
+    ]
+  },
+  {
+    "id": "tron",
+    "symbol": "TRX",
+    "name": "Tron",
+    "aliases": [
+      "tron",
+      "trx"
     ]
   },
   {
@@ -449,7 +445,7 @@
   },
   {
     "id": "yearn-finance",
-    "symbol": "yearn-finance",
+    "symbol": "YFI",
     "name": "Yearn Finance",
     "aliases": [
       "yearn finance",
