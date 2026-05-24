@@ -182,26 +182,33 @@ async def _process_batch(batch):
             _unresolved += 1
             continue
 
-        try:
-            price = float(data.get("price", 0))
-            size = float(data.get("size", 0))
-            side = data.get("side", "buy").lower()
-        except (ValueError, TypeError):
-            continue
-
-        if price <= 0 or size <= 0:
-            continue
-
-        # Store base-asset quantity (not USD notional) so that
-        # vol:ethereum = ETH traded, vol:bitcoin = BTC traded, etc.
-        # This captures all pairs (USD, USDT, BTC-quoted) in the coin's own unit.
-        volume = size
         minute_ts = int(tick.received_at) // config.VOLUME_BUCKET_SECONDS * config.VOLUME_BUCKET_SECONDS
-        bucket_key = "b" if side == "buy" else "s"
 
-        _accum[coin_id][minute_ts][bucket_key] += volume
-        _accum[coin_id][minute_ts]["ex"].add(exchange)
-        _processed += 1
+        if data.get("is_aggregated") == "1":
+            # Pre-aggregated entry from trade-collector: buy_vol/sell_vol already summed
+            try:
+                buy_vol  = float(data.get("buy_vol",  0))
+                sell_vol = float(data.get("sell_vol", 0))
+            except (ValueError, TypeError):
+                continue
+            _accum[coin_id][minute_ts]["b"] += buy_vol
+            _accum[coin_id][minute_ts]["s"] += sell_vol
+            _accum[coin_id][minute_ts]["ex"].add(exchange)
+            _processed += int(data.get("trade_count", 1))
+        else:
+            # Individual trade event (legacy / fallback path)
+            try:
+                price = float(data.get("price", 0))
+                size  = float(data.get("size",  0) or data.get("qty", 0))
+                side  = data.get("side", "buy").lower()
+            except (ValueError, TypeError):
+                continue
+            if price <= 0 or size <= 0:
+                continue
+            bucket_key = "b" if side == "buy" else "s"
+            _accum[coin_id][minute_ts][bucket_key] += size
+            _accum[coin_id][minute_ts]["ex"].add(exchange)
+            _processed += 1
 
     return ids
 

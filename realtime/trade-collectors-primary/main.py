@@ -100,7 +100,8 @@ async def main():
         batch_size=config.STREAM_PRODUCER_BATCH_SIZE,
         flush_interval_ms=config.STREAM_PRODUCER_FLUSH_MS,
         max_stream_len=config.STREAM_MAX_LEN,
-        deduplicate=False,  # volume events are additive — every trade must be kept
+        deduplicate=False,
+        aggregate_volume=True,  # accumulate buy/sell vol per (exchange,pair) for 60s then push one entry
     )
 
     kraken = KrakenTradeConnector(_producer)

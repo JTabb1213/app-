@@ -50,6 +50,7 @@ class StreamProducer:
         flush_interval_ms: int = 500,
         max_stream_len: int = 50_000,
         deduplicate: bool = True,
+        aggregate_volume: bool = False,
     ):
         self._client = redis_client
         self._stream_key = stream_key
@@ -57,12 +58,17 @@ class StreamProducer:
         self._flush_interval = flush_interval_ms / 1000.0
         self._max_stream_len = max_stream_len
         self._deduplicate = deduplicate
+        self._aggregate_volume = aggregate_volume
 
-        # When deduplication is on, the buffer is a dict keyed on
-        # (exchange, pair) — later ticks silently overwrite earlier ones
-        # within the same flush window, keeping only the most recent price.
-        # When off, it falls back to a plain list (e.g. volume trade events).
-        self._buffer: dict | List[RawTick] = {} if deduplicate else []
+        # deduplicate=True  → dict[(exchange, pair) → RawTick]  (latest tick wins)
+        # aggregate_volume=True → dict[(exchange, pair) → {buy_vol, sell_vol, count}]
+        # both False         → plain list (raw, no dedup)
+        if aggregate_volume:
+            self._buffer: dict | List[RawTick] = {}
+        elif deduplicate:
+            self._buffer = {}
+        else:
+            self._buffer = []
         self._lock = asyncio.Lock()
 
         # Stats
@@ -75,17 +81,44 @@ class StreamProducer:
     async def put(self, tick: RawTick) -> None:
         """Add a tick to the in-memory buffer (instant, no I/O)."""
         self._produced += 1
-        if self._deduplicate:
+
+        if self._aggregate_volume:
+            # Accumulate buy/sell volume per (exchange, pair).
+            # Expects tick.data to have: price (float), size (float), side (str)
+            key = (tick.exchange, tick.pair)
+            try:
+                size_val = float(tick.data.get("size", 0) or tick.data.get("qty", 0))
+                side = tick.data.get("side", "buy").lower()
+            except (ValueError, TypeError):
+                return
+            if size_val <= 0:
+                return
+            if key not in self._buffer:
+                self._buffer[key] = {
+                    "buy_vol": 0.0, "sell_vol": 0.0,
+                    "trade_count": 0, "exchange": tick.exchange,
+                    "pair": tick.pair, "received_at": tick.received_at,
+                }
+            else:
+                self._dropped += 1  # consolidated, not truly dropped
+            if side == "buy":
+                self._buffer[key]["buy_vol"] += size_val
+            else:
+                self._buffer[key]["sell_vol"] += size_val
+            self._buffer[key]["trade_count"] += 1
+            self._buffer[key]["received_at"] = tick.received_at  # keep latest ts
+            buf_size = len(self._buffer)
+        elif self._deduplicate:
             key = (tick.exchange, tick.pair)
             if key in self._buffer:
                 self._dropped += 1
             self._buffer[key] = tick
-            size = len(self._buffer)
+            buf_size = len(self._buffer)
         else:
             self._buffer.append(tick)
-            size = len(self._buffer)
+            buf_size = len(self._buffer)
 
-        if size >= self._batch_size:
+        if buf_size >= self._batch_size:
             await self.flush()
 
     async def flush(self) -> None:
@@ -94,7 +127,12 @@ class StreamProducer:
             return
 
         async with self._lock:
-            if self._deduplicate:
+            if self._aggregate_volume:
+                # Serialize accumulated buckets as flat dicts for XADD
+                raw_batch = list(self._buffer.values())
+                self._buffer = {}
+                batch = raw_batch   # list of plain dicts, not RawTick
+            elif self._deduplicate:
                 batch = list(self._buffer.values())
                 self._buffer = {}
             else:
@@ -105,9 +143,13 @@ class StreamProducer:
             pipe = self._client.pipeline(transaction=False)
 
             for tick in batch:
+                if self._aggregate_volume:
+                    entry = self._serialize_aggregate(tick)
+                else:
+                    entry = self._serialize(tick)
                 pipe.xadd(
                     self._stream_key,
-                    self._serialize(tick),
+                    entry,
                     maxlen=self._max_stream_len,
                     approximate=True,
                 )
@@ -128,11 +170,14 @@ class StreamProducer:
             self._errors += 1
             logger.error(f"[stream-producer] Flush failed: {e}")
             async with self._lock:
-                if self._deduplicate:
-                    # Re-insert failed batch, but don't overwrite any newer
-                    # ticks that arrived during the failed flush.
+                if self._aggregate_volume:
+                    # Merge failed buckets back; current buffer wins (already has newer data)
+                    recovered = {(b["exchange"], b["pair"]): b for b in batch}
+                    recovered.update(self._buffer)
+                    self._buffer = recovered
+                elif self._deduplicate:
                     recovered = {(t.exchange, t.pair): t for t in batch}
-                    recovered.update(self._buffer)  # current wins over failed
+                    recovered.update(self._buffer)
                     self._buffer = recovered
                 else:
                     self._buffer = batch + self._buffer
@@ -159,6 +204,19 @@ class StreamProducer:
             "pair": tick.pair,
             "data": json.dumps(tick.data),
             "received_at": str(tick.received_at),
+        }
+
+    @staticmethod
+    def _serialize_aggregate(bucket: dict) -> dict:
+        """Serialize a pre-aggregated volume bucket to a flat {str: str} dict."""
+        return {
+            "exchange":     bucket["exchange"],
+            "pair":         bucket["pair"],
+            "buy_vol":      str(bucket["buy_vol"]),
+            "sell_vol":     str(bucket["sell_vol"]),
+            "trade_count":  str(bucket["trade_count"]),
+            "is_aggregated": "1",
+            "received_at":  str(bucket["received_at"]),
         }
 
     @property

@@ -20,8 +20,8 @@ REDIS_URL = os.getenv("REDIS_URL")
 # ---------------------------------------------------------------------------
 STREAM_TRADES_KEY = os.getenv("STREAM_TRADES_KEY", "stream:trades")
 STREAM_MAX_LEN = int(os.getenv("STREAM_MAX_LEN", "50000"))
-STREAM_PRODUCER_BATCH_SIZE = int(os.getenv("STREAM_PRODUCER_BATCH_SIZE", "50"))
-STREAM_PRODUCER_FLUSH_MS = int(os.getenv("STREAM_PRODUCER_FLUSH_MS", "500"))
+STREAM_PRODUCER_BATCH_SIZE = int(os.getenv("STREAM_PRODUCER_BATCH_SIZE", "200"))
+STREAM_PRODUCER_FLUSH_MS = int(os.getenv("STREAM_PRODUCER_FLUSH_MS", "60000"))  # 60s window: dedup keeps only latest per (exchange,pair)
 
 # ---------------------------------------------------------------------------
 # Alias file (used for symbol discovery)
