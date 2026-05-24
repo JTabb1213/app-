@@ -13,6 +13,7 @@ from typing import Optional
 
 from .sources import cache as disk_cache
 from .sources import reddit
+from .sources import news_sentiment
 # from .sources import newsapi        # disabled until NEWSAPI_KEY is configured
 # from .sources import serpapi_trends  # disabled until SERPAPI_KEY is configured
 
@@ -48,18 +49,18 @@ def fetch(coin: dict, newsapi_key: str = "", serpapi_key: str = "") -> Optional[
     cache = disk_cache.load(coin_id)
 
     reddit_compound, reddit_count = reddit.fetch(coin, cache)
-    #news_compound,   news_count   = newsapi.fetch(coin, newsapi_key, cache)
+    news_compound, news_count     = news_sentiment.fetch(coin, cache)
     #search_interest               = serpapi_trends.fetch(coin, cache, serpapi_key)
 
     disk_cache.save(coin_id, cache)
 
     return {
-        "coin_id":            coin_id,
-        "symbol":             coin.get("symbol", ""),
-        "reddit_compound":    reddit_compound,
-        "reddit_post_count":  reddit_count,
-        #"news_compound":      news_compound,
-        #"news_article_count": news_count,
+        "coin_id":             coin_id,
+        "symbol":              coin.get("symbol", ""),
+        "reddit_compound":     reddit_compound,
+        "reddit_post_count":   reddit_count,
+        "news_compound":       news_compound,
+        "news_article_count":  news_count,
         #"search_interest":    search_interest,
-        "snapshot_time":      datetime.now(timezone.utc).isoformat(),
+        "snapshot_time":       datetime.now(timezone.utc).isoformat(),
     }

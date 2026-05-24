@@ -189,6 +189,26 @@ services:
       - LOG_LEVEL=INFO
     restart: unless-stopped
 
+  # ── News Sentiment Collector ──────────────────────────────────────────────────
+  # Runs every 4 hours. Fetches Google News RSS for each coin in coin_aliases.json,
+  # scores headline sentiment with VADER, and writes bucketed averages to
+  # the news_sentiment_snapshots SQL table.
+  # The rating-orchestrator reads these buckets to populate news_compound.
+  news-sentiment-collector:
+    build:
+      context: .
+      dockerfile: collectors/news-sentiment/Dockerfile
+    volumes:
+      - ./data:/data:ro
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - COIN_ALIASES_PATH=/data/coin_aliases.json
+      - NEWS_SENTIMENT_RUN_INTERVAL=14400
+      - NEWS_SENTIMENT_REQUEST_DELAY=2.0
+      - NEWS_SENTIMENT_MAX_ARTICLES=10
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+
   # ── Rating Score Orchestrator ──────────────────────────────────────────────────
   # Runs a full scoring cycle once per week (SCHEDULE_INTERVAL_SECONDS=604800).
   rating-orchestrator:
