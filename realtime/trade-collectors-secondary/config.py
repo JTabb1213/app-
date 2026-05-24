@@ -21,7 +21,7 @@ REDIS_URL = os.getenv("REDIS_URL")
 STREAM_KEY = os.getenv("VOLUME_STREAM_KEY", "stream:trades:volume")
 STREAM_MAX_LEN = int(os.getenv("STREAM_MAX_LEN", "50000"))
 STREAM_PRODUCER_BATCH_SIZE = int(os.getenv("STREAM_PRODUCER_BATCH_SIZE", "200"))
-STREAM_PRODUCER_FLUSH_MS = int(os.getenv("STREAM_PRODUCER_FLUSH_MS", "60000"))  # 60s window: aggregates buy/sell vol per (exchange,pair)
+STREAM_PRODUCER_FLUSH_MS = int(os.getenv("STREAM_PRODUCER_FLUSH_MS", "30000"))  # 30s: push aggregated buy/sell per (exchange,pair) twice per minute
 
 # ---------------------------------------------------------------------------
 # Alias file (used for symbol discovery)
