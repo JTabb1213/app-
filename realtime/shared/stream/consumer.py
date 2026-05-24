@@ -81,7 +81,10 @@ class StreamConsumer:
 
         if not response:
             return []
-        return self._parse_response(response)
+        results, failed_ids = self._parse_response(response)
+        if failed_ids:
+            await self.ack(failed_ids)
+        return results
 
     async def reclaim_pending(self) -> List[Tuple[str, RawTick]]:
         """Reclaim pending (unacknowledged) messages from a previous crash."""
@@ -98,7 +101,9 @@ class StreamConsumer:
         if not response:
             return []
 
-        results = self._parse_response(response)
+        results, failed_ids = self._parse_response(response)
+        if failed_ids:
+            await self.ack(failed_ids)
         if results:
             logger.info(f"[stream-consumer] Reclaimed {len(results)} pending messages")
         return results
@@ -113,11 +118,13 @@ class StreamConsumer:
         except Exception as e:
             logger.error(f"[stream-consumer] XACK failed: {e}")
 
-    def _parse_response(self, response: list) -> List[Tuple[str, RawTick]]:
+    def _parse_response(self, response: list) -> Tuple[List[Tuple[str, RawTick]], List[str]]:
         results = []
+        failed_ids = []
         for _stream_name, messages in response:
             for msg_id, fields in messages:
                 if not fields:
+                    failed_ids.append(msg_id)
                     continue
                 try:
                     tick = self._deserialize(fields)
@@ -126,7 +133,8 @@ class StreamConsumer:
                 except Exception as e:
                     logger.error(f"[stream-consumer] Deserialize failed for {msg_id}: {e}")
                     self._errors += 1
-        return results
+                    failed_ids.append(msg_id)
+        return results, failed_ids
 
     @staticmethod
     def _deserialize(fields: dict) -> RawTick:
