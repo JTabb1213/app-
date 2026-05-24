@@ -208,15 +208,21 @@ class StreamProducer:
 
     @staticmethod
     def _serialize_aggregate(bucket: dict) -> dict:
-        """Serialize a pre-aggregated volume bucket to a flat {str: str} dict."""
+        """Serialize a pre-aggregated volume bucket to a flat {str: str} dict.
+
+        Packs aggregate fields into 'data' as JSON so the existing StreamConsumer
+        _deserialize() method (which does json.loads(fields['data'])) works unchanged.
+        """
         return {
-            "exchange":     bucket["exchange"],
-            "pair":         bucket["pair"],
-            "buy_vol":      str(bucket["buy_vol"]),
-            "sell_vol":     str(bucket["sell_vol"]),
-            "trade_count":  str(bucket["trade_count"]),
-            "is_aggregated": "1",
-            "received_at":  str(bucket["received_at"]),
+            "exchange":    bucket["exchange"],
+            "pair":        bucket["pair"],
+            "received_at": str(bucket["received_at"]),
+            "data": json.dumps({
+                "buy_vol":      bucket["buy_vol"],
+                "sell_vol":     bucket["sell_vol"],
+                "trade_count":  bucket["trade_count"],
+                "is_aggregated": "1",
+            }),
         }
 
     @property
