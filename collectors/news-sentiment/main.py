@@ -175,7 +175,13 @@ def _get_seen_urls(coin_id: str, lookback_buckets: int = 3) -> set[str]:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT articles
+                SELECT art                cd collectors/news-sentiment
+                pip install -r requirements.txt
+                
+                DATABASE_URL="postgresql://postgres.lbdzuqlaqsjrvmkdofmb:v1Gtm7Qo4EiY2Rhe@aws-1-us-east-2.pooler.supabase.com:5432/postgres" \
+                COIN_ALIASES_PATH="../../data/coin_aliases.json" \
+                NEWS_SENTIMENT_RUN_INTERVAL=14400 \
+                python main.pyicles
                 FROM news_sentiment_snapshots
                 WHERE coin_id = %s
                 ORDER BY bucket_start DESC

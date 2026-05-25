@@ -1,0 +1,248 @@
+# Crypto Network Metrics Seed CSV
+
+```csv
+coin_id,metric_name,metric_value,metric_text
+bitcoin,max_theoretical_tps,7,
+bitcoin,block_time_seconds,600,
+bitcoin,theoretical_time_to_finality,3600,
+bitcoin,consensus_mechanism,,Proof of Work
+bitcoin,execution_environment,,Bitcoin Script UTXO
+bitcoin,scaling_architecture,,Layer 1 Monolithic
+ethereum,max_theoretical_tps,119,
+ethereum,block_time_seconds,12,
+ethereum,theoretical_time_to_finality,900,
+ethereum,consensus_mechanism,,Proof of Stake
+ethereum,execution_environment,,EVM Serial Execution
+ethereum,scaling_architecture,,Layer 1 Modular with Layer 2 Rollups
+solana,max_theoretical_tps,65000,
+solana,block_time_seconds,0.4,
+solana,theoretical_time_to_finality,2.5,
+solana,consensus_mechanism,,Proof of History plus Proof of Stake
+solana,execution_environment,,Sealevel Parallel Runtime
+solana,scaling_architecture,,High Throughput Monolithic Layer 1
+cardano,max_theoretical_tps,250,
+cardano,block_time_seconds,20,
+cardano,theoretical_time_to_finality,120,
+cardano,consensus_mechanism,,Ouroboros Proof of Stake
+cardano,execution_environment,,Extended UTXO
+cardano,scaling_architecture,,Layer 1 with Hydra Scaling
+avalanche-2,max_theoretical_tps,4500,
+avalanche-2,block_time_seconds,2,
+avalanche-2,theoretical_time_to_finality,2,
+avalanche-2,consensus_mechanism,,Avalanche Consensus Proof of Stake
+avalanche-2,execution_environment,,EVM Compatible Subnets
+avalanche-2,scaling_architecture,,Subnet Based Modular Scaling
+polkadot,max_theoretical_tps,1000,
+polkadot,block_time_seconds,6,
+polkadot,theoretical_time_to_finality,60,
+polkadot,consensus_mechanism,,Nominated Proof of Stake
+polkadot,execution_environment,,Substrate WASM Runtime
+polkadot,scaling_architecture,,Relay Chain with Parachains
+cosmos,max_theoretical_tps,10000,
+cosmos,block_time_seconds,6,
+cosmos,theoretical_time_to_finality,6,
+cosmos,consensus_mechanism,,Tendermint Proof of Stake
+cosmos,execution_environment,,Cosmos SDK
+cosmos,scaling_architecture,,App Chain Modular Architecture
+algorand,max_theoretical_tps,6000,
+algorand,block_time_seconds,3.3,
+algorand,theoretical_time_to_finality,4,
+algorand,consensus_mechanism,,Pure Proof of Stake
+algorand,execution_environment,,AVM Algorand Virtual Machine
+algorand,scaling_architecture,,Monolithic Layer 1
+aptos,max_theoretical_tps,160000,
+aptos,block_time_seconds,1,
+aptos,theoretical_time_to_finality,1,
+aptos,consensus_mechanism,,Proof of Stake
+aptos,execution_environment,,Move VM Parallel Execution
+aptos,scaling_architecture,,Parallelized Monolithic Layer 1
+sui,max_theoretical_tps,297000,
+sui,block_time_seconds,0.5,
+sui,theoretical_time_to_finality,3,
+sui,consensus_mechanism,,Delegated Proof of Stake
+sui,execution_environment,,Move VM Object Based Parallelism
+sui,scaling_architecture,,Horizontally Scalable Layer 1
+near,max_theoretical_tps,100000,
+near,block_time_seconds,1,
+near,theoretical_time_to_finality,2,
+near,consensus_mechanism,,Proof of Stake
+near,execution_environment,,WASM Runtime
+near,scaling_architecture,,Nightshade Sharding
+arbitrum,max_theoretical_tps,40000,
+arbitrum,block_time_seconds,0.25,
+arbitrum,theoretical_time_to_finality,900,
+arbitrum,consensus_mechanism,,Optimistic Rollup
+arbitrum,execution_environment,,EVM Compatible Rollup
+arbitrum,scaling_architecture,,Ethereum Layer 2 Rollup
+optimism,max_theoretical_tps,4000,
+optimism,block_time_seconds,2,
+optimism,theoretical_time_to_finality,900,
+optimism,consensus_mechanism,,Optimistic Rollup
+optimism,execution_environment,,OP Stack EVM
+optimism,scaling_architecture,,Superchain Rollup Architecture
+tron,max_theoretical_tps,2000,
+tron,block_time_seconds,3,
+tron,theoretical_time_to_finality,57,
+tron,consensus_mechanism,,Delegated Proof of Stake
+tron,execution_environment,,TVM Tron Virtual Machine
+tron,scaling_architecture,,High Throughput Layer 1
+ripple,max_theoretical_tps,1500,
+ripple,block_time_seconds,4,
+ripple,theoretical_time_to_finality,5,
+ripple,consensus_mechanism,,RPCA Federated Consensus
+ripple,execution_environment,,XRP Ledger Native Runtime
+ripple,scaling_architecture,,Payment Optimized Layer 1
+stellar,max_theoretical_tps,1000,
+stellar,block_time_seconds,5,
+stellar,theoretical_time_to_finality,5,
+stellar,consensus_mechanism,,Stellar Consensus Protocol
+stellar,execution_environment,,Soroban Smart Contracts
+stellar,scaling_architecture,,Payment Focused Layer 1
+hedera-hashgraph,max_theoretical_tps,10000,
+hedera-hashgraph,block_time_seconds,3,
+hedera-hashgraph,theoretical_time_to_finality,5,
+hedera-hashgraph,consensus_mechanism,,Hashgraph aBFT
+hedera-hashgraph,execution_environment,,EVM Compatible Smart Contracts
+hedera-hashgraph,scaling_architecture,,Hashgraph DAG Architecture
+fantom,max_theoretical_tps,10000,
+fantom,block_time_seconds,1,
+fantom,theoretical_time_to_finality,1,
+fantom,consensus_mechanism,,Lachesis aBFT Proof of Stake
+fantom,execution_environment,,EVM Compatible
+fantom,scaling_architecture,,DAG Based Layer 1
+ton,max_theoretical_tps,100000,
+ton,block_time_seconds,5,
+ton,theoretical_time_to_finality,5,
+ton,consensus_mechanism,,Proof of Stake
+ton,execution_environment,,TON Virtual Machine
+ton,scaling_architecture,,Dynamic Sharding
+chainlink,oracle_update_latency_seconds,1,
+chainlink,network_type,,Decentralized Oracle Network
+chainlink,scaling_architecture,,Off Chain Oracle Aggregation
+filecoin,storage_capacity_exabytes,0,
+filecoin,consensus_mechanism,,Proof of Replication and Proof of Spacetime
+filecoin,execution_environment,,Filecoin Virtual Machine
+filecoin,scaling_architecture,,Decentralized Storage Network
+uniswap,network_type,,Decentralized Exchange Protocol
+uniswap,execution_environment,,EVM Smart Contracts
+uniswap,scaling_architecture,,AMM Protocol Across Multiple Chains
+aave,network_type,,Decentralized Lending Protocol
+aave,execution_environment,,EVM Smart Contracts
+aave,scaling_architecture,,Multi Chain Liquidity Markets
+hyperliquid,max_theoretical_tps,100000,
+hyperliquid,theoretical_time_to_finality,1,
+hyperliquid,execution_environment,,Custom On Chain Order Book
+hyperliquid,scaling_architecture,,High Performance Trading Focused Layer 1
+injective,max_theoretical_tps,25000,
+injective,theoretical_time_to_finality,1,
+injective,execution_environment,,CosmWasm and EVM Support
+injective,scaling_architecture,,App Specific DeFi Chain
+loopring,max_theoretical_tps,2000,
+loopring,consensus_mechanism,,zkRollup
+loopring,execution_environment,,Ethereum Layer 2 zkRollup
+loopring,scaling_architecture,,Zero Knowledge Rollup
+immutable-x,max_theoretical_tps,9000,
+immutable-x,consensus_mechanism,,zkRollup
+immutable-x,execution_environment,,StarkEx Engine
+immutable-x,scaling_architecture,,NFT Focused Layer 2
+thorchain,max_theoretical_tps,1000,
+thorchain,consensus_mechanism,,Tendermint BFT
+thorchain,execution_environment,,Cross Chain Liquidity Engine
+thorchain,scaling_architecture,,Cross Chain AMM Network
+zcash,max_theoretical_tps,26,
+zcash,consensus_mechanism,,Proof of Work
+zcash,execution_environment,,zkSNARK Privacy Transactions
+zcash,scaling_architecture,,Privacy Focused Layer 1
+litecoin,max_theoretical_tps,56,
+litecoin,block_time_seconds,150,
+litecoin,theoretical_time_to_finality,900,
+litecoin,consensus_mechanism,,Proof of Work
+litecoin,scaling_architecture,,Bitcoin Derived Payment Network
+dogecoin,max_theoretical_tps,33,
+dogecoin,block_time_seconds,60,
+dogecoin,theoretical_time_to_finality,360,
+dogecoin,consensus_mechanism,,Proof of Work
+
+```
+
+axie-infinity,network_type,,Blockchain Gaming Ecosystem
+axie-infinity,execution_environment,,Ronin EVM Sidechain
+axie-infinity,scaling_architecture,,Gaming Optimized Sidechain
+basic-attention-token,network_type,,Digital Advertising Token
+basic-attention-token,execution_environment,,ERC 20 Ethereum Token
+basic-attention-token,scaling_architecture,,Application Layer Token
+binancecoin,max_theoretical_tps,2200,
+binancecoin,block_time_seconds,3,
+binancecoin,theoretical_time_to_finality,6,
+binancecoin,consensus_mechanism,,Proof of Staked Authority
+binancecoin,execution_environment,,EVM Compatible BNB Chain
+binancecoin,scaling_architecture,,High Throughput EVM Layer 1
+bitcoin-cash,max_theoretical_tps,116,
+bitcoin-cash,block_time_seconds,600,
+bitcoin-cash,theoretical_time_to_finality,3600,
+bitcoin-cash,consensus_mechanism,,Proof of Work
+bitcoin-cash,execution_environment,,Bitcoin Script UTXO
+bitcoin-cash,scaling_architecture,,Large Block Payment Network
+compound-governance-token,network_type,,Decentralized Lending Protocol
+compound-governance-token,execution_environment,,EVM Smart Contracts
+compound-governance-token,scaling_architecture,,Algorithmic Money Markets
+curve-dao-token,network_type,,Stablecoin Focused AMM
+curve-dao-token,execution_environment,,EVM Smart Contracts
+curve-dao-token,scaling_architecture,,Liquidity Pool Exchange Protocol
+decentraland,network_type,,Metaverse Virtual World
+decentraland,execution_environment,,Ethereum Based Virtual Land System
+decentraland,scaling_architecture,,Application Layer Metaverse Platform
+ethereum-classic,max_theoretical_tps,27,
+ethereum-classic,block_time_seconds,13,
+ethereum-classic,theoretical_time_to_finality,300,
+ethereum-classic,consensus_mechanism,,Proof of Work
+ethereum-classic,execution_environment,,EVM Serial Execution
+ethereum-classic,scaling_architecture,,Immutable Smart Contract Layer 1
+ethereum-name-service,network_type,,Decentralized Naming Protocol
+ethereum-name-service,execution_environment,,Ethereum Smart Contracts
+ethereum-name-service,scaling_architecture,,Identity and Naming Layer
+havven,network_type,,Synthetic Asset Protocol
+havven,execution_environment,,EVM Smart Contracts
+havven,scaling_architecture,,Collateralized Synthetic Asset System
+kusama,max_theoretical_tps,1000,
+kusama,block_time_seconds,6,
+kusama,theoretical_time_to_finality,60,
+kusama,consensus_mechanism,,Nominated Proof of Stake
+kusama,execution_environment,,Substrate WASM Runtime
+kusama,scaling_architecture,,Canary Network with Parachains
+lido-dao,network_type,,Liquid Staking Protocol
+lido-dao,execution_environment,,Ethereum Smart Contracts
+lido-dao,scaling_architecture,,Liquid Staking Middleware
+ocean-protocol,network_type,,Decentralized Data Marketplace
+ocean-protocol,execution_environment,,EVM Smart Contracts
+ocean-protocol,scaling_architecture,,Tokenized Data Exchange
+pepe,network_type,,Meme Token
+pepe,execution_environment,,ERC 20 Ethereum Token
+pepe,scaling_architecture,,Community Driven Meme Asset
+shiba-inu,network_type,,Meme Coin Ecosystem
+shiba-inu,execution_environment,,ERC 20 Ethereum Token
+shiba-inu,scaling_architecture,,Layer 2 Enabled Meme Ecosystem
+sushi,network_type,,Decentralized Exchange Protocol
+sushi,execution_environment,,EVM Smart Contracts
+sushi,scaling_architecture,,Cross Chain AMM Platform
+the-graph,network_type,,Blockchain Indexing Protocol
+the-graph,execution_environment,,Subgraph Query Network
+the-graph,scaling_architecture,,Decentralized Data Indexing Layer
+the-sandbox,network_type,,Blockchain Gaming Metaverse
+the-sandbox,execution_environment,,Ethereum and Polygon Based Assets
+the-sandbox,scaling_architecture,,User Generated Metaverse Platform
+yearn-finance,network_type,,Yield Optimization Protocol
+yearn-finance,execution_environment,,EVM Smart Contracts
+yearn-finance,scaling_architecture,,Automated Yield Aggregation
+
+```
+
+## Notes
+
+- `metric_value` is numeric only.
+- Text-based values go in `metric_text`.
+- TPS figures are theoretical or commonly cited upper-bound estimates, not sustained real-world throughput.
+- Some projects like Aave, Uniswap, and Chainlink are protocols rather than standalone L1/L2 chains, so their metrics focus more on architecture and execution environment.
+- You can extend this model later with metrics like `data_availability_layer`, `supports_parallel_execution`, `native_language`, `validator_count`, `max_block_size_mb`, or `rollup_type`.
+
+```
