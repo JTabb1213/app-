@@ -162,6 +162,40 @@ def _current_bucket() -> datetime:
     return datetime.fromtimestamp(bucket_ts, tz=timezone.utc)
 
 
+# ── SQL dedup ─────────────────────────────────────────────────────────────────
+
+def _get_seen_urls(coin_id: str, lookback_buckets: int = 3) -> set[str]:
+    """
+    Return the set of article URLs already stored for this coin in the last
+    `lookback_buckets` buckets.  Articles appearing in the RSS feed again
+    within that window are skipped so we don't double-count them.
+    """
+    try:
+        conn = _get_pg()
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT articles
+                FROM news_sentiment_snapshots
+                WHERE coin_id = %s
+                ORDER BY bucket_start DESC
+                LIMIT %s
+                """,
+                (coin_id, lookback_buckets),
+            )
+            rows = cur.fetchall()
+        seen = set()
+        for (articles_json,) in rows:
+            if not articles_json:
+                continue
+            data = articles_json if isinstance(articles_json, dict) else json.loads(articles_json)
+            seen.update(data.keys())
+        return seen
+    except Exception as exc:
+        logger.warning("[DB] _get_seen_urls failed for %s: %s", coin_id, exc)
+        return set()
+
+
 # ── SQL upsert ────────────────────────────────────────────────────────────────
 
 def _upsert(coin_id: str, bucket_start: datetime, article_scores: dict):
@@ -211,12 +245,17 @@ def run_cycle(coins: list[dict], bucket_start: datetime):
                 continue
 
             article_scores = {}
+            seen_urls = _get_seen_urls(coin_id)
             for item in items:
+                url   = item["url"]
                 title = item["title"]
+                if url in seen_urls:
+                    logger.debug("[%s] Skipping already-seen article: %s", coin_id, url)
+                    continue
                 if not _headline_matches(title, coin["aliases"]):
                     continue
                 score = _score_headline(title)
-                article_scores[item["url"]] = round(score, 6)
+                article_scores[url] = round(score, 6)
 
             if article_scores:
                 _upsert(coin_id, bucket_start, article_scores)
